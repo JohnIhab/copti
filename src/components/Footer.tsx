@@ -1,0 +1,107 @@
+import React from 'react';
+import { Church, MapPin, Phone, Mail, Facebook, Instagram, Youtube } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
+
+const Footer: React.FC = () => {
+  const { t } = useLanguage();
+
+  const quickLinks = [
+    { key: 'home', href: '#home' },
+    { key: 'about', href: '#about' },
+    { key: 'meetings', href: '#meetings' },
+    { key: 'events', href: '#events' },
+    { key: 'contact', href: '#contact' },
+  ];
+
+  const socialLinks = [
+    { icon: Facebook, href: '#', color: 'hover:text-blue-600' },
+    { icon: Instagram, href: '#', color: 'hover:text-pink-600' },
+    { icon: Youtube, href: '#', color: 'hover:text-red-600' },
+  ];
+
+  return (
+    <footer className="bg-gray-900 dark:bg-gray-950 text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Church Info */}
+          <div className="col-span-1 lg:col-span-2">
+            <div className="flex items-center space-x-3 rtl:space-x-reverse mb-4">
+              <Church className="h-8 w-8 text-blue-400" />
+              <h3 className="text-xl font-bold">{t('heroTitle')}</h3>
+            </div>
+            <p className="text-gray-300 mb-6 leading-relaxed">
+              {t('footerDescription')}
+            </p>
+            
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3 rtl:space-x-reverse text-gray-300">
+                <MapPin className="h-5 w-5 text-blue-400 flex-shrink-0" />
+                <span>كفر فرج جرجس، محافظة الجيزة، مصر</span>
+              </div>
+              <div className="flex items-center space-x-3 rtl:space-x-reverse text-gray-300">
+                <Phone className="h-5 w-5 text-green-400 flex-shrink-0" />
+                <span dir="ltr">+20 123 456 789</span>
+              </div>
+              <div className="flex items-center space-x-3 rtl:space-x-reverse text-gray-300">
+                <Mail className="h-5 w-5 text-red-400 flex-shrink-0" />
+                <span dir="ltr">info@stmarychurch.eg</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h4 className="text-lg font-semibold mb-6">{t('quickLinks')}</h4>
+            <ul className="space-y-3">
+              {quickLinks.map((link) => (
+                <li key={link.key}>
+                  <a
+                    href={link.href}
+                    className="text-gray-300 hover:text-blue-400 transition-colors duration-200"
+                  >
+                    {t(link.key)}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Social Media */}
+          <div>
+            <h4 className="text-lg font-semibold mb-6">{t('followUs')}</h4>
+            <div className="flex space-x-4 rtl:space-x-reverse">
+              {socialLinks.map((social, index) => (
+                <a
+                  key={index}
+                  href={social.href}
+                  className={`p-3 bg-gray-800 rounded-full ${social.color} 
+                           transition-all duration-300 transform hover:scale-110`}
+                >
+                  <social.icon className="h-5 w-5" />
+                </a>
+              ))}
+            </div>
+            
+            <div className="mt-6">
+              <h5 className="font-semibold mb-3">أوقات الخدمة</h5>
+              <div className="text-gray-300 text-sm space-y-1">
+                <p>القداس الصباحي: 7:00 ص</p>
+                <p>القداس المسائي: 6:00 م</p>
+                <p>اجتماع الشباب: الجمعة 7:00 م</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Copyright */}
+        <div className="border-t border-gray-800 mt-12 pt-8 text-center">
+          <p className="text-gray-400">
+            © 2025 {t('heroTitle')}. {t('rightsReserved')}
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;
