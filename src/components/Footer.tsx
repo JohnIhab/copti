@@ -1,6 +1,7 @@
 import React from 'react';
-import { Church, MapPin, Phone, Mail, Facebook, Instagram, Youtube } from 'lucide-react';
+import { Church, MapPin, Phone, Mail, Facebook, Instagram, Youtube, Lock } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
   const { t } = useLanguage();
@@ -21,7 +22,7 @@ const Footer: React.FC = () => {
 
   return (
     <footer className="bg-gray-900 dark:bg-gray-950 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Church Info */}
           <div className="col-span-1 lg:col-span-2">
@@ -57,7 +58,7 @@ const Footer: React.FC = () => {
                 <li key={link.key}>
                   <a
                     href={link.href}
-                    className="text-gray-300 hover:text-blue-400 transition-colors duration-200"
+                    className="text-gray-300 hover:text-red-500 transition-colors duration-200 focus:outline-none"
                   >
                     {t(link.key)}
                   </a>
@@ -93,10 +94,32 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-gray-800 mt-12 pt-8 text-center">
+        <div className="border-t border-gray-800 mt-12 pt-8 text-center relative">
           <p className="text-gray-400">
             © 2025 {t('heroTitle')}. {t('rightsReserved')}
           </p>
+          
+          {/* Hidden Admin Access */}
+          <Link
+            to="/admin"
+            className="absolute left-4 -bottom-4 group"
+            title="Admin Access"
+          >
+            <div className="relative p-5 bg-gray-800/50 backdrop-blur-sm rounded-full border border-gray-700/50 
+                          opacity-20 hover:opacity-80 transition-all duration-500 ease-in-out
+                          hover:bg-gray-700/70 hover:border-gray-600/70 hover:shadow-lg hover:shadow-blue-500/20
+                          transform hover:scale-110 active:scale-95">
+              <Lock className="h-4 w-4 text-white group-hover:text-blue-400 transition-colors duration-300" />
+              
+              {/* Subtle glow effect on hover */}
+              <div className="absolute inset-0 rounded-full bg-blue-500/10 opacity-0 group-hover:opacity-100 
+                            transition-opacity duration-300 blur-sm"></div>
+              
+              {/* Pulse animation on hover */}
+              <div className="absolute inset-0 rounded-full border-2 border-blue-500/30 opacity-0 
+                            group-hover:opacity-100 group-hover:animate-ping"></div>
+            </div>
+          </Link>
         </div>
       </div>
     </footer>
