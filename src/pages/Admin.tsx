@@ -55,14 +55,14 @@ const Admin: React.FC = () => {
       stagger: 0.1,
       ease: 'power3.out',
     })
-    .to('.admin-card', {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      duration: 0.6,
-      stagger: 0.1,
-      ease: 'power3.out',
-    }, '-=0.3');
+      .to('.admin-card', {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: 'power3.out',
+      }, '-=0.3');
   }, [isAuthenticated, activeTab]);
 
   if (!isAuthenticated) {
@@ -90,7 +90,7 @@ const Admin: React.FC = () => {
                 <input
                   type="text"
                   value={loginData.username}
-                  onChange={(e) => setLoginData({...loginData, username: e.target.value})}
+                  onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
                            focus:ring-2 focus:ring-blue-500 focus:border-transparent
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -105,7 +105,7 @@ const Admin: React.FC = () => {
                 <input
                   type="password"
                   value={loginData.password}
-                  onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+                  onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
                            focus:ring-2 focus:ring-blue-500 focus:border-transparent
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -189,10 +189,9 @@ const Admin: React.FC = () => {
               { message: 'رسالة جديدة من صفحة الاتصال', priority: 'high' }
             ].map((notification, index) => (
               <div key={index} className="flex items-center space-x-3 rtl:space-x-reverse p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <Bell className={`h-4 w-4 ${
-                  notification.priority === 'high' ? 'text-red-500' :
-                  notification.priority === 'medium' ? 'text-yellow-500' : 'text-green-500'
-                }`} />
+                <Bell className={`h-4 w-4 ${notification.priority === 'high' ? 'text-red-500' :
+                    notification.priority === 'medium' ? 'text-yellow-500' : 'text-green-500'
+                  }`} />
                 <p className="text-sm text-gray-900 dark:text-white flex-1">{notification.message}</p>
               </div>
             ))}
@@ -251,19 +250,18 @@ const Admin: React.FC = () => {
   };
 
   return (
-    <div ref={adminRef} className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div ref={adminRef} className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 right-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
-        sidebarOpen ? 'translate-x-0' : 'translate-x-full'
-      }`}>
+      <div className={`fixed inset-y-0 right-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}>
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700">
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">لوحة التحكم</h1>
           <button
@@ -273,7 +271,7 @@ const Admin: React.FC = () => {
             <X className="h-5 w-5" />
           </button>
         </div>
-        
+
         <nav className="mt-6 px-3">
           {menuItems.map((item) => (
             <button
@@ -282,11 +280,10 @@ const Admin: React.FC = () => {
                 setActiveTab(item.id);
                 setSidebarOpen(false);
               }}
-              className={`w-full flex items-center space-x-3 rtl:space-x-reverse px-3 py-3 rounded-lg mb-1 transition-colors duration-200 ${
-                activeTab === item.id
+              className={`w-full flex items-center space-x-3 rtl:space-x-reverse px-3 py-3 rounded-lg mb-1 transition-colors duration-200 ${activeTab === item.id
                   ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
+                }`}
             >
               <item.icon className="h-5 w-5" />
               <span>{language === 'ar' ? item.label : item.labelEn}</span>
@@ -307,7 +304,7 @@ const Admin: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="lg:mr-64">
+      <div className="flex-1">
         {/* Top Bar */}
         <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 h-16 flex items-center justify-between px-6">
           <button
@@ -316,25 +313,7 @@ const Admin: React.FC = () => {
           >
             <Menu className="h-5 w-5" />
           </button>
-          
-          <div className="flex items-center space-x-4 rtl:space-x-reverse">
-            <div className="relative">
-              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="البحث..."
-                className="pr-10 pl-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
-                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm
-                         focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 relative">
-              <Bell className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-              <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
-            </button>
-          </div>
         </div>
-
         {/* Page Content */}
         <div className="p-6">
           {renderContent()}
