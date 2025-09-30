@@ -8,6 +8,7 @@ import Features from './components/Features';
 import About from './components/About';
 import Footer from './components/Footer';
 import PageLoader from './components/PageLoader';
+import BibleVerseModal from './components/BibleVerseModal';
 import Meetings from './pages/Meetings';
 import Events from './pages/Events';
 import Trips from './pages/Trips';
@@ -18,11 +19,14 @@ import Admin from './pages/Admin';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
+  const [showBibleVerse, setShowBibleVerse] = useState(false);
 
   useEffect(() => {
     // Simulate loading time for animations to initialize
     const timer = setTimeout(() => {
       setIsLoading(false);
+      // Show Bible verse modal after loading is complete
+      setShowBibleVerse(true);
     }, 2000);
 
     return () => clearTimeout(timer);
@@ -35,15 +39,12 @@ function App() {
   return (
     <ThemeProvider>
       <LanguageProvider>
-
-
-
-
-
-
-
         <Router>
           <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
+            <BibleVerseModal 
+              isOpen={showBibleVerse} 
+              onClose={() => setShowBibleVerse(false)} 
+            />
             <Routes>
               <Route path="/" element={
                 <>
