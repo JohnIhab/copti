@@ -5,9 +5,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        'arabic': ['Cairo', 'system-ui', 'sans-serif'],
-        'english': ['Inter', 'system-ui', 'sans-serif'],
-        'sans': ['Cairo', 'Inter', 'system-ui', 'sans-serif'],
+        'arabic': ['system-ui', '-apple-system', 'Segoe UI', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        'english': ['system-ui', '-apple-system', 'Segoe UI', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        'sans': ['system-ui', '-apple-system', 'Segoe UI', 'Helvetica Neue', 'Arial', 'sans-serif'],
       },
       colors: {
         primary: {

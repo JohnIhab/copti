@@ -1,166 +1,195 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ChevronDown, Heart, Users, Calendar } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Hero: React.FC = () => {
-  const heroRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const subtitleRef = useRef<HTMLParagraphElement>(null);
-  const descriptionRef = useRef<HTMLParagraphElement>(null);
-  const buttonsRef = useRef<HTMLDivElement>(null);
-  const statsRef = useRef<HTMLDivElement>(null);
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { t } = useLanguage();
 
+  // Desktop images
+  const desktopImages = [
+    '/Images/hero.jpg',
+    '/Images/card/2.jpg',
+    '/Images/card/3.jpg',
+    '/Images/card/4.jpg',
+    '/Images/card/5.jpg'
+  ];
+
+  // Mobile images (you can replace these with mobile-optimized versions)
+  const mobileImages = [
+    '/Images/card/22.jpg',
+    '/Images/card/33.jpg',
+    '/Images/card/44.jpg',
+    '/Images/card/55.jpg',
+    '/Images/card/66.jpg'
+  ];
+
+  // Get current images based on screen size
+  const images = isMobile ? mobileImages : desktopImages;
+
+  // Check screen size
   useEffect(() => {
-    if (!titleRef.current) return;
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768); // md breakpoint
+    };
 
-    const tl = gsap.timeline();
-
-    // Set initial states
-    gsap.set([titleRef.current, subtitleRef.current, descriptionRef.current, buttonsRef.current], {
-      opacity: 0,
-      y: 50,
-    });
-
-    gsap.set(statsRef.current, {
-      opacity: 0,
-      y: 30,
-    });
-
-    // Animate elements in sequence
-    tl.to(titleRef.current, {
-      opacity: 1,
-      y: 0,
-      duration: 1,
-      ease: 'power3.out',
-    })
-    .to(subtitleRef.current, {
-      opacity: 1,
-      y: 0,
-      duration: 0.8,
-      ease: 'power3.out',
-    }, '-=0.5')
-    .to(descriptionRef.current, {
-      opacity: 1,
-      y: 0,
-      duration: 0.8,
-      ease: 'power3.out',
-    }, '-=0.4')
-    .to(buttonsRef.current, {
-      opacity: 1,
-      y: 0,
-      duration: 0.8,
-      ease: 'power3.out',
-    }, '-=0.4')
-    .to(statsRef.current, {
-      opacity: 1,
-      y: 0,
-      duration: 0.8,
-      ease: 'power3.out',
-    }, '-=0.4');
-
-    // Parallax effect for background
-    gsap.to(heroRef.current, {
-      yPercent: -50,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: heroRef.current,
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: true,
-      },
-    });
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
 
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      window.removeEventListener('resize', checkScreenSize);
     };
   }, []);
 
+  useEffect(() => {
+    if (!sliderRef.current) return;
+
+    const slides = sliderRef.current.querySelectorAll('.slide');
+    
+    // Reset current slide when switching between mobile/desktop
+    setCurrentSlide(0);
+    
+    // Set initial state - all slides except first are translated to the right
+    gsap.set(slides, { xPercent: 100, opacity: 0 });
+    gsap.set(slides[0], { xPercent: 0, opacity: 1 });
+
+    // Auto-slide functionality
+    const startAutoSlide = () => {
+      intervalRef.current = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % images.length);
+      }, 4000); // Changed to 4 seconds for faster auto-scroll
+    };
+
+    const stopAutoSlide = () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+
+    startAutoSlide();
+
+    return () => {
+      stopAutoSlide();
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, [images.length, isMobile]); // Added isMobile to dependencies
+
+  useEffect(() => {
+    if (!sliderRef.current) return;
+
+    const slides = sliderRef.current.querySelectorAll('.slide');
+    const currentSlideEl = slides[currentSlide];
+    const prevSlideIndex = currentSlide === 0 ? images.length - 1 : currentSlide - 1;
+    const prevSlideEl = slides[prevSlideIndex];
+
+    // Animate slide transition
+    const tl = gsap.timeline();
+
+    // Move current slide out to the left
+    tl.to(prevSlideEl, {
+      xPercent: -100,
+      opacity: 0,
+      duration: 0.8,
+      ease: 'power2.inOut'
+    });
+
+    // Move new slide in from the right
+    tl.fromTo(currentSlideEl, 
+      { xPercent: 100, opacity: 0 },
+      { 
+        xPercent: 0, 
+        opacity: 1, 
+        duration: 0.8, 
+        ease: 'power2.inOut' 
+      }, 
+      '-=0.4'
+    );
+
+    // Add subtle zoom effect to the current slide
+    tl.fromTo(currentSlideEl.querySelector('img'), 
+      { scale: 1.1 },
+      { 
+        scale: 1, 
+        duration: 6,
+        ease: 'power1.out' 
+      }, 
+      '-=0.8'
+    );
+
+  }, [currentSlide, images.length]);
+
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background */}
-      <div 
-        ref={heroRef}
-        className="absolute inset-0 z-0"
-        style={{
-          background: 'linear-gradient(135deg, #1E40AF 0%, #3B82F6 50%, #60A5FA 100%)',
-        }}
-      >
-        <div className="absolute inset-0 bg-black/20"></div>
-        {/* Decorative elements */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
-        <div className="absolute bottom-20 right-10 w-48 h-48 bg-white/5 rounded-full blur-2xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
+    <section id="home" className="relative min-h-screen overflow-hidden">
+      {/* Slider Container */}
+      <div ref={sliderRef} className="relative w-full h-screen">
+        {images.map((image, index) => (
+          <div
+            key={index}
+            className="slide absolute inset-0 w-full h-full"
+          >
+            <img
+              src={image}
+              alt={`Slide ${index + 1}`}
+              className="w-full h-full object-cover object-center"
+              style={{ transformOrigin: 'center center' }}
+            />
+            {/* Overlay for better text readability */}
+            <div className="absolute inset-0 bg-black/20 sm:bg-black/30"></div>
+          </div>
+        ))}
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-        <h1 
-          ref={titleRef}
-          className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 leading-tight"
-        >
-          {t('heroTitle')}
-        </h1>
-        
-        <p 
-          ref={subtitleRef}
-          className="text-xl sm:text-2xl lg:text-3xl mb-6 text-blue-100 font-semibold"
-        >
-          {t('heroSubtitle')}
-        </p>
-        
-        <p 
-          ref={descriptionRef}
-          className="text-lg sm:text-xl mb-8 text-blue-50 max-w-2xl mx-auto leading-relaxed"
-        >
-          {t('heroDescription')}
-        </p>
-        
-        <div 
-          ref={buttonsRef}
-          className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
-        >
-          <button className="px-8 py-4 bg-white text-blue-700 rounded-lg font-semibold
-                           hover:bg-gray-100 transition-all duration-300 transform hover:scale-105
-                           shadow-lg hover:shadow-xl">
-            {t('joinUs')}
-          </button>
-          <button className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg font-semibold
-                           hover:bg-white hover:text-blue-700 transition-all duration-300 transform hover:scale-105">
-            {t('learnMore')}
-          </button>
-        </div>
-
-        {/* Stats */}
-        <div 
-          ref={statsRef}
-          className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-2xl mx-auto"
-        >
-          <div className="text-center">
-            <Heart className="h-8 w-8 mx-auto mb-2 text-red-300" />
-            <div className="text-2xl font-bold">500+</div>
-            <div className="text-blue-100">أعضاء العائلة</div>
-          </div>
-          <div className="text-center">
-            <Users className="h-8 w-8 mx-auto mb-2 text-green-300" />
-            <div className="text-2xl font-bold">50+</div>
-            <div className="text-blue-100">خدام</div>
-          </div>
-          <div className="text-center">
-            <Calendar className="h-8 w-8 mx-auto mb-2 text-yellow-300" />
-            <div className="text-2xl font-bold">25+</div>
-            <div className="text-blue-100">سنة خدمة</div>
-          </div>
+      {/* Progress Indicators */}
+      <div className="absolute top-1/2 transform -translate-y-1/2 left-4 z-20">
+        <div className="flex flex-col space-y-2">
+          {images.map((_, index) => (
+            <div
+              key={index}
+              className={`w-2 h-8 rounded-full transition-all duration-300 ${
+                index === currentSlide 
+                  ? 'bg-white shadow-lg' 
+                  : 'bg-white/40'
+              }`}
+            />
+          ))}
         </div>
       </div>
+      {/* Progress Bar */}
+      <div className="absolute bottom-0 left-0 w-full h-1 sm:h-1.5 bg-white/20 z-20">
+        <div 
+          className="h-full bg-white transition-all duration-300 ease-out"
+          style={{ 
+            width: `${((currentSlide + 1) / images.length) * 100}%` 
+          }}
+        />
+      </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <ChevronDown className="h-6 w-6 text-white" />
+      {/* Content Overlay (Optional) */}
+      <div className="absolute inset-0 z-10 flex items-center justify-center translate-y-60">
+        <div className="text-center text-white px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+          
+          
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button className="px-6 py-3 sm:px-8 sm:py-4 bg-red-500 text-white rounded-lg font-semibold
+                            hover:bg-transparent hover:border-2 hover:border-white hover:text-white 
+                            transition-all duration-300 transform hover:scale-105
+                            shadow-lg hover:shadow-xl">
+              {t('joinUs')}
+            </button>
+            <button className="px-6 py-3 sm:px-8 sm:py-4 bg-transparent border-2 border-white text-white rounded-lg font-semibold
+                            hover:bg-red-500 hover:text-white hover:border-0 transition-all duration-300 transform hover:scale-105">
+              {t('learnMore')}
+            </button>
+          </div>
+        </div>
       </div>
     </section>
   );

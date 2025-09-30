@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Calendar, Clock, MapPin, Users, Filter, Search } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, Search } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import CardMeeting from '../components/CardMeeting';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,7 +25,7 @@ interface Meeting {
 }
 
 const Meetings: React.FC = () => {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -199,67 +200,22 @@ const Meetings: React.FC = () => {
         </div>
 
         {/* Meetings Grid */}
-        <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
           {filteredMeetings.map((meeting) => (
-            <div
-              key={meeting.id}
-              className="meeting-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg
-                       hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2
-                       border border-gray-100 dark:border-gray-700 group"
-            >
-              {/* Header */}
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    {language === 'ar' ? meeting.title : meeting.titleEn}
-                  </h3>
-                  <div className="flex items-center text-gray-600 dark:text-gray-300 mb-2">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    <span>{language === 'ar' ? meeting.day : meeting.dayEn}</span>
-                  </div>
-                  <div className="flex items-center text-gray-600 dark:text-gray-300">
-                    <Clock className="h-4 w-4 mr-2" />
-                    <span>{meeting.time}</span>
-                  </div>
-                </div>
-                <div className="bg-blue-100 dark:bg-blue-900 px-3 py-1 rounded-full">
-                  <span className="text-blue-800 dark:text-blue-200 text-sm font-medium">
-                    {language === 'ar' ? categories.find(c => c.key === meeting.category)?.label : categories.find(c => c.key === meeting.category)?.labelEn}
-                  </span>
-                </div>
-              </div>
-
-              {/* Location */}
-              <div className="flex items-center text-gray-600 dark:text-gray-300 mb-4">
-                <MapPin className="h-4 w-4 mr-2" />
-                <span>{language === 'ar' ? meeting.location : meeting.locationEn}</span>
-              </div>
-
-              {/* Description */}
-              <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                {language === 'ar' ? meeting.description : meeting.descriptionEn}
-              </p>
-
-              {/* Capacity */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center text-gray-600 dark:text-gray-300">
-                  <Users className="h-4 w-4 mr-2" />
-                  <span>{meeting.registered}/{meeting.capacity}</span>
-                </div>
-                <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${(meeting.registered / meeting.capacity) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Action Button */}
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg
-                               font-semibold transition-all duration-300 transform hover:scale-105
-                               shadow-lg hover:shadow-xl">
-                {language === 'ar' ? 'انضم للاجتماع' : 'Join Meeting'}
-              </button>
+            <div key={meeting.id} className="meeting-card">
+              <CardMeeting
+                title={language === 'ar' ? meeting.title : meeting.titleEn}
+                time={meeting.time}
+                day={language === 'ar' ? meeting.day : meeting.dayEn}
+                location={language === 'ar' ? meeting.location : meeting.locationEn}
+                description={language === 'ar' ? meeting.description : meeting.descriptionEn}
+                category={language === 'ar' ? categories.find(c => c.key === meeting.category)?.label || meeting.category : categories.find(c => c.key === meeting.category)?.labelEn || meeting.categoryEn}
+                capacity={meeting.capacity}
+                registered={meeting.registered}
+                onJoin={() => {
+                  console.log(`Joining meeting: ${meeting.title}`);
+                }}
+              />
             </div>
           ))}
         </div>
@@ -277,6 +233,7 @@ const Meetings: React.FC = () => {
           </div>
         )}
       </div>
+      
     </div>
   );
 };

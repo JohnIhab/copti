@@ -36,15 +36,15 @@ const Footer: React.FC = () => {
             <div className="space-y-3">
               <div className="flex items-center space-x-3 rtl:space-x-reverse text-gray-300">
                 <MapPin className="h-5 w-5 text-blue-400 flex-shrink-0" />
-                <span>كفر فرج جرجس، محافظة الجيزة، مصر</span>
+                <span>كفر فرج جرجس،منيا القمح، محافظة الشرقية، مصر</span>
               </div>
               <div className="flex items-center space-x-3 rtl:space-x-reverse text-gray-300">
                 <Phone className="h-5 w-5 text-green-400 flex-shrink-0" />
-                <span dir="ltr">+20 123 456 789</span>
+                <span dir="ltr">+201110797455</span>
               </div>
               <div className="flex items-center space-x-3 rtl:space-x-reverse text-gray-300">
                 <Mail className="h-5 w-5 text-red-400 flex-shrink-0" />
-                <span dir="ltr">info@stmarychurch.eg</span>
+                <span dir="ltr">johnihab.01@gmail.com</span>
               </div>
             </div>
           </div>
@@ -86,8 +86,7 @@ const Footer: React.FC = () => {
               <h5 className="font-semibold mb-3">أوقات الخدمة</h5>
               <div className="text-gray-300 text-sm space-y-1">
                 <p>القداس الصباحي: 7:00 ص</p>
-                <p>القداس المسائي: 6:00 م</p>
-                <p>اجتماع الشباب: الجمعة 7:00 م</p>
+                <p>اجتماع الشباب: الخميس 7:00 م</p>
               </div>
             </div>
           </div>

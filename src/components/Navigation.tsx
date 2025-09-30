@@ -10,7 +10,7 @@ const Navigation: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
   const { isDark, toggleTheme } = useTheme();
   const location = useLocation();
-
+  
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -30,37 +30,36 @@ const Navigation: React.FC = () => {
   ];
 
   return (
-    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-      isScrolled 
-        ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-lg' 
-        : 'bg-transparent'
-    }`}>
+    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled || isOpen
+        ? 'bg-white/10 dark:bg-gray-900/10 backdrop-blur-md shadow-lg'
+        : 'bg-white/5 dark:bg-gray-900/5 backdrop-blur-sm'
+      }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-14 sm:h-16 min-h-[3.5rem]">
           {/* Logo */}
-          <div className="flex items-center space-x-2 rtl:space-x-reverse">
-            <Link to="/" className="flex items-center space-x-2 rtl:space-x-reverse">
-              <Church className="h-8 w-8 text-blue-700 dark:text-blue-400" />
+          <div className="flex items-center space-x-2 rtl:space-x-reverse flex-shrink-0">
+            <Link to="/" className="flex items-center space-x-2 rtl:space-x-reverse focus:outline-none">
+              <Church className="h-6 w-6 sm:h-8 sm:w-8 text-blue-700 dark:text-blue-400" />
             </Link>
             <div className="hidden sm:block">
-              <Link to="/">
-                <h1 className="text-lg font-bold text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                  {language === 'ar' ? 'كنيسة السيدة العذراء' : 'St. Mary Church'}
+              <Link to="/" className="focus:outline-none">
+                <h1 className="text-sm sm:text-lg font-bold text-white dark:text-white transition-colors whitespace-nowrap px-2 py-1 rounded-md bg-black/20 dark:bg-white/10 backdrop-blur-sm border border-white/10 dark:border-gray-700/20">
+                  {language === 'ar' ? 'كنيسة الأنبا رويس' : 'St. Rouis Church'}
                 </h1>
               </Link>
             </div>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-8 rtl:space-x-reverse">
+          <div className="hidden md:flex items-center space-x-4 lg:space-x-8 rtl:space-x-reverse">
             {navItems.map((item) => (
               <Link
                 key={item.key}
                 to={item.href}
-                className={`text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-400 
-                         transition-colors duration-200 font-medium ${
-                           location.pathname === item.href ? 'text-blue-700 dark:text-blue-400' : ''
-                         }`}
+                className={`text-black dark:text-gray-300 hover:text-red-700 dark:hover:text-blue-400 
+                         transition-all duration-200 font-medium focus:outline-none text-sm lg:text-base
+                         px-2 py-1 rounded-md hover:bg-white/20 dark:hover:bg-gray-800/20  hover:border-white/30 dark:hover:border-gray-700/30 ${location.pathname === item.href ? 'text-red-700 dark:text-red-400 font-bold bg-white/20 dark:bg-red-900/20 border-white/30 dark:border-red-700/30' : ''
+                  }`}
               >
                 {t(item.key)}
               </Link>
@@ -68,39 +67,39 @@ const Navigation: React.FC = () => {
           </div>
 
           {/* Controls */}
-          <div className="flex items-center space-x-4 rtl:space-x-reverse">
+          <div className="flex items-center space-x-2 sm:space-x-4 rtl:space-x-reverse flex-shrink-0">
             {/* Language Switcher */}
-            <button
+            {/* <button
               onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-              className="flex items-center space-x-1 rtl:space-x-reverse px-3 py-2 rounded-lg
+              className="flex items-center space-x-1 rtl:space-x-reverse px-2 sm:px-3 py-1 sm:py-2 rounded-lg
                        bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700
-                       transition-colors duration-200"
+                       transition-colors duration-200 focus:outline-none focus:ring-0"
             >
               <Globe className="h-4 w-4" />
-              <span className="text-sm font-medium">
+              <span className="text-xs sm:text-sm font-medium hidden sm:inline">
                 {language === 'ar' ? 'EN' : 'العربية'}
               </span>
-            </button>
+            </button> */}
 
             {/* Theme Toggle */}
-            <button
+            {/* <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 
+              className="p-1.5 sm:p-2 rounded-lg bg-gray-100 dark:bg-gray-800 
                        hover:bg-gray-200 dark:hover:bg-gray-700
-                       transition-colors duration-200"
+                       transition-colors duration-200 focus:outline-none focus:ring-0"
             >
               {isDark ? (
                 <Sun className="h-4 w-4 text-yellow-500" />
               ) : (
                 <Moon className="h-4 w-4 text-gray-600" />
               )}
-            </button>
+            </button> */}
 
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-800 
-                       hover:bg-gray-200 dark:hover:bg-gray-700"
+              className="md:hidden p-1.5 sm:p-2 rounded-lg bg-white/20 dark:bg-gray-800/20 backdrop-blur-sm
+                       hover:bg-white/30 dark:hover:bg-gray-700/30 focus:outline-none focus:ring-0 border border-white/20 dark:border-gray-700/20"
             >
               {isOpen ? (
                 <X className="h-5 w-5" />
@@ -111,27 +110,56 @@ const Navigation: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation - Sidebar */}
         {isOpen && (
-          <div className="lg:hidden absolute top-full left-0 right-0 
-                         bg-white dark:bg-gray-900 shadow-lg border-t 
-                         dark:border-gray-700">
-            <div className="px-4 py-2 space-y-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.key}
-                  to={item.href}
+          <>
+            {/* Backdrop */}
+            <div 
+              className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+              onClick={() => setIsOpen(false)}
+            ></div>
+            
+            {/* Sidebar Menu */}
+            <div className={`md:hidden fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white/10 dark:bg-gray-900/10 backdrop-blur-md shadow-xl border-r border-white/20 dark:border-gray-700/20 z-50 transform transition-transform duration-300 ease-in-out ${
+              isOpen ? 'translate-x-0' : '-translate-x-full'
+            }`}>
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b border-white/20 dark:border-gray-700/20">
+                <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                  <Church className="h-8 w-8 text-blue-700 dark:text-blue-400" />
+                  <h2 className="text-lg font-bold text-gray-800 dark:text-white">
+                    {language === 'ar' ? 'كنيسة السيدة العذراء' : 'St. Mary Church'}
+                  </h2>
+                </div>
+                <button
                   onClick={() => setIsOpen(false)}
-                  className={`block px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300
-                           hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 ${
-                             location.pathname === item.href ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400' : ''
-                           }`}
+                  className="p-2 rounded-lg hover:bg-white/20 dark:hover:bg-gray-800/20 backdrop-blur-sm transition-colors border border-transparent hover:border-white/30 dark:hover:border-gray-700/30"
                 >
-                  {t(item.key)}
-                </Link>
-              ))}
+                  <X className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+                </button>
+              </div>
+
+              {/* Navigation Links */}
+              <div className="p-4 space-y-2">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.key}
+                    to={item.href}
+                    onClick={() => setIsOpen(false)}
+                    className={`block px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300
+                             hover:bg-white/20 dark:hover:bg-gray-800/20 backdrop-blur-sm transition-all duration-200 focus:outline-none 
+                             text-base font-medium border-l-4 border border-transparent hover:border-white/30 dark:hover:border-gray-700/30 ${
+                               location.pathname === item.href 
+                                 ? 'bg-white/20 dark:bg-red-900/20 text-red-700 dark:text-red-400 font-bold border-red-500 border-white/30 dark:border-red-700/30' 
+                                 : 'border-transparent hover:border-l-white/50 dark:hover:border-l-gray-600/50'
+                             }`}
+                  >
+                    {t(item.key)}
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </nav>

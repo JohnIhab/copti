@@ -42,7 +42,7 @@ const Events: React.FC = () => {
       categoryEn: 'Conference',
       description: 'مؤتمر روحي للشباب مع متحدثين مميزين وأنشطة تفاعلية',
       descriptionEn: 'Spiritual conference for youth with distinguished speakers and interactive activities',
-      image: 'https://images.pexels.com/photos/1587927/pexels-photo-1587927.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: '/Images/events/youth-conference.jpg',
       capacity: 200,
       registered: 150,
       featured: true
@@ -59,7 +59,7 @@ const Events: React.FC = () => {
       categoryEn: 'Celebration',
       description: 'احتفال بميلاد السيد المسيح مع ترانيم وعروض للأطفال',
       descriptionEn: 'Celebrating the birth of Jesus Christ with hymns and children\'s performances',
-      image: 'https://images.pexels.com/photos/1303081/pexels-photo-1303081.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: '/Images/events/christmas-celebration.jpg',
       capacity: 300,
       registered: 280,
       featured: true
@@ -76,7 +76,7 @@ const Events: React.FC = () => {
       categoryEn: 'Seminar',
       description: 'ندوة حول بناء الأسرة المسيحية وتربية الأطفال',
       descriptionEn: 'Seminar on building Christian families and raising children',
-      image: 'https://images.pexels.com/photos/1128318/pexels-photo-1128318.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: '/Images/events/family-seminar.jpg',
       capacity: 100,
       registered: 75,
       featured: false
@@ -93,7 +93,7 @@ const Events: React.FC = () => {
       categoryEn: 'Festival',
       description: 'أمسية ترانيم روحية مع جوقات من كنائس مختلفة',
       descriptionEn: 'Spiritual hymns evening with choirs from different churches',
-      image: 'https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: '/Images/events/hymns-festival.jpg',
       capacity: 400,
       registered: 320,
       featured: true
