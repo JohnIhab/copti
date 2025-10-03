@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { MeetingsProvider } from './contexts/MeetingsContext';
@@ -112,6 +114,22 @@ function App() {
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
               </div>
+              <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={true}
+                closeOnClick
+                rtl={true}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="colored"
+                style={{ 
+                  fontFamily: 'inherit',
+                  direction: 'rtl'
+                }}
+              />
             </Router>
           </MeetingsProvider>
         </AuthProvider>

@@ -3,6 +3,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Heart, DollarSign, CreditCard, Smartphone, Gift, Users } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { toast } from 'react-toastify';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -50,10 +51,11 @@ const Donations: React.FC = () => {
 
   const handleDonation = () => {
     if (!donorName || !donorPhone || (!amount && !customAmount)) {
-      alert('يرجى ملء جميع البيانات المطلوبة');
+      toast.warning('يرجى ملء جميع البيانات المطلوبة');
       return;
     }
     setShowPaymentInstructions(true);
+    toast.success('شكراً لك! تم إنشاء طلب التبرع بنجاح. يرجى اتباع التعليمات أدناه لإتمام التبرع.');
   };
 
   const getFinalAmount = () => {
