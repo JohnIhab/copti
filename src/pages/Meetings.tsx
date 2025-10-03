@@ -1,109 +1,29 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Calendar, Clock, MapPin, Users, Search } from 'lucide-react';
+import { Calendar, Search } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useMeetings } from '../contexts/MeetingsContext';
 import CardMeeting from '../components/CardMeeting';
 
 gsap.registerPlugin(ScrollTrigger);
 
-interface Meeting {
-  id: number;
-  title: string;
-  titleEn: string;
-  time: string;
-  day: string;
-  dayEn: string;
-  location: string;
-  locationEn: string;
-  category: string;
-  categoryEn: string;
-  description: string;
-  descriptionEn: string;
-  capacity: number;
-  registered: number;
-}
-
 const Meetings: React.FC = () => {
   const { language } = useLanguage();
+  const { meetings, loading, error } = useMeetings();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const sectionRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
-
-  const meetings: Meeting[] = [
-    {
-      id: 1,
-      title: 'اجتماع الشباب',
-      titleEn: 'Youth Meeting',
-      time: '7:00 PM',
-      day: 'الجمعة',
-      dayEn: 'Friday',
-      location: 'قاعة الكنيسة الرئيسية',
-      locationEn: 'Main Church Hall',
-      category: 'youth',
-      categoryEn: 'Youth',
-      description: 'اجتماع أسبوعي للشباب مع دراسة كتابية وأنشطة روحية',
-      descriptionEn: 'Weekly youth meeting with Bible study and spiritual activities',
-      capacity: 100,
-      registered: 75
-    },
-    {
-      id: 2,
-      title: 'مدرسة الأحد للأطفال',
-      titleEn: 'Sunday School for Children',
-      time: '10:00 AM',
-      day: 'الأحد',
-      dayEn: 'Sunday',
-      location: 'فصول مدرسة الأحد',
-      locationEn: 'Sunday School Classrooms',
-      category: 'children',
-      categoryEn: 'Children',
-      description: 'تعليم الأطفال قصص الكتاب المقدس والقيم المسيحية',
-      descriptionEn: 'Teaching children Bible stories and Christian values',
-      capacity: 80,
-      registered: 65
-    },
-    {
-      id: 3,
-      title: 'اجتماع الخدام',
-      titleEn: 'Servants Meeting',
-      time: '8:00 PM',
-      day: 'الثلاثاء',
-      dayEn: 'Tuesday',
-      location: 'قاعة الاجتماعات',
-      locationEn: 'Meeting Room',
-      category: 'servants',
-      categoryEn: 'Servants',
-      description: 'اجتماع أسبوعي للخدام لمناقشة الخدمة والتخطيط',
-      descriptionEn: 'Weekly servants meeting for service discussion and planning',
-      capacity: 30,
-      registered: 25
-    },
-    {
-      id: 4,
-      title: 'اجتماع السيدات',
-      titleEn: 'Ladies Meeting',
-      time: '6:00 PM',
-      day: 'الأربعاء',
-      dayEn: 'Wednesday',
-      location: 'قاعة السيدات',
-      locationEn: 'Ladies Hall',
-      category: 'ladies',
-      categoryEn: 'Ladies',
-      description: 'اجتماع أسبوعي للسيدات مع دراسة كتابية وشركة',
-      descriptionEn: 'Weekly ladies meeting with Bible study and fellowship',
-      capacity: 60,
-      registered: 45
-    }
-  ];
 
   const categories = [
     { key: 'all', label: 'الكل', labelEn: 'All' },
     { key: 'youth', label: 'الشباب', labelEn: 'Youth' },
     { key: 'children', label: 'الأطفال', labelEn: 'Children' },
     { key: 'servants', label: 'الخدام', labelEn: 'Servants' },
-    { key: 'ladies', label: 'السيدات', labelEn: 'Ladies' }
+    { key: 'ladies', label: 'السيدات', labelEn: 'Ladies' },
+    { key: 'men', label: 'الرجال', labelEn: 'Men' },
+    { key: 'general', label: 'عام', labelEn: 'General' }
   ];
 
   const filteredMeetings = meetings.filter(meeting => {
@@ -199,26 +119,44 @@ const Meetings: React.FC = () => {
           </div>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="mb-8 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <p className="text-red-600 dark:text-red-400 text-center">
+              {language === 'ar' ? 'حدث خطأ في تحميل الاجتماعات. يتم عرض اجتماعات افتراضية.' : 'Error loading meetings. Showing default meetings.'}
+            </p>
+          </div>
+        )}
+
         {/* Meetings Grid */}
-        <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-          {filteredMeetings.map((meeting) => (
-            <div key={meeting.id} className="meeting-card">
-              <CardMeeting
-                title={language === 'ar' ? meeting.title : meeting.titleEn}
-                time={meeting.time}
-                day={language === 'ar' ? meeting.day : meeting.dayEn}
-                location={language === 'ar' ? meeting.location : meeting.locationEn}
-                description={language === 'ar' ? meeting.description : meeting.descriptionEn}
-                category={language === 'ar' ? categories.find(c => c.key === meeting.category)?.label || meeting.category : categories.find(c => c.key === meeting.category)?.labelEn || meeting.categoryEn}
-                capacity={meeting.capacity}
-                registered={meeting.registered}
-                onJoin={() => {
-                  console.log(`Joining meeting: ${meeting.title}`);
-                }}
-              />
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="text-gray-500 dark:text-gray-400 mt-4 text-lg">
+              {language === 'ar' ? 'جاري تحميل الاجتماعات...' : 'Loading meetings...'}
+            </p>
+          </div>
+        ) : (
+          <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+            {filteredMeetings.map((meeting) => (
+              <div key={meeting.id} className="meeting-card">
+                <CardMeeting
+                  title={language === 'ar' ? meeting.title : meeting.titleEn}
+                  time={meeting.time}
+                  day={language === 'ar' ? meeting.day : meeting.dayEn}
+                  location={language === 'ar' ? meeting.location : meeting.locationEn}
+                  description={language === 'ar' ? (meeting.description || meeting.subtitle || '') : (meeting.descriptionEn || meeting.subtitleEn || '')}
+                  category={language === 'ar' ? categories.find(c => c.key === meeting.category)?.label || meeting.category : categories.find(c => c.key === meeting.category)?.labelEn || meeting.categoryEn}
+                  capacity={meeting.capacity}
+                  registered={meeting.registered}
+                  onJoin={() => {
+                    console.log(`Joining meeting: ${meeting.title}`);
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* No Results */}
         {filteredMeetings.length === 0 && (
