@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Church, Sun, Moon, Globe } from 'lucide-react';
+import { Menu, X, Church, LogOut } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
+import { signOut, auth } from '../services/firebase';
 
 const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { language, setLanguage, t } = useLanguage();
-  const { isDark, toggleTheme } = useTheme();
+  const { language, t } = useLanguage();
+  const { currentUser } = useAuth();
   const location = useLocation();
   
   useEffect(() => {
@@ -18,6 +19,14 @@ const Navigation: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   const navItems = [
     { key: 'home', href: '/' },
@@ -64,6 +73,38 @@ const Navigation: React.FC = () => {
                 {t(item.key)}
               </Link>
             ))}
+            
+            {/* Auth Button */}
+            {currentUser ? (
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <Link
+                  to="/admin"
+                  className="bg-green-600 hover:bg-green-700 text-white px-3 lg:px-4 py-2 rounded-lg 
+                           transition-all duration-200 font-medium focus:outline-none text-sm lg:text-base
+                           shadow-md hover:shadow-lg border border-green-600 hover:border-green-700"
+                >
+                  {language === 'ar' ? 'لوحة التحكم' : 'Admin'}
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg 
+                           transition-all duration-200 focus:outline-none
+                           shadow-md hover:shadow-lg border border-red-600 hover:border-red-700"
+                  title={language === 'ar' ? 'تسجيل الخروج' : 'Logout'}
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3 lg:px-4 py-2 rounded-lg 
+                         transition-all duration-200 font-medium focus:outline-none text-sm lg:text-base
+                         shadow-md hover:shadow-lg border border-blue-600 hover:border-blue-700"
+              >
+                {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
+              </Link>
+            )}
           </div>
 
           {/* Controls */}
@@ -157,6 +198,42 @@ const Navigation: React.FC = () => {
                     {t(item.key)}
                   </Link>
                 ))}
+                
+                {/* Mobile Auth Buttons */}
+                {currentUser ? (
+                  <div className="space-y-2">
+                    <Link
+                      to="/admin"
+                      onClick={() => setIsOpen(false)}
+                      className="block px-4 py-3 rounded-lg bg-green-600 hover:bg-green-700 text-white
+                               transition-all duration-200 focus:outline-none text-base font-medium
+                               text-center shadow-md hover:shadow-lg border border-green-600 hover:border-green-700"
+                    >
+                      {language === 'ar' ? 'لوحة التحكم' : 'Admin Panel'}
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsOpen(false);
+                      }}
+                      className="block w-full px-4 py-3 rounded-lg bg-red-600 hover:bg-red-700 text-white
+                               transition-all duration-200 focus:outline-none text-base font-medium
+                               text-center shadow-md hover:shadow-lg border border-red-600 hover:border-red-700"
+                    >
+                      {language === 'ar' ? 'تسجيل الخروج' : 'Logout'}
+                    </button>
+                  </div>
+                ) : (
+                  <Link
+                    to="/login"
+                    onClick={() => setIsOpen(false)}
+                    className="block px-4 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white
+                             transition-all duration-200 focus:outline-none text-base font-medium
+                             text-center shadow-md hover:shadow-lg border border-blue-600 hover:border-blue-700"
+                  >
+                    {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
+                  </Link>
+                )}
               </div>
             </div>
           </>
