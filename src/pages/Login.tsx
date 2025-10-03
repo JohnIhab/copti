@@ -4,6 +4,7 @@ import { signInWithEmailAndPassword } from '../services/firebase';
 import { auth } from '../services/firebase';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Church, Eye, EyeOff, LogIn } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -24,10 +25,20 @@ const Login: React.FC = () => {
     
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      toast.success(
+        language === 'ar' 
+          ? 'تم تسجيل الدخول بنجاح'
+          : 'Successfully logged in'
+      );
       // Navigate to admin page after successful login
       navigate('/admin', { replace: true });
     } catch (error: any) {
       console.error('Login error:', error);
+      toast.error(
+        language === 'ar' 
+          ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة'
+          : 'Invalid email or password'
+      );
       setError(
         language === 'ar' 
           ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة'

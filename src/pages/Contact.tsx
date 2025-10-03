@@ -3,6 +3,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { MapPin, Phone, Mail, Clock, Send, Facebook, Instagram, Youtube } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { toast } from 'react-toastify';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -31,7 +32,7 @@ const Contact: React.FC = () => {
     
     // Simulate form submission
     setTimeout(() => {
-      alert('تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.');
+      toast.success('تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.');
       setFormData({
         name: '',
         email: '',

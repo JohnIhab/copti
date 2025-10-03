@@ -3,6 +3,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Calendar, Clock, User, Phone, MessageSquare, CheckCircle } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { toast } from 'react-toastify';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -77,10 +78,11 @@ const Confession: React.FC = () => {
 
   const handleBooking = () => {
     if (!selectedSlot || !userName || !userPhone) {
-      alert('يرجى ملء جميع البيانات المطلوبة واختيار موعد');
+      toast.warning('يرجى ملء جميع البيانات المطلوبة واختيار موعد');
       return;
     }
     setShowConfirmation(true);
+    toast.success('تم حجز موعدك بنجاح! سنتواصل معك قريباً لتأكيد الموعد.');
   };
 
   const getSelectedSlotInfo = () => {
