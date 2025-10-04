@@ -47,6 +47,10 @@ export default {
           900: '#7c2d12',
         }
       },
+      height: {
+        '110': '27.5rem', // 440px
+        '130': '32.5rem', // 520px
+      },
       animation: {
         'bounce-slow': 'bounce 2s infinite',
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
