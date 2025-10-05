@@ -17,6 +17,7 @@ import {
   MeetingsManagement,
   ContactMessagesManagement,
   ConfessionsManagement,
+  UsersManagement,
   UnderDevelopment
 } from '../components/admin';
 
@@ -210,7 +211,7 @@ const Admin: React.FC = () => {
       case 'confessions':
         return <ConfessionsManagement />;
       case 'users':
-        return <UnderDevelopment title="المستخدمين" titleEn="Users" />;
+        return <UsersManagement />;
       case 'bible':
         return <UnderDevelopment title="قراءة الكتاب المقدس" titleEn="Bible Reading" icon={Book} />;
       case 'contact':

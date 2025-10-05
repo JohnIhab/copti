@@ -1,111 +1,46 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Calendar, MapPin, Users, Clock, Star, Filter } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, Star } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { Event, getAllEvents } from '../services/eventsService';
 
 gsap.registerPlugin(ScrollTrigger);
 
-interface Event {
-  id: number;
-  title: string;
-  titleEn: string;
-  date: string;
-  time: string;
-  location: string;
-  locationEn: string;
-  category: string;
-  categoryEn: string;
-  description: string;
-  descriptionEn: string;
-  image: string;
-  capacity: number;
-  registered: number;
-  featured: boolean;
-}
-
 const Events: React.FC = () => {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
   const sectionRef = useRef<HTMLDivElement>(null);
 
-  const events: Event[] = [
-    {
-      id: 1,
-      title: 'مؤتمر الشباب السنوي',
-      titleEn: 'Annual Youth Conference',
-      date: '2025-02-15',
-      time: '9:00 AM',
-      location: 'قاعة المؤتمرات الكبرى',
-      locationEn: 'Grand Conference Hall',
-      category: 'conference',
-      categoryEn: 'Conference',
-      description: 'مؤتمر روحي للشباب مع متحدثين مميزين وأنشطة تفاعلية',
-      descriptionEn: 'Spiritual conference for youth with distinguished speakers and interactive activities',
-      image: '/Images/events/youth-conference.jpg',
-      capacity: 200,
-      registered: 150,
-      featured: true
-    },
-    {
-      id: 2,
-      title: 'احتفالية عيد الميلاد',
-      titleEn: 'Christmas Celebration',
-      date: '2025-01-07',
-      time: '7:00 PM',
-      location: 'الكنيسة الرئيسية',
-      locationEn: 'Main Church',
-      category: 'celebration',
-      categoryEn: 'Celebration',
-      description: 'احتفال بميلاد السيد المسيح مع ترانيم وعروض للأطفال',
-      descriptionEn: 'Celebrating the birth of Jesus Christ with hymns and children\'s performances',
-      image: '/Images/events/christmas-celebration.jpg',
-      capacity: 300,
-      registered: 280,
-      featured: true
-    },
-    {
-      id: 3,
-      title: 'ندوة الأسرة المسيحية',
-      titleEn: 'Christian Family Seminar',
-      date: '2025-02-01',
-      time: '6:00 PM',
-      location: 'قاعة الاجتماعات',
-      locationEn: 'Meeting Hall',
-      category: 'seminar',
-      categoryEn: 'Seminar',
-      description: 'ندوة حول بناء الأسرة المسيحية وتربية الأطفال',
-      descriptionEn: 'Seminar on building Christian families and raising children',
-      image: '/Images/events/family-seminar.jpg',
-      capacity: 100,
-      registered: 75,
-      featured: false
-    },
-    {
-      id: 4,
-      title: 'مهرجان الترانيم',
-      titleEn: 'Hymns Festival',
-      date: '2025-03-10',
-      time: '8:00 PM',
-      location: 'الحديقة الخارجية',
-      locationEn: 'Outdoor Garden',
-      category: 'festival',
-      categoryEn: 'Festival',
-      description: 'أمسية ترانيم روحية مع جوقات من كنائس مختلفة',
-      descriptionEn: 'Spiritual hymns evening with choirs from different churches',
-      image: '/Images/events/hymns-festival.jpg',
-      capacity: 400,
-      registered: 320,
-      featured: true
-    }
-  ];
+  // Load events on component mount
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        const eventsData = await getAllEvents();
+        setEvents(eventsData);
+      } catch (error) {
+        console.error('Error loading events:', error);
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadEvents();
+  }, []);
 
   const categories = [
     { key: 'all', label: 'الكل', labelEn: 'All' },
     { key: 'conference', label: 'مؤتمرات', labelEn: 'Conferences' },
     { key: 'celebration', label: 'احتفاليات', labelEn: 'Celebrations' },
     { key: 'seminar', label: 'ندوات', labelEn: 'Seminars' },
-    { key: 'festival', label: 'مهرجانات', labelEn: 'Festivals' }
+    { key: 'festival', label: 'مهرجانات', labelEn: 'Festivals' },
+    { key: 'youth', label: 'شباب', labelEn: 'Youth' },
+    { key: 'children', label: 'أطفال', labelEn: 'Children' },
+    { key: 'prayer', label: 'صلاة', labelEn: 'Prayer' },
+    { key: 'workshop', label: 'ورش عمل', labelEn: 'Workshops' }
   ];
 
   const filteredEvents = events.filter(event => 
@@ -236,8 +171,26 @@ const Events: React.FC = () => {
         </div>
 
         {/* Events Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredEvents.map((event) => (
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        ) : filteredEvents.length === 0 ? (
+          <div className="text-center py-12">
+            <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              {language === 'ar' ? 'لا توجد فعاليات' : 'No Events Found'}
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400">
+              {selectedCategory === 'all' 
+                ? (language === 'ar' ? 'لم يتم العثور على أي فعاليات' : 'No events available')
+                : (language === 'ar' ? 'لا توجد فعاليات في هذه الفئة' : 'No events found in this category')
+              }
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredEvents.map((event) => (
             <div
               key={event.id}
               className="event-card bg-white dark:bg-gray-800 rounded-2xl overflow-hidden
@@ -297,7 +250,8 @@ const Events: React.FC = () => {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

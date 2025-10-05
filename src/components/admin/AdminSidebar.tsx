@@ -321,7 +321,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
       {/* Smart Enhanced Sidebar */}
       <div className={`admin-sidebar fixed lg:static inset-y-0 ${language === 'ar' ? 'right-0' : 'left-0'} z-50 
-                      w-80 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl
+                      w-80 min-w-80 max-w-80 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl
                       shadow-2xl border-r border-gray-200/20 dark:border-gray-700/20
                       flex flex-col overflow-hidden
                       transform transition-all duration-500 ease-out
@@ -567,24 +567,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
               </div>
             </div>
             
-            {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-2 mb-3">
-              <div className="text-center p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <Clock className="h-4 w-4 text-blue-500 mx-auto mb-1" />
-                <p className="text-xs font-medium text-blue-700 dark:text-blue-300">2h 45m</p>
-                <p className="text-xs text-blue-600 dark:text-blue-400">{language === 'ar' ? 'الجلسة' : 'Session'}</p>
-              </div>
-              <div className="text-center p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                <Target className="h-4 w-4 text-green-500 mx-auto mb-1" />
-                <p className="text-xs font-medium text-green-700 dark:text-green-300">98%</p>
-                <p className="text-xs text-green-600 dark:text-green-400">{language === 'ar' ? 'الأداء' : 'Performance'}</p>
-              </div>
-              <div className="text-center p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                <Zap className="h-4 w-4 text-purple-500 mx-auto mb-1" />
-                <p className="text-xs font-medium text-purple-700 dark:text-purple-300">24</p>
-                <p className="text-xs text-purple-600 dark:text-purple-400">{language === 'ar' ? 'المهام' : 'Tasks'}</p>
-              </div>
-            </div>
+            
           </div>
           
           {/* Enhanced Logout Button */}

@@ -3,26 +3,95 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Calendar, Search } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useMeetings } from '../contexts/MeetingsContext';
 import CardMeeting from '../components/CardMeeting';
+import { db } from '../services/firebase';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 
 gsap.registerPlugin(ScrollTrigger);
 
+interface Meeting {
+  id: string;
+  title: string;
+  titleEn: string;
+  date: string;
+  time: string;
+  endTime: string;
+  location: string;
+  locationEn: string;
+  type: string;
+  typeEn: string;
+  description: string;
+  descriptionEn: string;
+  organizer: string;
+  organizerEn: string;
+  maxAttendees: number;
+  currentAttendees: number;
+  isRecurring: boolean;
+  recurrenceType?: 'weekly' | 'monthly' | 'yearly';
+  status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
+  category?: string;
+}
+
 const Meetings: React.FC = () => {
   const { language } = useLanguage();
-  const { meetings, loading, error } = useMeetings();
+  const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const sectionRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
 
+  // Helper function to format date to day name
+  const formatDateToDay = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  // Load meetings from Firebase
+  const loadMeetings = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const meetingsRef = collection(db, 'meetings');
+      const q = query(meetingsRef, orderBy('date', 'asc'));
+      const querySnapshot = await getDocs(q);
+      
+      const meetingsData: Meeting[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        meetingsData.push({
+          id: doc.id,
+          ...data,
+          category: data.type // Map type to category for filtering compatibility
+        } as Meeting);
+      });
+      
+      setMeetings(meetingsData);
+    } catch (err) {
+      console.error('Error loading meetings:', err);
+      setError('Failed to load meetings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadMeetings();
+  }, []);
+
   const categories = [
     { key: 'all', label: 'الكل', labelEn: 'All' },
     { key: 'youth', label: 'الشباب', labelEn: 'Youth' },
     { key: 'children', label: 'الأطفال', labelEn: 'Children' },
-    { key: 'servants', label: 'الخدام', labelEn: 'Servants' },
-    { key: 'ladies', label: 'السيدات', labelEn: 'Ladies' },
-    { key: 'men', label: 'الرجال', labelEn: 'Men' },
+    { key: 'prayer', label: 'صلاة', labelEn: 'Prayer' },
+    { key: 'bible-study', label: 'دراسة كتابية', labelEn: 'Bible Study' },
+    { key: 'worship', label: 'تسبيح', labelEn: 'Worship' },
+    { key: 'leadership', label: 'قيادة', labelEn: 'Leadership' },
     { key: 'general', label: 'عام', labelEn: 'General' }
   ];
 
@@ -143,12 +212,12 @@ const Meetings: React.FC = () => {
                 <CardMeeting
                   title={language === 'ar' ? meeting.title : meeting.titleEn}
                   time={meeting.time}
-                  day={language === 'ar' ? meeting.day : meeting.dayEn}
+                  day={formatDateToDay(meeting.date)}
                   location={language === 'ar' ? meeting.location : meeting.locationEn}
-                  description={language === 'ar' ? (meeting.description || meeting.subtitle || '') : (meeting.descriptionEn || meeting.subtitleEn || '')}
-                  category={language === 'ar' ? categories.find(c => c.key === meeting.category)?.label || meeting.category : categories.find(c => c.key === meeting.category)?.labelEn || meeting.categoryEn}
-                  capacity={meeting.capacity}
-                  registered={meeting.registered}
+                  description={language === 'ar' ? meeting.description : meeting.descriptionEn}
+                  category={language === 'ar' ? categories.find(c => c.key === meeting.category)?.label || meeting.type : categories.find(c => c.key === meeting.category)?.labelEn || meeting.typeEn}
+                  capacity={meeting.maxAttendees}
+                  registered={meeting.currentAttendees}
                   onJoin={() => {
                     console.log(`Joining meeting: ${meeting.title}`);
                   }}

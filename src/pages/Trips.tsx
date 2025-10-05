@@ -1,121 +1,36 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { MapPin, Calendar, Users, DollarSign, Clock, Filter } from 'lucide-react';
+import { MapPin, Calendar, Users, Clock } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { tripsService, Trip } from '../services/tripsService';
 
 gsap.registerPlugin(ScrollTrigger);
 
-interface Trip {
-  id: number;
-  title: string;
-  titleEn: string;
-  destination: string;
-  destinationEn: string;
-  date: string;
-  duration: string;
-  durationEn: string;
-  category: string;
-  categoryEn: string;
-  description: string;
-  descriptionEn: string;
-  image: string;
-  capacity: number;
-  registered: number;
-  cost: number;
-  includes: string[];
-  includesEn: string[];
-}
-
 const Trips: React.FC = () => {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedTrips, setSelectedTrips] = useState<number[]>([]);
+  const [selectedTrips, setSelectedTrips] = useState<string[]>([]);
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [loading, setLoading] = useState(true);
   const sectionRef = useRef<HTMLDivElement>(null);
 
-  const trips: Trip[] = [
-    {
-      id: 1,
-      title: 'رحلة دير الأنبا بيشوي',
-      titleEn: 'St. Bishoy Monastery Trip',
-      destination: 'وادي النطرون',
-      destinationEn: 'Wadi El Natrun',
-      date: '2025-02-20',
-      duration: 'يوم واحد',
-      durationEn: 'One Day',
-      category: 'adults',
-      categoryEn: 'Adults',
-      description: 'رحلة روحية لدير الأنبا بيشوي العامر بوادي النطرون مع زيارة المتحف والكنائس الأثرية',
-      descriptionEn: 'Spiritual trip to St. Bishoy Monastery in Wadi El Natrun with museum and historic churches visit',
-      image: '/Images/trips/monastery-trip.jpg',
-      capacity: 50,
-      registered: 35,
-      cost: 200,
-      includes: ['المواصلات', 'الغداء', 'المرشد السياحي', 'رسوم الدخول'],
-      includesEn: ['Transportation', 'Lunch', 'Tour Guide', 'Entry Fees']
-    },
-    {
-      id: 2,
-      title: 'رحلة الأطفال لحديقة الحيوان',
-      titleEn: 'Children Zoo Trip',
-      destination: 'حديقة حيوان الجيزة',
-      destinationEn: 'Giza Zoo',
-      date: '2025-02-15',
-      duration: 'يوم واحد',
-      durationEn: 'One Day',
-      category: 'children',
-      categoryEn: 'Children',
-      description: 'رحلة ترفيهية للأطفال لحديقة الحيوان مع أنشطة تعليمية وألعاب',
-      descriptionEn: 'Fun trip for children to the zoo with educational activities and games',
-      image: '/Images/trips/zoo-trip.jpg',
-      capacity: 40,
-      registered: 30,
-      cost: 100,
-      includes: ['المواصلات', 'الغداء', 'المشرفين', 'الأنشطة'],
-      includesEn: ['Transportation', 'Lunch', 'Supervisors', 'Activities']
-    },
-    {
-      id: 3,
-      title: 'رحلة الشباب لسانت كاترين',
-      titleEn: 'Youth Trip to St. Catherine',
-      destination: 'دير سانت كاترين - سيناء',
-      destinationEn: 'St. Catherine Monastery - Sinai',
-      date: '2025-03-01',
-      duration: '3 أيام',
-      durationEn: '3 Days',
-      category: 'youth',
-      categoryEn: 'Youth',
-      description: 'رحلة روحية للشباب لدير سانت كاترين مع تسلق جبل موسى ومشاهدة شروق الشمس',
-      descriptionEn: 'Spiritual youth trip to St. Catherine Monastery with Mount Moses climbing and sunrise viewing',
-      image: '/Images/trips/family-trip.jpg',
-      capacity: 30,
-      registered: 25,
-      cost: 800,
-      includes: ['المواصلات', 'الإقامة', 'جميع الوجبات', 'المرشد', 'التأمين'],
-      includesEn: ['Transportation', 'Accommodation', 'All Meals', 'Guide', 'Insurance']
-    },
-    {
-      id: 4,
-      title: 'رحلة الخدام للإسكندرية',
-      titleEn: 'Servants Trip to Alexandria',
-      destination: 'الإسكندرية',
-      destinationEn: 'Alexandria',
-      date: '2025-02-28',
-      duration: 'يومان',
-      durationEn: '2 Days',
-      category: 'servants',
-      categoryEn: 'Servants',
-      description: 'رحلة للخدام لزيارة الكنائس الأثرية بالإسكندرية ومكتبة الإسكندرية',
-      descriptionEn: 'Servants trip to visit historic churches in Alexandria and Alexandria Library',
-      image: '/Images/trips/pilgrimage-trip.jpg',
-      capacity: 25,
-      registered: 20,
-      cost: 400,
-      includes: ['المواصلات', 'الإقامة', 'الوجبات', 'الزيارات'],
-      includesEn: ['Transportation', 'Accommodation', 'Meals', 'Visits']
-    }
-  ];
+  // Load trips from Firestore
+  useEffect(() => {
+    const loadTrips = async () => {
+      try {
+        setLoading(true);
+        const tripsData = await tripsService.getTrips();
+        setTrips(tripsData);
+      } catch (error) {
+        console.error('Error loading trips:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    loadTrips();
+  }, []);
   const categories = [
     { key: 'all', label: 'الكل', labelEn: 'All' },
     { key: 'children', label: 'الأطفال', labelEn: 'Children' },
@@ -128,7 +43,8 @@ const Trips: React.FC = () => {
     selectedCategory === 'all' || trip.category === selectedCategory
   );
 
-  const toggleTripSelection = (tripId: number) => {
+  const toggleTripSelection = (tripId: string | undefined) => {
+    if (!tripId) return;
     setSelectedTrips(prev => 
       prev.includes(tripId) 
         ? prev.filter(id => id !== tripId)
@@ -184,24 +100,33 @@ const Trips: React.FC = () => {
           </p>
         </div>
 
-        {/* Category Filter */}
-        <div className="mb-8">
-          <div className="flex flex-wrap gap-2 justify-center">
-            {categories.map((category) => (
-              <button
-                key={category.key}
-                onClick={() => setSelectedCategory(category.key)}
-                className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
-                  selectedCategory === category.key
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700'
-                }`}
-              >
-                {language === 'ar' ? category.label : category.labelEn}
-              </button>
-            ))}
+        {loading ? (
+          <div className="flex items-center justify-center min-h-96">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <span className="ml-4 text-gray-600 dark:text-gray-300">
+              {language === 'ar' ? 'جاري التحميل...' : 'Loading trips...'}
+            </span>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Category Filter */}
+            <div className="mb-8">
+              <div className="flex flex-wrap gap-2 justify-center">
+                {categories.map((category) => (
+                  <button
+                    key={category.key}
+                    onClick={() => setSelectedCategory(category.key)}
+                    className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
+                      selectedCategory === category.key
+                        ? 'bg-blue-600 text-white shadow-lg'
+                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    {language === 'ar' ? category.label : category.labelEn}
+                  </button>
+                ))}
+              </div>
+            </div>
 
         {/* Selected Trips Summary */}
         {selectedTrips.length > 0 && (
@@ -221,12 +146,12 @@ const Trips: React.FC = () => {
 
         {/* Trips Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTrips.map((trip) => (
+          {filteredTrips.length > 0 ? filteredTrips.map((trip) => (
             <div
               key={trip.id}
               className={`trip-card bg-white dark:bg-gray-800 rounded-2xl overflow-hidden
                        shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2
-                       border-2 ${selectedTrips.includes(trip.id) 
+                       border-2 ${selectedTrips.includes(trip.id || '') 
                          ? 'border-blue-500 ring-2 ring-blue-200 dark:ring-blue-800' 
                          : 'border-gray-100 dark:border-gray-700'} group cursor-pointer`}
               onClick={() => toggleTripSelection(trip.id)}
@@ -243,7 +168,7 @@ const Trips: React.FC = () => {
                 <div className="absolute top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
                   {language === 'ar' ? categories.find(c => c.key === trip.category)?.label : categories.find(c => c.key === trip.category)?.labelEn}
                 </div>
-                {selectedTrips.includes(trip.id) && (
+                {selectedTrips.includes(trip.id || '') && (
                   <div className="absolute inset-0 bg-blue-600/20 flex items-center justify-center">
                     <div className="bg-blue-600 text-white rounded-full p-2">
                       <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -286,7 +211,7 @@ const Trips: React.FC = () => {
                 <div className="mb-4">
                   <h4 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm">يشمل:</h4>
                   <div className="flex flex-wrap gap-1">
-                    {(language === 'ar' ? trip.includes : trip.includesEn).map((item, index) => (
+                    {(language === 'ar' ? trip.includes || [] : trip.includesEn || []).map((item, index) => (
                       <span key={index} className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
                                                    px-2 py-1 rounded text-xs">
                         {item}
@@ -307,17 +232,25 @@ const Trips: React.FC = () => {
                     {trip.cost} جنيه
                   </span>
                   <div className={`px-4 py-2 rounded-lg font-semibold transition-all duration-300 ${
-                    selectedTrips.includes(trip.id)
+                    selectedTrips.includes(trip.id || '')
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                   }`}>
-                    {selectedTrips.includes(trip.id) ? 'مختار' : 'اختر'}
+                    {selectedTrips.includes(trip.id || '') ? 'مختار' : 'اختر'}
                   </div>
                 </div>
               </div>
             </div>
-          ))}
+          )) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500 dark:text-gray-400 text-lg">
+                {language === 'ar' ? 'لا توجد رحلات متاحة' : 'No trips available'}
+              </p>
+            </div>
+          )}
         </div>
+        </>
+        )}
       </div>
     </div>
   );
