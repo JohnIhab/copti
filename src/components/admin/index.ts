@@ -7,5 +7,6 @@ export { default as DonationsManagement } from './DonationsManagement';
 export { default as MeetingsManagement } from './MeetingsManagement';
 export { default as ContactMessagesManagement } from './ContactMessagesManagement';
 export { default as ConfessionsManagement } from './ConfessionsManagement';
+export { default as UsersManagement } from './UsersManagement';
 export { default as UnderDevelopment } from './UnderDevelopment';
 export { default as MessagePreviewDialog } from './MessagePreviewDialog';

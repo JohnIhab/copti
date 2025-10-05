@@ -4,7 +4,6 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { ThemeProvider } from './contexts/ThemeContext';
-import { MeetingsProvider } from './contexts/MeetingsContext';
 import { AuthProvider } from './contexts/AuthContext';
 import Navigation from './components/Navigation';
 import Hero from './components/Hero';
@@ -46,8 +45,7 @@ function App() {
     <ThemeProvider>
       <LanguageProvider>
         <AuthProvider>
-          <MeetingsProvider>
-            <Router>
+          <Router>
               <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
                 <BibleVerseModal 
                   isOpen={showBibleVerse} 
@@ -131,7 +129,6 @@ function App() {
                 }}
               />
             </Router>
-          </MeetingsProvider>
         </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>

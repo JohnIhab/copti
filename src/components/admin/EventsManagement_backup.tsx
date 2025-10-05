@@ -308,7 +308,7 @@ const EventsManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Events Content */}
+      {/* Events Grid/Table */}
       {!loading && (
         <>
           {viewMode === 'table' ? (
@@ -477,81 +477,79 @@ const EventsManagement: React.FC = () => {
                 </div>
               ) : (
                 events.map((event) => (
-                  <div key={event.id} className="admin-card bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-xl border border-gray-200 dark:border-gray-700">
-                    <div className="relative">
-                      <img 
-                        src={event.image} 
-                        alt={language === 'ar' ? event.title : event.titleEn}
-                        className="w-full h-48 object-cover"
-                        onError={(e) => {
-                          e.currentTarget.src = '/Images/hero.jpg';
-                        }}
-                      />
-                      {event.featured && (
-                        <div className="absolute top-4 left-4 bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center">
-                          <Star className="h-4 w-4 mr-1 rtl:ml-1 rtl:mr-0" />
-                          {language === 'ar' ? 'مميز' : 'Featured'}
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                        {language === 'ar' ? event.title : event.titleEn}
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
-                        {language === 'ar' ? event.description : event.descriptionEn}
-                      </p>
-                      <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0" />
-                          <span>{event.date} - {event.time}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0" />
-                          <span>{language === 'ar' ? event.location : event.locationEn}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Users className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0" />
-                          <span>{event.registered}/{event.capacity} {language === 'ar' ? 'مشارك' : 'participants'}</span>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-xs font-medium">
-                          {language === 'ar' ? event.category : event.categoryEn}
-                        </span>
-                        <div className="flex space-x-2 rtl:space-x-reverse">
-                          <button className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
-                            <Eye className="h-4 w-4" />
-                          </button>
-                          <button 
-                            onClick={() => handleEdit(event)}
-                            className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
-                            title={language === 'ar' ? 'تعديل' : 'Edit'}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </button>
-                          <button 
-                            onClick={() => handleDelete(event)}
-                            className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                            title={language === 'ar' ? 'حذف' : 'Delete'}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
+          <div key={event.id} className="admin-card bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-xl border border-gray-200 dark:border-gray-700">
+            <div className="relative">
+              <img 
+                src={event.image} 
+                alt={language === 'ar' ? event.title : event.titleEn}
+                className="w-full h-48 object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = '/Images/hero.jpg';
+                }}
+              />
+              {event.featured && (
+                <div className="absolute top-4 left-4 bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center">
+                  <Star className="h-4 w-4 mr-1 rtl:ml-1 rtl:mr-0" />
+                  {language === 'ar' ? 'مميز' : 'Featured'}
+                </div>
               )}
             </div>
-          )}
-        </>
+            <div className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                {language === 'ar' ? event.title : event.titleEn}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
+                {language === 'ar' ? event.description : event.descriptionEn}
+              </p>
+              <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
+                <div className="flex items-center">
+                  <Calendar className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0" />
+                  <span>{event.date} - {event.time}</span>
+                </div>
+                <div className="flex items-center">
+                  <MapPin className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0" />
+                  <span>{language === 'ar' ? event.location : event.locationEn}</span>
+                </div>
+                <div className="flex items-center">
+                  <Users className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0" />
+                  <span>{event.registered}/{event.capacity} {language === 'ar' ? 'مشارك' : 'participants'}</span>
+                </div>
+              </div>
+              <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
+                <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-xs font-medium">
+                  {language === 'ar' ? event.category : event.categoryEn}
+                </span>
+                <div className="flex space-x-2 rtl:space-x-reverse">
+                  <button className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
+                    <Eye className="h-4 w-4" />
+                  </button>
+                  <button 
+                    onClick={() => handleEdit(event)}
+                    className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                    title={language === 'ar' ? 'تعديل' : 'Edit'}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(event)}
+                    className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    title={language === 'ar' ? 'حذف' : 'Delete'}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))
       )}
+    </>
+  )}
 
       {/* Add Event Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto transform -translate-x-[70px]">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                 {language === 'ar' ? 'إضافة فعالية جديدة' : 'Add New Event'}
@@ -817,7 +815,7 @@ const EventsManagement: React.FC = () => {
             </div>
 
             <form onSubmit={handleUpdate} className="p-6 space-y-6">
-              {/* Same fields as Add Modal */}
+              {/* Title Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -847,7 +845,7 @@ const EventsManagement: React.FC = () => {
                 </div>
               </div>
 
-              {/* Other fields identical to Add Modal */}
+              {/* Date and Time */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -887,6 +885,7 @@ const EventsManagement: React.FC = () => {
                 </div>
               </div>
 
+              {/* Location Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -916,6 +915,7 @@ const EventsManagement: React.FC = () => {
                 </div>
               </div>
 
+              {/* Category and Featured */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -947,6 +947,7 @@ const EventsManagement: React.FC = () => {
                 </div>
               </div>
 
+              {/* Description Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -974,6 +975,7 @@ const EventsManagement: React.FC = () => {
                 </div>
               </div>
 
+              {/* Image Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {language === 'ar' ? 'تحديث صورة الفعالية' : 'Update Event Image'}
@@ -1006,6 +1008,7 @@ const EventsManagement: React.FC = () => {
                 )}
               </div>
 
+              {/* Form Actions */}
               <div className="flex justify-end space-x-4 rtl:space-x-reverse pt-6 border-t border-gray-200 dark:border-gray-700">
                 <button
                   type="button"

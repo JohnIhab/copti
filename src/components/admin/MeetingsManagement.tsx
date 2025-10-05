@@ -1,879 +1,918 @@
-import React, { useState } from 'react';
-import { Plus, Calendar, MapPin, Users, X, ChevronRight, ChevronLeft, Save, Eye, EyeOff, Sparkles, CheckCircle, AlertCircle, Edit, Trash2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Calendar, Edit, Trash2, X, Save } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { useMeetings } from '../../contexts/MeetingsContext';
 import { toast } from 'react-toastify';
 import ConfirmDialog from '../ConfirmDialog';
+import { db } from '../../services/firebase';
+import { 
+  collection, 
+  addDoc, 
+  getDocs, 
+  doc, 
+  updateDoc, 
+  deleteDoc, 
+  orderBy, 
+  query,
+  serverTimestamp 
+} from 'firebase/firestore';
+
+interface Meeting {
+  id: string;
+  title: string;
+  titleEn: string;
+  date: string;
+  time: string;
+  endTime: string;
+  location: string;
+  locationEn: string;
+  type: string;
+  typeEn: string;
+  description: string;
+  descriptionEn: string;
+  organizer: string;
+  organizerEn: string;
+  maxAttendees: number;
+  currentAttendees: number;
+  isRecurring: boolean;
+  recurrenceType?: 'weekly' | 'monthly' | 'yearly';
+  status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
+  createdAt: any;
+  updatedAt: any;
+}
 
 interface MeetingFormData {
   title: string;
   titleEn: string;
-  subtitle: string;
-  subtitleEn: string;
+  date: string;
   time: string;
-  day: string;
-  dayEn: string;
+  endTime: string;
   location: string;
   locationEn: string;
-  category: string;
-  categoryEn: string;
-  capacity: number;
-}
-
-interface FormStep {
-  id: number;
-  title: string;
-  titleEn: string;
-  fields: string[];
+  type: string;
+  description: string;
+  descriptionEn: string;
+  organizer: string;
+  organizerEn: string;
+  maxAttendees: number;
+  isRecurring: boolean;
+  recurrenceType: 'weekly' | 'monthly' | 'yearly';
+  status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
 }
 
 const MeetingsManagement: React.FC = () => {
   const { language } = useLanguage();
-  const { meetings, addMeeting, updateMeeting, deleteMeeting, loading, error } = useMeetings();
   
-  const [showMeetingForm, setShowMeetingForm] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [isPreviewMode, setIsPreviewMode] = useState(false);
-  const [editingMeeting, setEditingMeeting] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<Partial<MeetingFormData>>({});
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [meetingToDelete, setMeetingToDelete] = useState<string | null>(null);
-  const [meetingForm, setMeetingForm] = useState<MeetingFormData>({
+  const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Modal and form state
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingMeeting, setEditingMeeting] = useState<Meeting | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [meetingToDelete, setMeetingToDelete] = useState<Meeting | null>(null);
+  
+  const [formData, setFormData] = useState<MeetingFormData>({
     title: '',
     titleEn: '',
-    subtitle: '',
-    subtitleEn: '',
+    date: '',
     time: '',
-    day: '',
-    dayEn: '',
+    endTime: '',
     location: '',
     locationEn: '',
-    category: 'الشباب',
-    categoryEn: 'Youth',
-    capacity: 50
+    type: 'general',
+    description: '',
+    descriptionEn: '',
+    organizer: '',
+    organizerEn: '',
+    maxAttendees: 20,
+    isRecurring: false,
+    recurrenceType: 'weekly',
+    status: 'scheduled'
   });
 
-  const formSteps: FormStep[] = [
-    {
-      id: 1,
-      title: 'المعلومات الأساسية',
-      titleEn: 'Basic Information',
-      fields: ['title', 'titleEn', 'subtitle', 'subtitleEn']
-    },
-    {
-      id: 2,
-      title: 'التوقيت والمكان',
-      titleEn: 'Time & Location',
-      fields: ['day', 'time', 'location', 'locationEn']
-    },
-    {
-      id: 3,
-      title: 'التفاصيل النهائية',
-      titleEn: 'Final Details',
-      fields: ['category', 'capacity']
-    }
+  const meetingTypes = [
+    { value: 'general', label: 'اجتماع عام', labelEn: 'General Meeting' },
+    { value: 'prayer', label: 'اجتماع صلاة', labelEn: 'Prayer Meeting' },
+    { value: 'bible-study', label: 'دراسة كتابية', labelEn: 'Bible Study' },
+    { value: 'youth', label: 'اجتماع شباب', labelEn: 'Youth Meeting' },
+    { value: 'children', label: 'اجتماع أطفال', labelEn: 'Children Meeting' },
+    { value: 'worship', label: 'اجتماع تسبيح', labelEn: 'Worship Meeting' },
+    { value: 'leadership', label: 'اجتماع قيادة', labelEn: 'Leadership Meeting' },
+    { value: 'committee', label: 'اجتماع لجنة', labelEn: 'Committee Meeting' }
   ];
 
-  const categories = [
-    { key: 'youth', label: 'الشباب', labelEn: 'Youth' },
-    { key: 'children', label: 'الأطفال', labelEn: 'Children' },
-    { key: 'servants', label: 'الخدام', labelEn: 'Servants' },
-    { key: 'ladies', label: 'السيدات', labelEn: 'Ladies' },
-    { key: 'men', label: 'الرجال', labelEn: 'Men' },
-    { key: 'general', label: 'عام', labelEn: 'General' }
+  const statusOptions = [
+    { value: 'scheduled', label: 'مجدول', labelEn: 'Scheduled' },
+    { value: 'ongoing', label: 'جاري', labelEn: 'Ongoing' },
+    { value: 'completed', label: 'مكتمل', labelEn: 'Completed' },
+    { value: 'cancelled', label: 'ملغي', labelEn: 'Cancelled' }
   ];
 
-  const days = [
-    { key: 'sunday', label: 'الأحد', labelEn: 'Sunday' },
-    { key: 'monday', label: 'الاثنين', labelEn: 'Monday' },
-    { key: 'tuesday', label: 'الثلاثاء', labelEn: 'Tuesday' },
-    { key: 'wednesday', label: 'الأربعاء', labelEn: 'Wednesday' },
-    { key: 'thursday', label: 'الخميس', labelEn: 'Thursday' },
-    { key: 'friday', label: 'الجمعة', labelEn: 'Friday' },
-    { key: 'saturday', label: 'السبت', labelEn: 'Saturday' }
-  ];
-
-  // Validation function for current step
-  const validateStep = (step: number): boolean => {
-    const errors: Record<string, string> = {};
-    const currentFields = formSteps[step - 1]?.fields || [];
-
-    currentFields.forEach(field => {
-      const value = meetingForm[field as keyof MeetingFormData];
-      if (!value || (typeof value === 'string' && !value.trim())) {
-        errors[field] = language === 'ar' ? 'هذا الحقل مطلوب' : 'This field is required';
-      }
-    });
-
-    // Special validation for capacity
-    if (currentFields.includes('capacity') && meetingForm.capacity < 1) {
-      errors.capacity = language === 'ar' ? 'يجب أن يكون العدد أكثر من صفر' : 'Capacity must be greater than 0';
-    }
-
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  // Navigate between steps
-  const nextStep = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, formSteps.length));
-    }
-  };
-
-  const prevStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
-  };
-
-  // Reset form and state
-  const resetForm = () => {
-    setMeetingForm({
-      title: '',
-      titleEn: '',
-      subtitle: '',
-      subtitleEn: '',
-      time: '',
-      day: '',
-      dayEn: '',
-      location: '',
-      locationEn: '',
-      category: 'الشباب',
-      categoryEn: 'Youth',
-      capacity: 50
-    });
-    setCurrentStep(1);
-    setFormErrors({});
-    setIsPreviewMode(false);
-    setShowMeetingForm(false);
-  };
-
-  // Edit meeting functions
-  const handleEditMeeting = (meeting: any) => {
-    setEditingMeeting(meeting.id);
-    
-    // Convert category key to label for editing
-    const categoryData = categories.find(c => c.key === meeting.category);
-    
-    setEditForm({
-      title: meeting.title,
-      titleEn: meeting.titleEn,
-      subtitle: meeting.subtitle,
-      subtitleEn: meeting.subtitleEn,
-      time: meeting.time,
-      day: meeting.day,
-      dayEn: meeting.dayEn,
-      location: meeting.location,
-      locationEn: meeting.locationEn,
-      category: categoryData?.label || meeting.category,
-      categoryEn: categoryData?.labelEn || meeting.categoryEn,
-      capacity: meeting.capacity
-    });
-  };
-
-  const handleSaveEdit = async (meetingId: string) => {
+  // Load meetings from Firebase
+  const loadMeetings = async () => {
     try {
-      // Convert category label back to key for storage
-      const categoryKey = categories.find(c => 
-        c.label === editForm.category || c.labelEn === editForm.categoryEn
-      )?.key || 'youth';
+      setLoading(true);
+      const meetingsRef = collection(db, 'meetings');
+      const q = query(meetingsRef, orderBy('date', 'desc'));
+      const querySnapshot = await getDocs(q);
       
-      const updateData = {
-        ...editForm,
-        category: categoryKey
-      };
+      const meetingsData: Meeting[] = [];
+      querySnapshot.forEach((doc) => {
+        meetingsData.push({
+          id: doc.id,
+          ...doc.data()
+        } as Meeting);
+      });
       
-      await updateMeeting(meetingId, updateData);
-      setEditingMeeting(null);
-      setEditForm({});
-      toast.success(
-        language === 'ar' ? 'تم تحديث الاجتماع بنجاح!' : 'Meeting updated successfully!'
-      );
+      setMeetings(meetingsData);
     } catch (error) {
-      console.error('Error updating meeting:', error);
+      console.error('Error loading meetings:', error);
       toast.error(
-        language === 'ar' ? 'فشل في تحديث الاجتماع' : 'Failed to update meeting'
-      );
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setEditingMeeting(null);
-    setEditForm({});
-  };
-
-  const handleMeetingSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (submitting) return;
-    
-    // Validate all steps before submission
-    let allValid = true;
-    for (let i = 1; i <= formSteps.length; i++) {
-      if (!validateStep(i)) {
-        allValid = false;
-        setCurrentStep(i);
-        break;
-      }
-    }
-    
-    if (!allValid) return;
-    
-    setSubmitting(true);
-    
-    try {
-      // Convert category label back to key for storage
-      const categoryKey = categories.find(c => 
-        c.label === meetingForm.category || c.labelEn === meetingForm.categoryEn
-      )?.key || 'youth';
-      
-      const newMeeting = {
-        ...meetingForm,
-        category: categoryKey,
-        description: meetingForm.subtitle,
-        descriptionEn: meetingForm.subtitleEn
-      };
-      
-      await addMeeting(newMeeting);
-      resetForm();
-      toast.success(
-        language === 'ar' ? 'تم إضافة الاجتماع بنجاح!' : 'Meeting added successfully!'
-      );
-    } catch (error) {
-      console.error('Error adding meeting:', error);
-      toast.error(
-        language === 'ar' ? 'فشل في إضافة الاجتماع' : 'Failed to add meeting'
+        language === 'ar' 
+          ? 'حدث خطأ في تحميل الاجتماعات'
+          : 'Error loading meetings'
       );
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
 
-  // Smart Input Component
-  const SmartInput: React.FC<{
-    label: string;
-    type?: string;
-    value: string | number;
-    onChange: (value: string | number) => void;
-    placeholder?: string;
-    required?: boolean;
-    error?: string;
-    options?: Array<{key: string; label: string; labelEn: string}>;
-  }> = ({ label, type = 'text', value, onChange, placeholder, required, error, options }) => {
-    const inputClasses = `w-full px-4 py-3 border rounded-xl transition-colors duration-200 form-input-smooth
-                         bg-white dark:bg-gray-800 text-gray-900 dark:text-white
-                         focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none
-                         ${error 
-                           ? 'border-red-300 dark:border-red-600 focus:ring-red-500' 
-                           : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
-                         }`;
+  useEffect(() => {
+    loadMeetings();
+  }, []);
 
-    return (
-      <div className="space-y-2">
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-          {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
-        </label>
-        
-        {options ? (
-          <select
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            className={inputClasses}
-            required={required}
-          >
-            <option value="">{language === 'ar' ? 'اختر...' : 'Select...'}</option>
-            {options.map((option) => (
-              <option key={option.key} value={language === 'ar' ? option.label : option.labelEn}>
-                {language === 'ar' ? option.label : option.labelEn}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <input
-            type={type}
-            value={value}
-            onChange={(e) => onChange(type === 'number' ? parseInt(e.target.value) || 0 : e.target.value)}
-            placeholder={placeholder}
-            className={inputClasses}
-            required={required}
-            min={type === 'number' ? 1 : undefined}
-          />
-        )}
-        
-        {error && (
-          <div className="flex items-center space-x-2 rtl:space-x-reverse text-red-500 text-sm">
-            <AlertCircle className="h-4 w-4" />
-            <span>{error}</span>
-          </div>
-        )}
-      </div>
-    );
+  const handleInputChange = (field: keyof MeetingFormData, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
-  // Step indicator component
-  const StepIndicator: React.FC = () => (
-    <div className="flex items-center justify-center space-x-4 rtl:space-x-reverse mb-8">
-      {formSteps.map((step, index) => (
-        <React.Fragment key={step.id}>
-          <div className={`flex items-center space-x-2 rtl:space-x-reverse ${
-            currentStep === step.id ? 'text-blue-600' : 
-            currentStep > step.id ? 'text-green-600' : 'text-gray-400'
-          }`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
-              currentStep === step.id ? 'bg-blue-600 text-white scale-110' :
-              currentStep > step.id ? 'bg-green-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-500'
-            }`}>
-              {currentStep > step.id ? <CheckCircle className="h-5 w-5" /> : step.id}
-            </div>
-            <span className="text-sm font-medium hidden sm:block">
-              {language === 'ar' ? step.title : step.titleEn}
-            </span>
-          </div>
-          {index < formSteps.length - 1 && (
-            <ChevronRight className={`h-4 w-4 ${language === 'ar' ? 'rotate-180' : ''}`} />
-          )}
-        </React.Fragment>
-      ))}
-    </div>
-  );
-
-  const handleDeleteMeeting = async (id: string) => {
-    setMeetingToDelete(id);
-    setShowConfirmDialog(true);
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      titleEn: '',
+      date: '',
+      time: '',
+      endTime: '',
+      location: '',
+      locationEn: '',
+      type: 'general',
+      description: '',
+      descriptionEn: '',
+      organizer: '',
+      organizerEn: '',
+      maxAttendees: 20,
+      isRecurring: false,
+      recurrenceType: 'weekly',
+      status: 'scheduled'
+    });
   };
 
-  const confirmDeleteMeeting = async () => {
+  const validateForm = (): boolean => {
+    if (!formData.title.trim() || !formData.titleEn.trim()) {
+      toast.error(
+        language === 'ar' 
+          ? 'يرجى إدخال عنوان الاجتماع باللغتين العربية والإنجليزية'
+          : 'Please enter meeting title in both Arabic and English'
+      );
+      return false;
+    }
+
+    if (!formData.date || !formData.time) {
+      toast.error(
+        language === 'ar' 
+          ? 'يرجى تحديد تاريخ ووقت الاجتماع'
+          : 'Please specify meeting date and time'
+      );
+      return false;
+    }
+
+    if (!formData.endTime) {
+      toast.error(
+        language === 'ar' 
+          ? 'يرجى تحديد وقت انتهاء الاجتماع'
+          : 'Please specify meeting end time'
+      );
+      return false;
+    }
+
+    if (!formData.location.trim() || !formData.locationEn.trim()) {
+      toast.error(
+        language === 'ar' 
+          ? 'يرجى إدخال مكان الاجتماع باللغتين'
+          : 'Please enter meeting location in both languages'
+      );
+      return false;
+    }
+
+    if (!formData.organizer.trim() || !formData.organizerEn.trim()) {
+      toast.error(
+        language === 'ar' 
+          ? 'يرجى إدخال اسم المنظم باللغتين'
+          : 'Please enter organizer name in both languages'
+      );
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+    
+    setIsSubmitting(true);
+
+    try {
+      const meetingData = {
+        title: formData.title.trim(),
+        titleEn: formData.titleEn.trim(),
+        date: formData.date,
+        time: formData.time,
+        endTime: formData.endTime,
+        location: formData.location.trim(),
+        locationEn: formData.locationEn.trim(),
+        type: formData.type,
+        typeEn: meetingTypes.find(type => type.value === formData.type)?.labelEn || 'General Meeting',
+        description: formData.description.trim(),
+        descriptionEn: formData.descriptionEn.trim(),
+        organizer: formData.organizer.trim(),
+        organizerEn: formData.organizerEn.trim(),
+        maxAttendees: formData.maxAttendees,
+        currentAttendees: 0,
+        isRecurring: formData.isRecurring,
+        recurrenceType: formData.isRecurring ? formData.recurrenceType : null,
+        status: formData.status,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      if (editingMeeting) {
+        // Update existing meeting
+        const meetingRef = doc(db, 'meetings', editingMeeting.id);
+        await updateDoc(meetingRef, {
+          ...meetingData,
+          updatedAt: serverTimestamp()
+        });
+        
+        toast.success(
+          language === 'ar' 
+            ? 'تم تحديث الاجتماع بنجاح'
+            : 'Meeting updated successfully'
+        );
+        setShowEditModal(false);
+        setEditingMeeting(null);
+      } else {
+        // Add new meeting
+        await addDoc(collection(db, 'meetings'), meetingData);
+        
+        toast.success(
+          language === 'ar' 
+            ? 'تم إضافة الاجتماع بنجاح'
+            : 'Meeting added successfully'
+        );
+        setShowAddModal(false);
+      }
+      
+      resetForm();
+      loadMeetings(); // Reload meetings
+      
+    } catch (error) {
+      console.error('Error saving meeting:', error);
+      toast.error(
+        language === 'ar' 
+          ? 'حدث خطأ في حفظ الاجتماع'
+          : 'Error saving meeting'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEdit = (meeting: Meeting) => {
+    setEditingMeeting(meeting);
+    setFormData({
+      title: meeting.title,
+      titleEn: meeting.titleEn,
+      date: meeting.date,
+      time: meeting.time,
+      endTime: meeting.endTime,
+      location: meeting.location,
+      locationEn: meeting.locationEn,
+      type: meeting.type,
+      description: meeting.description,
+      descriptionEn: meeting.descriptionEn,
+      organizer: meeting.organizer,
+      organizerEn: meeting.organizerEn,
+      maxAttendees: meeting.maxAttendees,
+      isRecurring: meeting.isRecurring,
+      recurrenceType: meeting.recurrenceType || 'weekly',
+      status: meeting.status
+    });
+    setShowEditModal(true);
+  };
+
+  const handleDelete = async () => {
     if (!meetingToDelete) return;
     
     try {
-      await deleteMeeting(meetingToDelete);
+      await deleteDoc(doc(db, 'meetings', meetingToDelete.id));
+      
       toast.success(
-        language === 'ar' ? 'تم حذف الاجتماع بنجاح!' : 'Meeting deleted successfully!'
+        language === 'ar' 
+          ? 'تم حذف الاجتماع بنجاح'
+          : 'Meeting deleted successfully'
       );
+      
+      setShowDeleteConfirm(false);
+      setMeetingToDelete(null);
+      loadMeetings(); // Reload meetings
+      
     } catch (error) {
       console.error('Error deleting meeting:', error);
       toast.error(
-        language === 'ar' ? 'فشل في حذف الاجتماع' : 'Failed to delete meeting'
+        language === 'ar' 
+          ? 'حدث خطأ في حذف الاجتماع'
+          : 'Error deleting meeting'
       );
-    } finally {
-      setShowConfirmDialog(false);
-      setMeetingToDelete(null);
     }
   };
 
+  const openDeleteConfirm = (meeting: Meeting) => {
+    setMeetingToDelete(meeting);
+    setShowDeleteConfirm(true);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'scheduled':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+      case 'ongoing':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      case 'completed':
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
+    }
+  };
+
+  const formatTime = (timeString: string) => {
+    const [hours, minutes] = timeString.split(':');
+    const date = new Date();
+    date.setHours(parseInt(hours), parseInt(minutes));
+    return date.toLocaleTimeString(language === 'ar' ? 'ar-EG' : 'en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <div className="admin-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             {language === 'ar' ? 'إدارة الاجتماعات' : 'Meetings Management'}
-          </h2>
-          <button 
-            onClick={() => setShowMeetingForm(!showMeetingForm)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-colors"
-          >
-            <Plus className="h-4 w-4" />
-            <span>{language === 'ar' ? 'إضافة اجتماع' : 'Add Meeting'}</span>
-          </button>
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            {language === 'ar' 
+              ? 'إضافة وتحرير وحذف الاجتماعات' 
+              : 'Add, edit, and delete meetings'
+            }
+          </p>
         </div>
+        <button
+          onClick={() => {
+            resetForm();
+            setShowAddModal(true);
+          }}
+          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          <Plus className="h-5 w-5 ml-2" />
+          {language === 'ar' ? 'اجتماع جديد' : 'New Meeting'}
+        </button>
+      </div>
 
-        {/* Enhanced Meeting Form */}
-        {showMeetingForm && (
-          <div className="mb-8 relative">
-            {/* Animated background */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl blur-xl"></div>
-            
-            <div className="relative bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl border border-gray-200 dark:border-gray-700">
-              {/* Header with sparkles */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                  <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl text-white">
-                    <Sparkles className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {language === 'ar' ? 'إضافة اجتماع جديد' : 'Add New Meeting'}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      {language === 'ar' ? 'املأ البيانات بعناية لإنشاء اجتماع مثالي' : 'Fill in the details carefully to create the perfect meeting'}
-                    </p>
-                  </div>
+      {/* Meetings Table */}
+      <div className="bg-white dark:bg-gray-800 shadow-xl rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700">
+        {meetings.length === 0 ? (
+          <div className="text-center py-16 px-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 rounded-full"></div>
+              </div>
+              <Calendar className="h-12 w-12 text-blue-600 dark:text-blue-400 mx-auto mb-6 relative z-10" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+              {language === 'ar' ? 'لا توجد اجتماعات' : 'No meetings found'}
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+              {language === 'ar' 
+                ? 'ابدأ بإضافة اجتماع جديد لتنظيم أنشطة الكنيسة' 
+                : 'Start by adding a new meeting to organize church activities'
+              }
+            </p>
+            <button
+              onClick={() => {
+                resetForm();
+                setShowAddModal(true);
+              }}
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              <Plus className="h-5 w-5 ml-2" />
+              {language === 'ar' ? 'إضافة أول اجتماع' : 'Add First Meeting'}
+            </button>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead>
+                <tr className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-b border-gray-200 dark:border-gray-600">
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    <div className="flex items-center justify-center space-x-1">
+                      <Calendar className="h-4 w-4" />
+                      <span>{language === 'ar' ? 'العنوان' : 'Title'}</span>
+                    </div>
+                  </th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    {language === 'ar' ? 'النوع' : 'Type'}
+                  </th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    {language === 'ar' ? 'التاريخ والوقت' : 'Date & Time'}
+                  </th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    {language === 'ar' ? 'المكان' : 'Location'}
+                  </th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    {language === 'ar' ? 'المنظم' : 'Organizer'}
+                  </th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    {language === 'ar' ? 'الحضور' : 'Attendees'}
+                  </th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    {language === 'ar' ? 'الحالة' : 'Status'}
+                  </th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    {language === 'ar' ? 'الإجراءات' : 'Actions'}
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
+                {meetings.map((meeting, index) => (
+                  <tr 
+                    key={meeting.id} 
+                    className={`
+                      hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 
+                      dark:hover:from-blue-900/10 dark:hover:to-purple-900/10 
+                      transition-all duration-200 
+                      ${index % 2 === 0 ? 'bg-gray-50/30 dark:bg-gray-700/30' : 'bg-white dark:bg-gray-800'}
+                    `}
+                  >
+                    <td className="px-6 py-5">
+                      <div className="flex flex-col items-center space-y-2">
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white text-center leading-tight">
+                          {language === 'ar' ? meeting.title : meeting.titleEn}
+                        </div>
+                        {meeting.isRecurring && (
+                          <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
+                            <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1.5 animate-pulse"></div>
+                            {language === 'ar' ? 'متكرر' : 'Recurring'}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-5 text-center">
+                      <div className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                        {language === 'ar' 
+                          ? meetingTypes.find(t => t.value === meeting.type)?.label
+                          : meetingTypes.find(t => t.value === meeting.type)?.labelEn
+                        }
+                      </div>
+                    </td>
+                    <td className="px-6 py-5 text-center">
+                      <div className="space-y-1">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          {new Date(meeting.date).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
+                            weekday: 'short',
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400 font-mono">
+                          {formatTime(meeting.time)} - {formatTime(meeting.endTime)}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5 text-center">
+                      <div className="text-sm text-gray-900 dark:text-white font-medium">
+                        {language === 'ar' ? meeting.location : meeting.locationEn}
+                      </div>
+                    </td>
+                    <td className="px-6 py-5 text-center">
+                      <div className="text-sm text-gray-900 dark:text-white font-medium">
+                        {language === 'ar' ? meeting.organizer : meeting.organizerEn}
+                      </div>
+                    </td>
+                    <td className="px-6 py-5 text-center">
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="flex items-center space-x-1">
+                          <span className="text-sm font-bold text-gray-900 dark:text-white">
+                            {meeting.currentAttendees}
+                          </span>
+                          <span className="text-sm text-gray-500 dark:text-gray-400">/</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-300">
+                            {meeting.maxAttendees}
+                          </span>
+                        </div>
+                        <div className="w-16 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                          <div 
+                            className="h-2 rounded-full bg-gradient-to-r from-green-400 to-blue-500 transition-all duration-300"
+                            style={{ 
+                              width: `${Math.min((meeting.currentAttendees / meeting.maxAttendees) * 100, 100)}%` 
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5 text-center">
+                      <span className={`
+                        inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-semibold
+                        ${getStatusColor(meeting.status)} 
+                        shadow-sm border border-opacity-20
+                      `}>
+                        <div className={`
+                          w-2 h-2 rounded-full mr-2
+                          ${meeting.status === 'scheduled' ? 'bg-blue-500' : ''}
+                          ${meeting.status === 'ongoing' ? 'bg-green-500 animate-pulse' : ''}
+                          ${meeting.status === 'completed' ? 'bg-gray-500' : ''}
+                          ${meeting.status === 'cancelled' ? 'bg-red-500' : ''}
+                        `}></div>
+                        {language === 'ar' 
+                          ? statusOptions.find(s => s.value === meeting.status)?.label
+                          : statusOptions.find(s => s.value === meeting.status)?.labelEn
+                        }
+                      </span>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="flex justify-center items-center space-x-2">
+                        <button
+                          onClick={() => handleEdit(meeting)}
+                          className="group relative p-2 text-blue-600 hover:text-white hover:bg-blue-600 dark:text-blue-400 dark:hover:text-white dark:hover:bg-blue-500 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:scale-110"
+                          title={language === 'ar' ? 'تحرير' : 'Edit'}
+                        >
+                          <Edit className="h-4 w-4" />
+                          <div className="absolute inset-0 rounded-lg bg-blue-600 opacity-0 group-hover:opacity-10 transition-opacity duration-200"></div>
+                        </button>
+                        <button
+                          onClick={() => openDeleteConfirm(meeting)}
+                          className="group relative p-2 text-red-600 hover:text-white hover:bg-red-600 dark:text-red-400 dark:hover:text-white dark:hover:bg-red-500 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:scale-110"
+                          title={language === 'ar' ? 'حذف' : 'Delete'}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <div className="absolute inset-0 rounded-lg bg-red-600 opacity-0 group-hover:opacity-10 transition-opacity duration-200"></div>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Add/Edit Meeting Modal */}
+      {(showAddModal || showEditModal) && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {editingMeeting
+                  ? (language === 'ar' ? 'تحرير الاجتماع' : 'Edit Meeting')
+                  : (language === 'ar' ? 'اجتماع جديد' : 'New Meeting')
+                }
+              </h3>
+              <button
+                onClick={() => {
+                  setShowAddModal(false);
+                  setShowEditModal(false);
+                  setEditingMeeting(null);
+                  resetForm();
+                }}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              {/* Title Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {language === 'ar' ? 'العنوان (عربي) *' : 'Title (Arabic) *'}
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) => handleInputChange('title', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    required
+                    dir="rtl"
+                  />
                 </div>
-                
-                {/* Preview Toggle */}
-                <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                  <button
-                    type="button"
-                    onClick={() => setIsPreviewMode(!isPreviewMode)}
-                    className={`px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all duration-300 ${
-                      isPreviewMode 
-                        ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' 
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                    }`}
-                  >
-                    {isPreviewMode ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    <span>{isPreviewMode ? (language === 'ar' ? 'إخفاء المعاينة' : 'Hide Preview') : (language === 'ar' ? 'معاينة' : 'Preview')}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {language === 'ar' ? 'العنوان (إنجليزي) *' : 'Title (English) *'}
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.titleEn}
+                    onChange={(e) => handleInputChange('titleEn', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    required
+                  />
                 </div>
               </div>
 
-              {/* Step Indicator */}
-              <StepIndicator />
+              {/* Date and Time Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {language === 'ar' ? 'التاريخ *' : 'Date *'}
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => handleInputChange('date', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {language === 'ar' ? 'وقت البداية *' : 'Start Time *'}
+                  </label>
+                  <input
+                    type="time"
+                    value={formData.time}
+                    onChange={(e) => handleInputChange('time', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {language === 'ar' ? 'وقت النهاية *' : 'End Time *'}
+                  </label>
+                  <input
+                    type="time"
+                    value={formData.endTime}
+                    onChange={(e) => handleInputChange('endTime', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    required
+                  />
+                </div>
+              </div>
 
-              {/* Form Content */}
-              <form onSubmit={handleMeetingSubmit} className="space-y-6">
-                {/* Step 1: Basic Information */}
-                {currentStep === 1 && (
-                  <div className="space-y-6 animate-fadeIn">
-                    <div className="text-center mb-6">
-                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                        {language === 'ar' ? 'المعلومات الأساسية' : 'Basic Information'}
-                      </h4>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">
-                        {language === 'ar' ? 'ابدأ بإدخال العنوان والوصف' : 'Start by entering the title and description'}
-                      </p>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <SmartInput
-                        label={language === 'ar' ? 'العنوان (عربي)' : 'Title (Arabic)'}
-                        value={meetingForm.title}
-                        onChange={(value) => setMeetingForm({...meetingForm, title: value as string})}
-                        placeholder={language === 'ar' ? 'أدخل عنوان الاجتماع' : 'Enter meeting title'}
-                        required
-                        error={formErrors.title}
-                      />
-                      
-                      <SmartInput
-                        label={language === 'ar' ? 'العنوان (إنجليزي)' : 'Title (English)'}
-                        value={meetingForm.titleEn}
-                        onChange={(value) => setMeetingForm({...meetingForm, titleEn: value as string})}
-                        placeholder="Enter meeting title in English"
-                        required
-                        error={formErrors.titleEn}
-                      />
-                      
-                      <SmartInput
-                        label={language === 'ar' ? 'الوصف (عربي)' : 'Description (Arabic)'}
-                        value={meetingForm.subtitle}
-                        onChange={(value) => setMeetingForm({...meetingForm, subtitle: value as string})}
-                        placeholder={language === 'ar' ? 'أدخل وصفاً مختصراً للاجتماع' : 'Enter a short description'}
-                        error={formErrors.subtitle}
-                      />
-                      
-                      <SmartInput
-                        label={language === 'ar' ? 'الوصف (إنجليزي)' : 'Description (English)'}
-                        value={meetingForm.subtitleEn}
-                        onChange={(value) => setMeetingForm({...meetingForm, subtitleEn: value as string})}
-                        placeholder="Enter a short description in English"
-                        error={formErrors.subtitleEn}
-                      />
-                    </div>
-                  </div>
-                )}
+              {/* Location Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {language === 'ar' ? 'المكان (عربي) *' : 'Location (Arabic) *'}
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.location}
+                    onChange={(e) => handleInputChange('location', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    required
+                    dir="rtl"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {language === 'ar' ? 'المكان (إنجليزي) *' : 'Location (English) *'}
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.locationEn}
+                    onChange={(e) => handleInputChange('locationEn', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    required
+                  />
+                </div>
+              </div>
 
-                {/* Step 2: Time & Location */}
-                {currentStep === 2 && (
-                  <div className="space-y-6 animate-fadeIn">
-                    <div className="text-center mb-6">
-                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                        {language === 'ar' ? 'التوقيت والمكان' : 'Time & Location'}
-                      </h4>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">
-                        {language === 'ar' ? 'حدد موعد ومكان الاجتماع' : 'Set the meeting schedule and location'}
-                      </p>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <SmartInput
-                        label={language === 'ar' ? 'اليوم' : 'Day'}
-                        value={meetingForm.day}
-                        onChange={(value) => {
-                          const selectedDay = days.find(d => d.label === value || d.labelEn === value);
-                          setMeetingForm({
-                            ...meetingForm, 
-                            day: selectedDay?.label || value as string,
-                            dayEn: selectedDay?.labelEn || value as string
-                          });
-                        }}
-                        options={days}
-                        required
-                        error={formErrors.day}
-                      />
-                      
-                      <SmartInput
-                        label={language === 'ar' ? 'الوقت' : 'Time'}
-                        value={meetingForm.time}
-                        onChange={(value) => setMeetingForm({...meetingForm, time: value as string})}
-                        placeholder={language === 'ar' ? 'مثال: 10:00 AM' : 'Example: 10:00 AM'}
-                        required
-                        error={formErrors.time}
-                      />
-                      
-                      <SmartInput
-                        label={language === 'ar' ? 'المكان (عربي)' : 'Location (Arabic)'}
-                        value={meetingForm.location}
-                        onChange={(value) => setMeetingForm({...meetingForm, location: value as string})}
-                        placeholder={language === 'ar' ? 'أدخل مكان الاجتماع' : 'Enter meeting location'}
-                        required
-                        error={formErrors.location}
-                      />
-                      
-                      <SmartInput
-                        label={language === 'ar' ? 'المكان (إنجليزي)' : 'Location (English)'}
-                        value={meetingForm.locationEn}
-                        onChange={(value) => setMeetingForm({...meetingForm, locationEn: value as string})}
-                        placeholder="Enter meeting location in English"
-                        required
-                        error={formErrors.locationEn}
-                      />
-                    </div>
-                  </div>
-                )}
+              {/* Type and Status */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {language === 'ar' ? 'نوع الاجتماع' : 'Meeting Type'}
+                  </label>
+                  <select
+                    value={formData.type}
+                    onChange={(e) => handleInputChange('type', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  >
+                    {meetingTypes.map((type) => (
+                      <option key={type.value} value={type.value}>
+                        {language === 'ar' ? type.label : type.labelEn}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {language === 'ar' ? 'الحالة' : 'Status'}
+                  </label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => handleInputChange('status', e.target.value as any)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  >
+                    {statusOptions.map((status) => (
+                      <option key={status.value} value={status.value}>
+                        {language === 'ar' ? status.label : status.labelEn}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
-                {/* Step 3: Final Details */}
-                {currentStep === 3 && (
-                  <div className="space-y-6 animate-fadeIn">
-                    <div className="text-center mb-6">
-                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                        {language === 'ar' ? 'التفاصيل النهائية' : 'Final Details'}
-                      </h4>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">
-                        {language === 'ar' ? 'اختر الفئة المستهدفة وحدد عدد المقاعد' : 'Choose target category and set capacity'}
-                      </p>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <SmartInput
-                        label={language === 'ar' ? 'الفئة المستهدفة' : 'Target Category'}
-                        value={language === 'ar' ? meetingForm.category : meetingForm.categoryEn}
-                        onChange={(value) => {
-                          const selectedCategory = categories.find(c => 
-                            (language === 'ar' ? c.label === value : c.labelEn === value)
-                          );
-                          if (selectedCategory) {
-                            setMeetingForm({
-                              ...meetingForm, 
-                              category: selectedCategory.label,
-                              categoryEn: selectedCategory.labelEn
-                            });
-                          }
-                        }}
-                        options={categories}
-                        required
-                        error={formErrors.category}
-                      />
-                      
-                      <SmartInput
-                        label={language === 'ar' ? 'عدد المقاعد' : 'Capacity'}
-                        type="number"
-                        value={meetingForm.capacity}
-                        onChange={(value) => setMeetingForm({...meetingForm, capacity: value as number})}
-                        placeholder={language === 'ar' ? 'أدخل عدد المقاعد' : 'Enter capacity'}
-                        required
-                        error={formErrors.capacity}
-                      />
-                    </div>
-                  </div>
-                )}
+              {/* Organizer Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {language === 'ar' ? 'المنظم (عربي) *' : 'Organizer (Arabic) *'}
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.organizer}
+                    onChange={(e) => handleInputChange('organizer', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    required
+                    dir="rtl"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {language === 'ar' ? 'المنظم (إنجليزي) *' : 'Organizer (English) *'}
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.organizerEn}
+                    onChange={(e) => handleInputChange('organizerEn', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    required
+                  />
+                </div>
+              </div>
 
-                {/* Form Navigation */}
-                <div className="flex justify-between items-center pt-8 border-t border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                    {currentStep > 1 && (
-                      <button
-                        type="button"
-                        onClick={prevStep}
-                        className="px-6 py-3 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white transition-colors flex items-center space-x-2 rtl:space-x-reverse"
-                      >
-                        <ChevronLeft className={`h-4 w-4 ${language === 'ar' ? 'rotate-180' : ''}`} />
-                        <span>{language === 'ar' ? 'السابق' : 'Previous'}</span>
-                      </button>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                    <button
-                      type="button"
-                      onClick={resetForm}
-                      className="px-4 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+              {/* Max Attendees */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {language === 'ar' ? 'الحد الأقصى للحضور' : 'Maximum Attendees'}
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={formData.maxAttendees}
+                  onChange={(e) => handleInputChange('maxAttendees', parseInt(e.target.value) || 1)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+
+              {/* Recurring Options */}
+              <div className="space-y-4">
+                <div className="flex items-center">
+                  <input
+                    id="isRecurring"
+                    type="checkbox"
+                    checked={formData.isRecurring}
+                    onChange={(e) => handleInputChange('isRecurring', e.target.checked)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="isRecurring" className="mr-2 text-sm text-gray-700 dark:text-gray-300">
+                    {language === 'ar' ? 'اجتماع متكرر' : 'Recurring Meeting'}
+                  </label>
+                </div>
+
+                {formData.isRecurring && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      {language === 'ar' ? 'نوع التكرار' : 'Recurrence Type'}
+                    </label>
+                    <select
+                      value={formData.recurrenceType}
+                      onChange={(e) => handleInputChange('recurrenceType', e.target.value as any)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
-                      {language === 'ar' ? 'إلغاء' : 'Cancel'}
-                    </button>
-                    
-                    {currentStep < formSteps.length ? (
-                      <button
-                        type="button"
-                        onClick={nextStep}
-                        className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center space-x-2 rtl:space-x-reverse shadow-lg hover:shadow-xl transform hover:scale-105"
-                      >
-                        <span>{language === 'ar' ? 'التالي' : 'Next'}</span>
-                        <ChevronRight className={`h-4 w-4 ${language === 'ar' ? 'rotate-180' : ''}`} />
-                      </button>
-                    ) : (
-                      <button
-                        type="submit"
-                        disabled={submitting}
-                        className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white px-8 py-3 rounded-xl transition-all duration-300 flex items-center space-x-2 rtl:space-x-reverse shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none"
-                      >
-                        <Save className="h-4 w-4" />
-                        <span>
-                          {submitting 
-                            ? (language === 'ar' ? 'جاري الحفظ...' : 'Saving...') 
-                            : (language === 'ar' ? 'حفظ الاجتماع' : 'Save Meeting')
-                          }
-                        </span>
-                      </button>
-                    )}
+                      <option value="weekly">{language === 'ar' ? 'أسبوعي' : 'Weekly'}</option>
+                      <option value="monthly">{language === 'ar' ? 'شهري' : 'Monthly'}</option>
+                      <option value="yearly">{language === 'ar' ? 'سنوي' : 'Yearly'}</option>
+                    </select>
                   </div>
+                )}
+              </div>
+
+              {/* Description Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {language === 'ar' ? 'الوصف (عربي)' : 'Description (Arabic)'}
+                  </label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    dir="rtl"
+                  />
                 </div>
-              </form>
-              
-              {/* Preview Section */}
-              {isPreviewMode && currentStep === formSteps.length && (
-                <div className="mt-8 p-6 bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-700 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-600">
-                  <h5 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center space-x-2 rtl:space-x-reverse">
-                    <Eye className="h-5 w-5" />
-                    <span>{language === 'ar' ? 'معاينة الاجتماع' : 'Meeting Preview'}</span>
-                  </h5>
-                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-                    <h6 className="font-bold text-gray-900 dark:text-white mb-2">
-                      {language === 'ar' ? meetingForm.title : meetingForm.titleEn}
-                    </h6>
-                    {(meetingForm.subtitle || meetingForm.subtitleEn) && (
-                      <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">
-                        {language === 'ar' ? meetingForm.subtitle : meetingForm.subtitleEn}
-                      </p>
-                    )}
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-300">
-                      <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                        <Calendar className="h-4 w-4" />
-                        <span>{language === 'ar' ? meetingForm.day : meetingForm.dayEn} - {meetingForm.time}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                        <MapPin className="h-4 w-4" />
-                        <span>{language === 'ar' ? meetingForm.location : meetingForm.locationEn}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                        <Users className="h-4 w-4" />
-                        <span>{meetingForm.capacity} {language === 'ar' ? 'مقعد' : 'seats'}</span>
-                      </div>
-                    </div>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {language === 'ar' ? 'الوصف (إنجليزي)' : 'Description (English)'}
+                  </label>
+                  <textarea
+                    value={formData.descriptionEn}
+                    onChange={(e) => handleInputChange('descriptionEn', e.target.value)}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
                 </div>
-              )}
-            </div>
+              </div>
+
+              {/* Form Actions */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddModal(false);
+                    setShowEditModal(false);
+                    setEditingMeeting(null);
+                    resetForm();
+                  }}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white ml-2"></div>
+                      {language === 'ar' ? 'جاري الحفظ...' : 'Saving...'}
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 ml-2" />
+                      {editingMeeting
+                        ? (language === 'ar' ? 'تحديث الاجتماع' : 'Update Meeting')
+                        : (language === 'ar' ? 'إضافة الاجتماع' : 'Add Meeting')
+                      }
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
-        )}
-
-        {/* Meetings List */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {language === 'ar' ? 'الاجتماعات الحالية' : 'Current Meetings'}
-          </h3>
-          
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-              <p className="text-red-600 dark:text-red-400 text-sm">
-                {language === 'ar' ? 'حدث خطأ في تحميل الاجتماعات' : 'Error loading meetings'}
-              </p>
-            </div>
-          )}
-          
-          {/* Loading State */}
-          {loading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="text-gray-500 dark:text-gray-400 mt-4">
-                {language === 'ar' ? 'جاري تحميل الاجتماعات...' : 'Loading meetings...'}
-              </p>
-            </div>
-          ) : meetings.length === 0 ? (
-            <div className="text-center py-8">
-              <Calendar className="h-12 w-12 mx-auto text-gray-400 mb-3" />
-              <p className="text-gray-500 dark:text-gray-400">
-                {language === 'ar' ? 'لا توجد اجتماعات حالياً' : 'No meetings available'}
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {meetings.map((meeting) => (
-                <div key={meeting.id} className="group relative">
-                  {/* Enhanced Meeting Card */}
-                  <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 dark:from-gray-800 dark:via-blue-900/10 dark:to-purple-900/10 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 overflow-hidden meeting-card">
-                    {/* Decorative Elements */}
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full -translate-y-6 translate-x-6"></div>
-                    <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-tr from-pink-500/10 to-yellow-500/10 rounded-full translate-y-4 -translate-x-4"></div>
-                    
-                    {/* Category Badge */}
-                    <div className="absolute top-4 left-4 z-10">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 shadow-sm">
-                        {language === 'ar' ? categories.find(c => c.key === meeting.category)?.label : categories.find(c => c.key === meeting.category)?.labelEn}
-                      </span>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="absolute top-4 right-4 z-10 flex items-center space-x-2 rtl:space-x-reverse opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <button
-                        onClick={() => handleEditMeeting(meeting)}
-                        className="p-2 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 text-blue-600 hover:text-blue-700"
-                        title={language === 'ar' ? 'تعديل' : 'Edit'}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteMeeting(meeting.id)}
-                        className="p-2 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 text-red-600 hover:text-red-700"
-                        title={language === 'ar' ? 'حذف' : 'Delete'}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-
-                    {/* Content */}
-                    <div className="relative pt-8">
-                      {editingMeeting === meeting.id ? (
-                        /* Edit Mode */
-                        <div className="space-y-4">
-                          <input
-                            type="text"
-                            value={editForm.title || ''}
-                            onChange={(e) => setEditForm({...editForm, title: e.target.value})}
-                            className="w-full px-3 py-2 text-lg font-bold bg-transparent border-b-2 border-blue-300 focus:border-blue-500 outline-none text-gray-900 dark:text-white transition-colors duration-200 form-input-smooth"
-                            placeholder={language === 'ar' ? 'عنوان الاجتماع' : 'Meeting Title'}
-                          />
-                          <input
-                            type="text"
-                            value={editForm.titleEn || ''}
-                            onChange={(e) => setEditForm({...editForm, titleEn: e.target.value})}
-                            className="w-full px-3 py-2 bg-transparent border-b border-gray-300 focus:border-blue-500 outline-none text-gray-600 dark:text-gray-300 transition-colors duration-200 form-input-smooth"
-                            placeholder="Meeting Title (English)"
-                          />
-                          <input
-                            type="text"
-                            value={editForm.time || ''}
-                            onChange={(e) => setEditForm({...editForm, time: e.target.value})}
-                            className="w-full px-3 py-2 bg-transparent border-b border-gray-300 focus:border-blue-500 outline-none text-gray-600 dark:text-gray-300 transition-colors duration-200 form-input-smooth"
-                            placeholder={language === 'ar' ? 'الوقت' : 'Time'}
-                          />
-                          <input
-                            type="text"
-                            value={editForm.location || ''}
-                            onChange={(e) => setEditForm({...editForm, location: e.target.value})}
-                            className="w-full px-3 py-2 bg-transparent border-b border-gray-300 focus:border-blue-500 outline-none text-gray-600 dark:text-gray-300 transition-colors duration-200 form-input-smooth"
-                            placeholder={language === 'ar' ? 'المكان' : 'Location'}
-                          />
-                          <input
-                            type="number"
-                            value={editForm.capacity || ''}
-                            onChange={(e) => setEditForm({...editForm, capacity: parseInt(e.target.value)})}
-                            className="w-full px-3 py-2 bg-transparent border-b border-gray-300 focus:border-blue-500 outline-none text-gray-600 dark:text-gray-300 transition-colors duration-200 form-input-smooth"
-                            placeholder={language === 'ar' ? 'العدد الأقصى' : 'Capacity'}
-                          />
-                          <div className="flex items-center space-x-2 rtl:space-x-reverse pt-2">
-                            <button
-                              onClick={() => handleSaveEdit(meeting.id)}
-                              className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center space-x-2 rtl:space-x-reverse"
-                            >
-                              <Save className="h-4 w-4" />
-                              <span>{language === 'ar' ? 'حفظ' : 'Save'}</span>
-                            </button>
-                            <button
-                              onClick={handleCancelEdit}
-                              className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition-colors duration-300"
-                            >
-                              {language === 'ar' ? 'إلغاء' : 'Cancel'}
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        /* View Mode */
-                        <div className="space-y-4">
-                          <h4 className="text-lg font-bold text-gray-900 dark:text-white line-clamp-2">
-                            {language === 'ar' ? meeting.title : meeting.titleEn}
-                          </h4>
-                          
-                          {meeting.subtitle && (
-                            <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
-                              {language === 'ar' ? meeting.subtitle : meeting.subtitleEn}
-                            </p>
-                          )}
-
-                          <div className="space-y-3">
-                            <div className="flex items-center space-x-3 rtl:space-x-reverse text-sm text-gray-600 dark:text-gray-300">
-                              <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
-                                <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                              </div>
-                              <div>
-                                <p className="font-medium">{language === 'ar' ? meeting.day : meeting.dayEn}</p>
-                                <p className="text-xs text-gray-500">{meeting.time}</p>
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center space-x-3 rtl:space-x-reverse text-sm text-gray-600 dark:text-gray-300">
-                              <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-lg">
-                                <MapPin className="h-4 w-4 text-green-600 dark:text-green-400" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium truncate">{language === 'ar' ? meeting.location : meeting.locationEn}</p>
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center space-x-3 rtl:space-x-reverse text-sm text-gray-600 dark:text-gray-300">
-                              <div className="p-2 bg-purple-100 dark:bg-purple-900/50 rounded-lg">
-                                <Users className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                              </div>
-                              <div>
-                                <p className="font-medium">{meeting.registered || 0} / {meeting.capacity}</p>
-                                <p className="text-xs text-gray-500">{language === 'ar' ? 'مشارك' : 'participants'}</p>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Progress Bar */}
-                          <div className="mt-4">
-                            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
-                              <span>{language === 'ar' ? 'معدل التسجيل' : 'Registration Rate'}</span>
-                              <span>{Math.round(((meeting.registered || 0) / meeting.capacity) * 100)}%</span>
-                            </div>
-                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                              <div 
-                                className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-500"
-                                style={{ width: `${Math.min(((meeting.registered || 0) / meeting.capacity) * 100, 100)}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
-      </div>
+      )}
 
-      {/* Confirm Delete Dialog */}
+      {/* Delete Confirmation Dialog */}
       <ConfirmDialog
-        isOpen={showConfirmDialog}
+        isOpen={showDeleteConfirm}
         onClose={() => {
-          setShowConfirmDialog(false);
+          setShowDeleteConfirm(false);
           setMeetingToDelete(null);
         }}
-        onConfirm={confirmDeleteMeeting}
-        title={language === 'ar' ? 'تأكيد الحذف' : 'Confirm Deletion'}
-        message={language === 'ar' ? 'هل أنت متأكد من حذف هذا الاجتماع؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this meeting? This action cannot be undone.'}
+        onConfirm={handleDelete}
+        title={language === 'ar' ? 'حذف الاجتماع' : 'Delete Meeting'}
+        message={
+          language === 'ar'
+            ? `هل أنت متأكد من حذف اجتماع "${meetingToDelete?.title}"؟ لا يمكن التراجع عن هذا الإجراء.`
+            : `Are you sure you want to delete the meeting "${meetingToDelete?.titleEn}"? This action cannot be undone.`
+        }
         confirmText={language === 'ar' ? 'حذف' : 'Delete'}
         cancelText={language === 'ar' ? 'إلغاء' : 'Cancel'}
         type="danger"
