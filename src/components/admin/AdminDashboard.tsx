@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, BarChart3, Calendar, Star, MapPin, Heart, MessageSquare, Users, Edit, Trash2 } from 'lucide-react';
+import { Plus, BarChart3, Calendar, Star, MapPin, Heart, MessageSquare, Users, Edit, Trash2, RefreshCw } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { db } from '../../services/firebase';
 import { collection, getDocs, query, orderBy, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { toast } from 'react-toastify';
+import { donationsService } from '../../services/donationsService';
+import { usersService } from '../../services/usersService';
+import { tripsService } from '../../services/tripsService';
 
 interface Meeting {
   id: string;
@@ -36,6 +39,19 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ setActiveTab }) => {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [editingMeeting, setEditingMeeting] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
+  const [donationStats, setDonationStats] = useState({
+    totalAmount: 0,
+    completedAmount: 0,
+    total: 0,
+    completed: 0,
+    pending: 0,
+    cancelled: 0
+  });
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [totalMembers, setTotalMembers] = useState(0);
+  const [upcomingTrips, setUpcomingTrips] = useState(0);
+  const [loadingMembers, setLoadingMembers] = useState(true);
+  const [loadingTrips, setLoadingTrips] = useState(true);
 
   // Load meetings from Firebase
   const loadMeetings = async () => {
@@ -63,8 +79,70 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ setActiveTab }) => {
     }
   };
 
+  // Load donation statistics from Firebase
+  const loadDonationStats = async () => {
+    try {
+      setLoadingStats(true);
+      const stats = await donationsService.getDonationStats();
+      setDonationStats(stats);
+    } catch (error) {
+      console.error('Error loading donation stats:', error);
+      toast.error(
+        language === 'ar' 
+          ? 'حدث خطأ في تحميل إحصائيات التبرعات'
+          : 'Error loading donation statistics'
+      );
+    } finally {
+      setLoadingStats(false);
+    }
+  };
+
+  // Load total members count from Firebase
+  const loadMembersCount = async () => {
+    try {
+      setLoadingMembers(true);
+      const users = await usersService.getUsers();
+      setTotalMembers(users.length);
+    } catch (error) {
+      console.error('Error loading members count:', error);
+      toast.error(
+        language === 'ar' 
+          ? 'حدث خطأ في تحميل عدد الأعضاء'
+          : 'Error loading members count'
+      );
+    } finally {
+      setLoadingMembers(false);
+    }
+  };
+
+  // Load upcoming trips count from Firebase
+  const loadUpcomingTrips = async () => {
+    try {
+      setLoadingTrips(true);
+      const trips = await tripsService.getTrips();
+      const currentDate = new Date();
+      const upcoming = trips.filter(trip => {
+        const tripDate = new Date(trip.date);
+        return tripDate >= currentDate;
+      });
+      setUpcomingTrips(upcoming.length);
+    } catch (error) {
+      console.error('Error loading upcoming trips:', error);
+      toast.error(
+        language === 'ar' 
+          ? 'حدث خطأ في تحميل عدد الرحلات القادمة'
+          : 'Error loading upcoming trips count'
+      );
+    } finally {
+      setLoadingTrips(false);
+    }
+  };
+
   useEffect(() => {
     loadMeetings();
+    loadDonationStats();
+    loadMembersCount();
+    loadUpcomingTrips();
   }, []);
 
   // Update meeting function
@@ -127,11 +205,34 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ setActiveTab }) => {
     return language === 'ar' ? (category?.label || categoryKey) : (category?.labelEn || categoryKey);
   };
 
+  const formatCurrency = (amount: number) => {
+    if (amount === 0) return '0 ج.م';
+    return `${amount.toLocaleString('ar-EG')} ج.م`;
+  };
+
   const stats = [
-    { title: 'إجمالي الأعضاء', titleEn: 'Total Members', value: '1,234', change: '+12%', color: 'bg-blue-500' },
-    { title: 'الاجتماعات هذا الشهر', titleEn: 'Meetings This Month', value: meetings.length.toString(), change: '+8%', color: 'bg-green-500' },
-    { title: 'التبرعات هذا الشهر', titleEn: 'Donations This Month', value: '25,000 ج.م', change: '+15%', color: 'bg-yellow-500' },
-    { title: 'الرحلات القادمة', titleEn: 'Upcoming Trips', value: '8', change: '+3%', color: 'bg-purple-500' }
+    { 
+      title: 'إجمالي الأعضاء', 
+      titleEn: 'Total Members', 
+      value: loadingMembers ? (language === 'ar' ? 'جاري التحميل...' : 'Loading...') : totalMembers.toString(),
+      change: loadingMembers ? '' : `${totalMembers} ${language === 'ar' ? 'عضو' : 'members'}`, 
+      color: 'bg-blue-500' 
+    },
+    { title: 'إجمالي الاجتماعات', titleEn: 'Total Meetings', value: meetings.length.toString(), change: `${meetings.length} ${language === 'ar' ? 'اجتماع' : 'meetings'}`, color: 'bg-green-500' },
+    { 
+      title: 'إجمالي التبرعات', 
+      titleEn: 'Total Donations', 
+      value: loadingStats ? (language === 'ar' ? 'جاري التحميل...' : 'Loading...') : formatCurrency(donationStats.completedAmount), 
+      change: loadingStats ? '' : `${donationStats.completed} ${language === 'ar' ? 'مكتملة' : 'completed'}`, 
+      color: 'bg-yellow-500' 
+    },
+    { 
+      title: 'الرحلات القادمة', 
+      titleEn: 'Upcoming Trips', 
+      value: loadingTrips ? (language === 'ar' ? 'جاري التحميل...' : 'Loading...') : upcomingTrips.toString(),
+      change: loadingTrips ? '' : `${upcomingTrips} ${language === 'ar' ? 'رحلة' : 'trips'}`, 
+      color: 'bg-purple-500' 
+    }
   ];
 
   const handleEditMeeting = (meeting: Meeting) => {
@@ -188,6 +289,19 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ setActiveTab }) => {
             </p>
           </div>
           <div className="flex flex-wrap gap-3 mt-4 lg:mt-0">
+            <button 
+              onClick={() => {
+                loadMeetings();
+                loadDonationStats();
+                loadMembersCount();
+                loadUpcomingTrips();
+              }}
+              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200 flex items-center gap-2"
+              disabled={loadingStats || loadingMembers || loadingTrips}
+            >
+              <RefreshCw className={`h-4 w-4 ${(loadingStats || loadingMembers || loadingTrips) ? 'animate-spin' : ''}`} />
+              {language === 'ar' ? 'تحديث' : 'Refresh'}
+            </button>
             <button 
               onClick={() => setActiveTab('meetings')}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2"

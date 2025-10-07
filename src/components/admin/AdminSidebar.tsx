@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   X, ChevronRight, Search, TrendingUp, Clock, Zap, Activity, 
   Users, Calendar, MapPin, DollarSign, Book, MessageSquare, Settings, BarChart3, 
-  Bell, Shield, Star, Save, Home, Sparkles,
+  Bell, Shield, Star, Save, Home, Sparkles, CreditCard,
   ChevronDown, Target, AlertCircle
 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -88,7 +88,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           labelEn: 'Meetings', 
           icon: Calendar,
           badge: 'active',
-          count: 12,
           description: 'إدارة الاجتماعات والأنشطة',
           descriptionEn: 'Manage meetings and activities'
         },
@@ -97,7 +96,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           label: 'الفعاليات', 
           labelEn: 'Events', 
           icon: Star,
-          count: 8,
           description: 'تنظيم الفعاليات الخاصة',
           descriptionEn: 'Organize special events'
         },
@@ -106,7 +104,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           label: 'الرحلات', 
           labelEn: 'Trips', 
           icon: MapPin,
-          count: 3,
           description: 'تخطيط وإدارة الرحلات',
           descriptionEn: 'Plan and manage trips'
         }
@@ -134,20 +131,27 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           label: 'رسائل التواصل', 
           labelEn: 'Contact Messages', 
           icon: MessageSquare,
-          count: 15,
           badge: 'urgent',
           description: 'إدارة رسائل المستخدمين',
           descriptionEn: 'Manage user messages'
         },
         { 
           id: 'donations', 
-          label: 'التبرعات', 
-          labelEn: 'Donations', 
+          label: 'صناديق التبرعات', 
+          labelEn: 'Donation Boxes', 
           icon: DollarSign,
-          count: 42,
           badge: 'trending',
-          description: 'إدارة التبرعات والمساهمات',
-          descriptionEn: 'Manage donations and contributions'
+          description: 'إدارة أنواع وصناديق التبرعات',
+          descriptionEn: 'Manage donation types and boxes'
+        },
+        { 
+          id: 'donation-transactions', 
+          label: 'معاملات التبرعات', 
+          labelEn: 'Donation Transactions', 
+          icon: CreditCard,
+          badge: 'new',
+          description: 'إدارة تبرعات المستخدمين',
+          descriptionEn: 'Manage user donations'
         }
       ]
     },
@@ -212,6 +216,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           badge: 'important',
           description: 'إعدادات الأمان والحماية',
           descriptionEn: 'Security and protection settings'
+        },
+        { 
+          id: 'firestore-test', 
+          label: 'اختبار Firestore', 
+          labelEn: 'Firestore Test', 
+          icon: Activity,
+          badge: 'debug',
+          description: 'اختبار الاتصال بقاعدة البيانات',
+          descriptionEn: 'Test database connection'
         },
         { 
           id: 'notifications', 
@@ -429,12 +442,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
         )}
 
         {/* Enhanced Navigation */}
-        <div className="flex-1 overflow-y-auto admin-sidebar-scroll p-4 space-y-2">
+        <div className="flex-1 overflow-y-auto admin-sidebar-scroll px-2 py-4 space-y-2">
           {(searchQuery ? filteredGroups : menuGroups).map((group) => (
             <div key={group.id} className="space-y-1">
               {/* Smart Group Header */}
               {group.items.length > 1 ? (
-                <div className="relative">
+                <div className="relative px-2">
                   <button
                     onClick={() => toggleGroup(group.id)}
                     className={`menu-item w-full flex items-center justify-between px-4 py-3 text-sm font-semibold 
@@ -463,21 +476,21 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
               ) : null}
 
               {/* Smart Menu Items */}
-              <div className={`space-y-1 ${group.items.length > 1 ? `overflow-hidden transition-all duration-500 ease-out ${
+              <div className={`${group.items.length > 1 ? `overflow-hidden transition-all duration-500 ease-out ${
                 expandedGroups[group.id] ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
               }` : ''}`}>
                 {group.items.map((item) => (
-                  <div key={item.id} className="relative">
+                  <div key={item.id} className={`relative ${group.items.length > 1 ? 'mx-4' : ''}`}>
                     <button
                       onClick={() => handleItemClick(item.id)}
-                      className={`menu-item w-full flex items-center justify-between px-4 py-3.5
+                      className={`menu-item w-full flex items-center justify-between px-4 py-2 my-2
                                 text-sm font-medium rounded-xl transition-all duration-300
                                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
                                 transform hover:scale-[1.02] group relative overflow-hidden
                                 ${activeTab === item.id
                                   ? 'bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-600 text-white shadow-xl scale-[1.02]'
                                   : 'text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/80 dark:hover:bg-blue-900/20 hover:shadow-md'
-                                } ${group.items.length > 1 ? 'ml-4 rtl:mr-4 rtl:ml-0' : ''}`}
+                                }`}
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       
