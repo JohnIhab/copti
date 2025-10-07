@@ -14,12 +14,14 @@ import {
   EventsManagement,
   TripsManagement,
   DonationsManagement,
+  DonationTransactions,
   MeetingsManagement,
   ContactMessagesManagement,
   ConfessionsManagement,
   UsersManagement,
   UnderDevelopment
 } from '../components/admin';
+import FirestoreTest from '../components/FirestoreTest';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -208,6 +210,8 @@ const Admin: React.FC = () => {
         return <TripsManagement />;
       case 'donations':
         return <DonationsManagement />;
+      case 'donation-transactions':
+        return <DonationTransactions />;
       case 'confessions':
         return <ConfessionsManagement />;
       case 'users':
@@ -218,6 +222,8 @@ const Admin: React.FC = () => {
         return <ContactMessagesManagement />;
       case 'meetings':
         return <MeetingsManagement />;
+      case 'firestore-test':
+        return <FirestoreTest />;
       case 'reports':
       case 'analytics':
       case 'notifications':

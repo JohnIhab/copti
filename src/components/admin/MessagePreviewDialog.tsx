@@ -3,7 +3,7 @@ import { X, Mail, Phone, Clock, Calendar, User } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 interface ContactMessage {
-  id: string;
+  id?: string;
   name: string;
   email: string;
   phone: string;
@@ -19,15 +19,13 @@ interface MessagePreviewDialogProps {
   onClose: () => void;
   message: ContactMessage | null;
   onReply?: (messageId: string) => void;
-  onMarkAsRead?: (messageId: string) => void;
 }
 
 const MessagePreviewDialog: React.FC<MessagePreviewDialogProps> = ({
   isOpen,
   onClose,
   message,
-  onReply,
-  onMarkAsRead
+  onReply
 }) => {
   const { language } = useLanguage();
 
@@ -88,16 +86,6 @@ const MessagePreviewDialog: React.FC<MessagePreviewDialogProps> = ({
           {/* Message Status and Priority */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                message.isRead 
-                  ? 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
-                  : 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
-              }`}>
-                {message.isRead 
-                  ? (language === 'ar' ? 'مقروء' : 'Read')
-                  : (language === 'ar' ? 'جديد' : 'New')
-                }
-              </span>
               {message.priority && (
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(message.priority)}`}>
                   {language === 'ar' 
@@ -187,17 +175,9 @@ const MessagePreviewDialog: React.FC<MessagePreviewDialogProps> = ({
             </span>
           </div>
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            {!message.isRead && onMarkAsRead && (
+            {onReply && message.id && (
               <button
-                onClick={() => onMarkAsRead(message.id)}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
-                {language === 'ar' ? 'وضع علامة كمقروء' : 'Mark as Read'}
-              </button>
-            )}
-            {onReply && (
-              <button
-                onClick={() => onReply(message.id)}
+                onClick={() => onReply(message.id!)}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 rtl:space-x-reverse"
               >
                 <Mail className="h-4 w-4" />

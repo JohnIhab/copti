@@ -4,11 +4,12 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { MapPin, Phone, Mail, Clock, Send, Facebook, Instagram, Youtube } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { toast } from 'react-toastify';
+import { submitContactMessage, ContactFormData } from '../services/contactService';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Contact: React.FC = () => {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -30,9 +31,20 @@ const Contact: React.FC = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate form submission
-    setTimeout(() => {
-      toast.success('تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.');
+    try {
+      // Validate required fields
+      if (!formData.name || !formData.phone || !formData.subject || !formData.message) {
+        toast.error(language === 'ar' ? 'يرجى ملء جميع الحقول المطلوبة' : 'Please fill in all required fields');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Submit to Firebase
+      await submitContactMessage(formData as ContactFormData);
+      
+      toast.success(language === 'ar' ? 'تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.' : 'Your message has been sent successfully! We will contact you soon.');
+      
+      // Reset form
       setFormData({
         name: '',
         email: '',
@@ -40,8 +52,12 @@ const Contact: React.FC = () => {
         subject: '',
         message: ''
       });
+    } catch (error) {
+      console.error('Error submitting message:', error);
+      toast.error(language === 'ar' ? 'حدث خطأ أثناء إرسال الرسالة. يرجى المحاولة مرة أخرى.' : 'An error occurred while sending the message. Please try again.');
+    } finally {
       setIsSubmitting(false);
-    }, 2000);
+    }
   };
 
   const contactInfo = [
@@ -49,33 +65,25 @@ const Contact: React.FC = () => {
       icon: MapPin,
       title: 'العنوان',
       titleEn: 'Address',
-      content: 'كفر فرج جرجس، محافظة الجيزة، مصر',
-      contentEn: 'Kafr Farag Gerges, Giza Governorate, Egypt',
+      content: 'كفر فرج جرجس، محافظة الشرقية، مصر',
+      contentEn: 'Kafr Farag Gerges, Sharkia Governorate, Egypt',
       color: 'text-red-500'
     },
     {
       icon: Phone,
       title: 'الهاتف',
       titleEn: 'Phone',
-      content: '+20 123 456 789',
-      contentEn: '+20 123 456 789',
+      content: '+201110797455',
+      contentEn: '+201110797455',
       color: 'text-green-500'
     },
     {
       icon: Mail,
       title: 'البريد الإلكتروني',
       titleEn: 'Email',
-      content: 'info@stmarychurch.eg',
-      contentEn: 'info@stmarychurch.eg',
+      content: 'johnihab.01@gmail.com',
+      contentEn: 'johnihab.01@gmail.com',
       color: 'text-blue-500'
-    },
-    {
-      icon: Clock,
-      title: 'أوقات الخدمة',
-      titleEn: 'Service Hours',
-      content: 'يومياً من 6:00 ص إلى 9:00 م',
-      contentEn: 'Daily from 6:00 AM to 9:00 PM',
-      color: 'text-purple-500'
     }
   ];
 
@@ -150,7 +158,7 @@ const Contact: React.FC = () => {
         </div>
 
         {/* Contact Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {contactInfo.map((info, index) => (
             <div
               key={index}
@@ -302,7 +310,7 @@ const Contact: React.FC = () => {
                   <div className="text-center">
                     <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                     <p className="text-gray-500 dark:text-gray-400">خريطة الموقع</p>
-                    <p className="text-sm text-gray-400 dark:text-gray-500">كفر فرج جرجس، الجيزة</p>
+                    <p className="text-sm text-gray-400 dark:text-gray-500">كفر فرج جرجس، الشرقية</p>
                   </div>
                 </div>
               </div>
@@ -319,17 +327,14 @@ const Contact: React.FC = () => {
                   <span className="text-gray-600 dark:text-gray-300">القداس الصباحي</span>
                   <span className="font-semibold text-gray-900 dark:text-white">7:00 ص</span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
-                  <span className="text-gray-600 dark:text-gray-300">القداس المسائي</span>
-                  <span className="font-semibold text-gray-900 dark:text-white">6:00 م</span>
-                </div>
+                
                 <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
                   <span className="text-gray-600 dark:text-gray-300">اجتماع الشباب</span>
-                  <span className="font-semibold text-gray-900 dark:text-white">الجمعة 7:00 م</span>
+                  <span className="font-semibold text-gray-900 dark:text-white">الخميس 7:00 م</span>
                 </div>
                 <div className="flex justify-between items-center py-2">
                   <span className="text-gray-600 dark:text-gray-300">مدرسة الأحد</span>
-                  <span className="font-semibold text-gray-900 dark:text-white">الأحد 10:00 ص</span>
+                  <span className="font-semibold text-gray-900 dark:text-white">الجمعة 10:30 ص</span>
                 </div>
               </div>
             </div>

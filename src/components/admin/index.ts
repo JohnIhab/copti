@@ -4,6 +4,7 @@ export { default as AdminDashboard } from './AdminDashboard';
 export { default as EventsManagement } from './EventsManagement';
 export { default as TripsManagement } from './TripsManagement';
 export { default as DonationsManagement } from './DonationsManagement';
+export { default as DonationTransactions } from './DonationTransactions';
 export { default as MeetingsManagement } from './MeetingsManagement';
 export { default as ContactMessagesManagement } from './ContactMessagesManagement';
 export { default as ConfessionsManagement } from './ConfessionsManagement';

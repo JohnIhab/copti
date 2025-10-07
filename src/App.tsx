@@ -21,6 +21,7 @@ import Confession from './pages/Confession';
 import Contact from './pages/Contact';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
+import ImageGallery from './components/ImageGallery';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -57,6 +58,7 @@ function App() {
                     <Navigation />
                     <Hero />
                     <Features />
+                    <ImageGallery />
                     <About />
                     <Footer />
                   </>

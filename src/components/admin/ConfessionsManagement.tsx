@@ -15,34 +15,12 @@ import {
   Download,
   UserCheck,
   AlertCircle,
-  Eye
+  Eye,
+  Loader
 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { toast } from 'react-toastify';
-
-interface ConfessionAppointment {
-  id: number;
-  userName: string;
-  userPhone: string;
-  date: string;
-  time: string;
-  priest: string;
-  priestEn: string;
-  notes?: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
-  createdAt: string;
-}
-
-interface TimeSlot {
-  id: number;
-  date: string;
-  time: string;
-  priest: string;
-  priestEn: string;
-  available: boolean;
-  maxAppointments: number;
-  currentAppointments: number;
-}
+import confessionService, { ConfessionAppointment, TimeSlot } from '../../services/confessionService';
 
 const ConfessionsManagement: React.FC = () => {
   const { language } = useLanguage();
@@ -54,79 +32,320 @@ const ConfessionsManagement: React.FC = () => {
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [editingSlot, setEditingSlot] = useState<TimeSlot | null>(null);
+  const [loading, setLoading] = useState(true);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Mock data - replace with actual Firebase data
-  const [appointments, setAppointments] = useState<ConfessionAppointment[]>([
-    {
-      id: 1,
-      userName: 'أحمد محمد',
-      userPhone: '+20123456789',
-      date: '2025-01-25',
-      time: '10:00 AM',
-      priest: 'أبونا يوسف',
-      priestEn: 'Father Youssef',
-      notes: 'طلب اعتراف خاص',
-      status: 'pending',
-      createdAt: '2025-01-20T10:00:00Z'
-    },
-    {
-      id: 2,
-      userName: 'سارة أحمد',
-      userPhone: '+20123456788',
-      date: '2025-01-25',
-      time: '11:00 AM',
-      priest: 'أبونا يوسف',
-      priestEn: 'Father Youssef',
-      status: 'confirmed',
-      createdAt: '2025-01-19T15:30:00Z'
-    },
-    {
-      id: 3,
-      userName: 'مينا جورج',
-      userPhone: '+20123456787',
-      date: '2025-01-25',
-      time: '2:00 PM',
-      priest: 'أبونا مرقس',
-      priestEn: 'Father Marcus',
-      status: 'completed',
-      createdAt: '2025-01-18T12:00:00Z'
-    }
-  ]);
+  // Firebase data - real-time sync
+  const [appointments, setAppointments] = useState<ConfessionAppointment[]>([]);
+  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
+  
+  // Bulk selection state
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState<Set<string>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
 
-  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([
-    {
-      id: 1,
-      date: '2025-01-25',
-      time: '10:00 AM',
-      priest: 'أبونا يوسف',
-      priestEn: 'Father Youssef',
-      available: true,
-      maxAppointments: 5,
-      currentAppointments: 1
-    },
-    {
-      id: 2,
-      date: '2025-01-25',
-      time: '11:00 AM',
-      priest: 'أبونا يوسف',
-      priestEn: 'Father Youssef',
-      available: true,
-      maxAppointments: 5,
-      currentAppointments: 1
-    },
-    {
-      id: 3,
-      date: '2025-01-25',
-      time: '2:00 PM',
-      priest: 'أبونا مرقس',
-      priestEn: 'Father Marcus',
-      available: true,
-      maxAppointments: 8,
-      currentAppointments: 1
-    }
-  ]);
 
+  // Load data from Firebase
+  useEffect(() => {
+    loadData();
+    
+    // Set up real-time listeners with error handling
+    const unsubscribeAppointments = confessionService.onAppointmentsChange((newAppointments) => {
+      console.log('Real-time appointments update:', newAppointments.length);
+      setAppointments(newAppointments);
+    });
+    
+    const unsubscribeTimeSlots = confessionService.onTimeSlotsChange((newTimeSlots) => {
+      console.log('Real-time time slots update:', newTimeSlots.length);
+      setTimeSlots(newTimeSlots);
+    });
+    
+    return () => {
+      try {
+        unsubscribeAppointments();
+        unsubscribeTimeSlots();
+      } catch (error) {
+        console.error('Error unsubscribing listeners:', error);
+      }
+    };
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      console.log('Loading appointments and time slots...');
+      
+      const [appointmentsData, timeSlotsData] = await Promise.all([
+        confessionService.getAllAppointments(),
+        confessionService.getAllTimeSlots()
+      ]);
+      
+      console.log('Loaded appointments:', appointmentsData.length);
+      console.log('Loaded time slots:', timeSlotsData.length);
+      
+      setAppointments(appointmentsData);
+      setTimeSlots(timeSlotsData);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      toast.error(
+        language === 'ar'
+          ? 'حدث خطأ أثناء تحميل البيانات'
+          : 'Error loading data'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredAppointments = appointments.filter(appointment => {
+    const matchesSearch = appointment.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         appointment.userPhone.includes(searchQuery) ||
+                         appointment.priest.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || appointment.status === statusFilter;
+    const matchesDate = !dateFilter || appointment.date === dateFilter;
+    
+    return matchesSearch && matchesStatus && matchesDate;
+  });
+
+  const updateAppointmentStatus = async (id: string, status: ConfessionAppointment['status']) => {
+    try {
+      await confessionService.updateAppointmentStatus(id, status);
+      
+      const statusText = {
+        pending: language === 'ar' ? 'في الانتظار' : 'Pending',
+        confirmed: language === 'ar' ? 'مؤكد' : 'Confirmed',
+        completed: language === 'ar' ? 'مكتمل' : 'Completed',
+        cancelled: language === 'ar' ? 'ملغي' : 'Cancelled'
+      };
+      
+      toast.success(
+        language === 'ar' 
+          ? `تم تحديث حالة الموعد إلى: ${statusText[status]}`
+          : `Appointment status updated to: ${statusText[status]}`
+      );
+    } catch (error) {
+      console.error('Error updating appointment status:', error);
+      toast.error(
+        language === 'ar'
+          ? 'حدث خطأ أثناء تحديث حالة الموعد'
+          : 'Error updating appointment status'
+      );
+    }
+  };
+
+  const deleteAppointment = async (id: string) => {
+    if (!id) {
+      console.error('No appointment ID provided');
+      toast.error(
+        language === 'ar'
+          ? 'معرف الموعد غير صحيح'
+          : 'Invalid appointment ID'
+      );
+      return;
+    }
+
+    const confirmed = window.confirm(
+      language === 'ar'
+        ? 'هل أنت متأكد من حذف هذا الموعد؟'
+        : 'Are you sure you want to delete this appointment?'
+    );
+    
+    if (confirmed) {
+      try {
+        console.log('Deleting appointment with ID:', id);
+        
+        // Optimistic update - remove from UI immediately
+        setAppointments(prev => prev.filter(apt => apt.id !== id));
+        
+        // Close modal if the deleted appointment was selected
+        if (selectedAppointment?.id === id) {
+          setSelectedAppointment(null);
+          setShowAppointmentModal(false);
+        }
+        
+        // Delete from Firebase
+        await confessionService.deleteAppointment(id);
+        console.log('Appointment deleted successfully');
+        
+        toast.success(
+          language === 'ar' ? 'تم حذف الموعد بنجاح' : 'Appointment deleted successfully'
+        );
+      } catch (error: any) {
+        console.error('Error deleting appointment:', error);
+        
+        // Revert optimistic update on error
+        loadData();
+        
+        toast.error(
+          error?.message ||
+          (language === 'ar'
+            ? 'حدث خطأ أثناء حذف الموعد'
+            : 'Error deleting appointment')
+        );
+      }
+    }
+  };
+
+  const addTimeSlot = async (newSlot: Omit<TimeSlot, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      await confessionService.createTimeSlot(newSlot);
+      toast.success(
+        language === 'ar' ? 'تم إضافة الوقت بنجاح' : 'Time slot added successfully'
+      );
+      setShowScheduleModal(false);
+      setEditingSlot(null);
+    } catch (error: any) {
+      console.error('Error adding time slot:', error);
+      toast.error(
+        error.message || 
+        (language === 'ar'
+          ? 'حدث خطأ أثناء إضافة الوقت'
+          : 'Error adding time slot')
+      );
+    }
+  };
+
+  const updateTimeSlot = async (id: string, updatedSlot: Partial<TimeSlot>) => {
+    try {
+      await confessionService.updateTimeSlot(id, updatedSlot);
+      toast.success(
+        language === 'ar' ? 'تم تحديث الوقت بنجاح' : 'Time slot updated successfully'
+      );
+      setShowScheduleModal(false);
+      setEditingSlot(null);
+    } catch (error) {
+      console.error('Error updating time slot:', error);
+      toast.error(
+        language === 'ar'
+          ? 'حدث خطأ أثناء تحديث الوقت'
+          : 'Error updating time slot'
+      );
+    }
+  };
+
+  const deleteTimeSlot = async (id: string) => {
+    if (!id) {
+      console.error('No time slot ID provided');
+      toast.error(
+        language === 'ar'
+          ? 'معرف الوقت غير صحيح'
+          : 'Invalid time slot ID'
+      );
+      return;
+    }
+
+    const confirmed = window.confirm(
+      language === 'ar'
+        ? 'هل أنت متأكد من حذف هذا الوقت؟'
+        : 'Are you sure you want to delete this time slot?'
+    );
+    
+    if (confirmed) {
+      try {
+        console.log('Deleting time slot with ID:', id);
+        
+        // Optimistic update - remove from UI immediately
+        setTimeSlots(prev => prev.filter(slot => slot.id !== id));
+        
+        // Delete from Firebase
+        await confessionService.deleteTimeSlot(id);
+        console.log('Time slot deleted successfully');
+        
+        toast.success(
+          language === 'ar' ? 'تم حذف الوقت بنجاح' : 'Time slot deleted successfully'
+        );
+      } catch (error: any) {
+        console.error('Error deleting time slot:', error);
+        
+        // Revert optimistic update on error
+        loadData();
+        
+        toast.error(
+          error?.message ||
+          (language === 'ar'
+            ? 'حدث خطأ أثناء حذف الوقت'
+            : 'Error deleting time slot')
+        );
+      }
+    }
+  };
+
+  // Bulk selection handlers
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedTimeSlots(new Set());
+      setSelectAll(false);
+    } else {
+      const allIds = new Set(timeSlots.map(slot => slot.id!).filter(Boolean));
+      setSelectedTimeSlots(allIds);
+      setSelectAll(true);
+    }
+  };
+
+  const handleSelectSlot = (slotId: string) => {
+    const newSelected = new Set(selectedTimeSlots);
+    if (newSelected.has(slotId)) {
+      newSelected.delete(slotId);
+    } else {
+      newSelected.add(slotId);
+    }
+    setSelectedTimeSlots(newSelected);
+    setSelectAll(newSelected.size === timeSlots.length);
+  };
+
+  const bulkDeleteTimeSlots = async () => {
+    if (selectedTimeSlots.size === 0) {
+      toast.error(
+        language === 'ar'
+          ? 'يرجى اختيار أوقات للحذف'
+          : 'Please select time slots to delete'
+      );
+      return;
+    }
+
+    const confirmed = window.confirm(
+      language === 'ar'
+        ? `هل أنت متأكد من حذف ${selectedTimeSlots.size} وقت محدد؟`
+        : `Are you sure you want to delete ${selectedTimeSlots.size} selected time slots?`
+    );
+
+    if (confirmed) {
+      try {
+        // Optimistic update - remove from UI immediately
+        setTimeSlots(prev => prev.filter(slot => !selectedTimeSlots.has(slot.id!)));
+        
+        // Delete from Firebase
+        const deletePromises = Array.from(selectedTimeSlots).map(id => 
+          confessionService.deleteTimeSlot(id)
+        );
+        
+        await Promise.all(deletePromises);
+        
+        // Clear selection
+        setSelectedTimeSlots(new Set());
+        setSelectAll(false);
+        
+        toast.success(
+          language === 'ar' 
+            ? `تم حذف ${selectedTimeSlots.size} وقت بنجاح` 
+            : `Successfully deleted ${selectedTimeSlots.size} time slots`
+        );
+      } catch (error: any) {
+        console.error('Error bulk deleting time slots:', error);
+        
+        // Revert optimistic update on error
+        loadData();
+        
+        toast.error(
+          error?.message ||
+          (language === 'ar'
+            ? 'حدث خطأ أثناء حذف الأوقات المحددة'
+            : 'Error deleting selected time slots')
+        );
+      }
+    }
+  };
+
+  // GSAP animations
   useEffect(() => {
     if (!contentRef.current) return;
 
@@ -140,87 +359,7 @@ const ConfessionsManagement: React.FC = () => {
         ease: 'power3.out'
       }
     );
-  }, [activeTab]);
-
-  const filteredAppointments = appointments.filter(appointment => {
-    const matchesSearch = appointment.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         appointment.userPhone.includes(searchQuery) ||
-                         appointment.priest.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || appointment.status === statusFilter;
-    const matchesDate = !dateFilter || appointment.date === dateFilter;
-    
-    return matchesSearch && matchesStatus && matchesDate;
-  });
-
-  const updateAppointmentStatus = (id: number, status: ConfessionAppointment['status']) => {
-    setAppointments(prev => 
-      prev.map(apt => apt.id === id ? { ...apt, status } : apt)
-    );
-    
-    const statusText = {
-      pending: language === 'ar' ? 'في الانتظار' : 'Pending',
-      confirmed: language === 'ar' ? 'مؤكد' : 'Confirmed',
-      completed: language === 'ar' ? 'مكتمل' : 'Completed',
-      cancelled: language === 'ar' ? 'ملغي' : 'Cancelled'
-    };
-    
-    toast.success(
-      language === 'ar' 
-        ? `تم تحديث حالة الموعد إلى: ${statusText[status]}`
-        : `Appointment status updated to: ${statusText[status]}`
-    );
-  };
-
-  const deleteAppointment = (id: number) => {
-    const confirmed = window.confirm(
-      language === 'ar'
-        ? 'هل أنت متأكد من حذف هذا الموعد؟'
-        : 'Are you sure you want to delete this appointment?'
-    );
-    
-    if (confirmed) {
-      setAppointments(prev => prev.filter(apt => apt.id !== id));
-      toast.success(
-        language === 'ar' ? 'تم حذف الموعد بنجاح' : 'Appointment deleted successfully'
-      );
-    }
-  };
-
-  const addTimeSlot = (newSlot: Omit<TimeSlot, 'id'>) => {
-    const id = Math.max(...timeSlots.map(slot => slot.id)) + 1;
-    setTimeSlots(prev => [...prev, { ...newSlot, id }]);
-    toast.success(
-      language === 'ar' ? 'تم إضافة الوقت بنجاح' : 'Time slot added successfully'
-    );
-    setShowScheduleModal(false);
-    setEditingSlot(null);
-  };
-
-  const updateTimeSlot = (id: number, updatedSlot: Partial<TimeSlot>) => {
-    setTimeSlots(prev => 
-      prev.map(slot => slot.id === id ? { ...slot, ...updatedSlot } : slot)
-    );
-    toast.success(
-      language === 'ar' ? 'تم تحديث الوقت بنجاح' : 'Time slot updated successfully'
-    );
-    setShowScheduleModal(false);
-    setEditingSlot(null);
-  };
-
-  const deleteTimeSlot = (id: number) => {
-    const confirmed = window.confirm(
-      language === 'ar'
-        ? 'هل أنت متأكد من حذف هذا الوقت؟'
-        : 'Are you sure you want to delete this time slot?'
-    );
-    
-    if (confirmed) {
-      setTimeSlots(prev => prev.filter(slot => slot.id !== id));
-      toast.success(
-        language === 'ar' ? 'تم حذف الوقت بنجاح' : 'Time slot deleted successfully'
-      );
-    }
-  };
+  }, [activeTab, loading]);
 
   const getStatusColor = (status: ConfessionAppointment['status']) => {
     switch (status) {
@@ -263,7 +402,7 @@ const ConfessionsManagement: React.FC = () => {
         language === 'ar' ? apt.priest : apt.priestEn,
         apt.status,
         apt.notes || '',
-        new Date(apt.createdAt).toLocaleDateString()
+        new Date(apt.createdAt.seconds * 1000).toLocaleDateString()
       ])
     ].map(row => row.join(',')).join('\n');
 
@@ -378,7 +517,7 @@ const ConfessionsManagement: React.FC = () => {
               
               <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button
-                  onClick={() => updateAppointmentStatus(selectedAppointment.id, 'confirmed')}
+                  onClick={() => selectedAppointment?.id && updateAppointmentStatus(selectedAppointment.id, 'confirmed')}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 rtl:space-x-reverse"
                 >
                   <CheckCircle className="w-4 h-4" />
@@ -386,7 +525,7 @@ const ConfessionsManagement: React.FC = () => {
                 </button>
                 
                 <button
-                  onClick={() => updateAppointmentStatus(selectedAppointment.id, 'completed')}
+                  onClick={() => selectedAppointment?.id && updateAppointmentStatus(selectedAppointment.id, 'completed')}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2 rtl:space-x-reverse"
                 >
                   <UserCheck className="w-4 h-4" />
@@ -394,7 +533,7 @@ const ConfessionsManagement: React.FC = () => {
                 </button>
                 
                 <button
-                  onClick={() => updateAppointmentStatus(selectedAppointment.id, 'cancelled')}
+                  onClick={() => selectedAppointment?.id && updateAppointmentStatus(selectedAppointment.id, 'cancelled')}
                   className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2 rtl:space-x-reverse"
                 >
                   <XCircle className="w-4 h-4" />
@@ -402,7 +541,7 @@ const ConfessionsManagement: React.FC = () => {
                 </button>
                 
                 <button
-                  onClick={() => deleteAppointment(selectedAppointment.id)}
+                  onClick={() => selectedAppointment?.id && deleteAppointment(selectedAppointment.id)}
                   className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2 rtl:space-x-reverse"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -420,9 +559,9 @@ const ConfessionsManagement: React.FC = () => {
     const [formData, setFormData] = useState({
       date: editingSlot?.date || '',
       time: editingSlot?.time || '',
-      priest: editingSlot?.priest || '',
-      priestEn: editingSlot?.priestEn || '',
-      maxAppointments: editingSlot?.maxAppointments || 5,
+      priest: editingSlot?.priest || 'ابونا برنابا',
+      priestEn: editingSlot?.priestEn || 'Father Barnaba',
+      maxAppointments: editingSlot?.maxAppointments || 1, // Default to 1 for individual appointments
       available: editingSlot?.available ?? true
     });
 
@@ -443,7 +582,7 @@ const ConfessionsManagement: React.FC = () => {
         currentAppointments: editingSlot?.currentAppointments || 0
       };
 
-      if (editingSlot) {
+      if (editingSlot && editingSlot.id) {
         updateTimeSlot(editingSlot.id, slotData);
       } else {
         addTimeSlot(slotData);
@@ -507,7 +646,7 @@ const ConfessionsManagement: React.FC = () => {
                   type="text"
                   value={formData.priest}
                   onChange={(e) => setFormData(prev => ({ ...prev, priest: e.target.value }))}
-                  placeholder={language === 'ar' ? 'أبونا يوسف' : 'أبونا يوسف'}
+                  placeholder={language === 'ar' ? 'ابونا برنابا' : 'ابونا برنابا'}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                   required
                 />
@@ -521,7 +660,7 @@ const ConfessionsManagement: React.FC = () => {
                   type="text"
                   value={formData.priestEn}
                   onChange={(e) => setFormData(prev => ({ ...prev, priestEn: e.target.value }))}
-                  placeholder={language === 'ar' ? 'Father Youssef' : 'Father Youssef'}
+                  placeholder={language === 'ar' ? 'Father Barnaba' : 'Father Barnaba'}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                   required
                 />
@@ -584,32 +723,41 @@ const ConfessionsManagement: React.FC = () => {
 
   return (
     <div ref={contentRef} className={`space-y-6 ${language === 'ar' ? 'rtl' : 'ltr'}`}>
-      {/* Header */}
-      <div className="admin-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {language === 'ar' ? 'إدارة الاعتراف' : 'Confessions Management'}
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              {language === 'ar' 
-                ? 'إدارة مواعيد الاعتراف والجدولة الزمنية'
-                : 'Manage confession appointments and scheduling'
-              }
-            </p>
-          </div>
-          
-          <div className="flex items-center space-x-4 rtl:space-x-reverse">
-            <button
-              onClick={exportAppointments}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2 rtl:space-x-reverse"
-            >
-              <Download className="w-4 h-4" />
-              <span>{language === 'ar' ? 'تصدير' : 'Export'}</span>
-            </button>
-          </div>
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader className="w-8 h-8 animate-spin text-blue-600 mr-3" />
+          <span className="text-gray-600 dark:text-gray-400">
+            {language === 'ar' ? 'جاري تحميل البيانات...' : 'Loading data...'}
+          </span>
         </div>
-      </div>
+      ) : (
+        <>
+          {/* Header */}
+          <div className="admin-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {language === 'ar' ? 'إدارة الاعتراف' : 'Confessions Management'}
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">
+                  {language === 'ar' 
+                    ? 'إدارة مواعيد الاعتراف والجدولة الزمنية'
+                    : 'Manage confession appointments and scheduling'
+                  }
+                </p>
+              </div>
+              
+              <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                <button
+                  onClick={exportAppointments}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2 rtl:space-x-reverse"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>{language === 'ar' ? 'تصدير' : 'Export'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
 
       {/* Tabs */}
       <div className="admin-card bg-white dark:bg-gray-800 rounded-xl shadow-lg">
@@ -689,7 +837,7 @@ const ConfessionsManagement: React.FC = () => {
                   <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
                       <th className="px-6 py-3 text-left rtl:text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        {language === 'ar' ? 'الاسم' : 'Name'}
+                        {language === 'ar' ? 'المستخدم' : 'User'}
                       </th>
                       <th className="px-6 py-3 text-left rtl:text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         {language === 'ar' ? 'التاريخ والوقت' : 'Date & Time'}
@@ -699,6 +847,9 @@ const ConfessionsManagement: React.FC = () => {
                       </th>
                       <th className="px-6 py-3 text-left rtl:text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         {language === 'ar' ? 'الحالة' : 'Status'}
+                      </th>
+                      <th className="px-6 py-3 text-left rtl:text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        {language === 'ar' ? 'تاريخ الحجز' : 'Booked On'}
                       </th>
                       <th className="px-6 py-3 text-left rtl:text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         {language === 'ar' ? 'الإجراءات' : 'Actions'}
@@ -742,6 +893,12 @@ const ConfessionsManagement: React.FC = () => {
                             </span>
                           </span>
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                          {new Date(appointment.createdAt.seconds * 1000).toLocaleDateString()}
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            {new Date(appointment.createdAt.seconds * 1000).toLocaleTimeString()}
+                          </div>
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex items-center space-x-2 rtl:space-x-reverse">
                             <button
@@ -754,7 +911,7 @@ const ConfessionsManagement: React.FC = () => {
                               <Eye className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => deleteAppointment(appointment.id)}
+                              onClick={() => appointment.id && deleteAppointment(appointment.id)}
                               className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -790,78 +947,169 @@ const ConfessionsManagement: React.FC = () => {
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {language === 'ar' ? 'الجدولة الزمنية' : 'Time Slots'}
                 </h3>
-                <button
-                  onClick={() => {
-                    setEditingSlot(null);
-                    setShowScheduleModal(true);
-                  }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 rtl:space-x-reverse"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>{language === 'ar' ? 'إضافة وقت' : 'Add Slot'}</span>
-                </button>
+                <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                  {selectedTimeSlots.size > 0 && (
+                    <button
+                      onClick={bulkDeleteTimeSlots}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2 rtl:space-x-reverse"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>
+                        {language === 'ar' 
+                          ? `حذف المحدد (${selectedTimeSlots.size})`
+                          : `Delete Selected (${selectedTimeSlots.size})`
+                        }
+                      </span>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      setEditingSlot(null);
+                      setShowScheduleModal(true);
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 rtl:space-x-reverse"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>{language === 'ar' ? 'إضافة وقت' : 'Add Slot'}</span>
+                  </button>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {timeSlots.map((slot) => (
-                  <div key={slot.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <h4 className="font-medium text-gray-900 dark:text-white">
-                          {new Date(slot.date).toLocaleDateString()} - {slot.time}
-                        </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {language === 'ar' ? slot.priest : slot.priestEn}
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-1 rtl:space-x-reverse">
-                        <button
-                          onClick={() => {
-                            setEditingSlot(slot);
-                            setShowScheduleModal(true);
-                          }}
-                          className="text-blue-600 hover:text-blue-700 dark:text-blue-400"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => deleteTimeSlot(slot.id)}
-                          className="text-red-600 hover:text-red-700 dark:text-red-400"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600 dark:text-gray-400">
-                          {language === 'ar' ? 'الحد الأقصى:' : 'Max:'}
-                        </span>
-                        <span className="text-gray-900 dark:text-white">{slot.maxAppointments}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600 dark:text-gray-400">
-                          {language === 'ar' ? 'المحجوزة:' : 'Booked:'}
-                        </span>
-                        <span className="text-gray-900 dark:text-white">{slot.currentAppointments}</span>
-                      </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                        <div
-                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${(slot.currentAppointments / slot.maxAppointments) * 100}%` }}
-                        ></div>
-                      </div>
-                      <p className={`text-xs ${slot.available ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                        {slot.available 
-                          ? (language === 'ar' ? 'متاح' : 'Available')
-                          : (language === 'ar' ? 'غير متاح' : 'Unavailable')
-                        }
-                      </p>
-                    </div>
+              {timeSlots.length > 0 ? (
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <input
+                              type="checkbox"
+                              checked={selectAll}
+                              onChange={handleSelectAll}
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                          </th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            {language === 'ar' ? 'التاريخ والوقت' : 'Date & Time'}
+                          </th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            {language === 'ar' ? 'الكاهن' : 'Priest'}
+                          </th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            {language === 'ar' ? 'الحد الأقصى' : 'Max Slots'}
+                          </th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            {language === 'ar' ? 'المحجوزة' : 'Booked'}
+                          </th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            {language === 'ar' ? 'التقدم' : 'Progress'}
+                          </th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            {language === 'ar' ? 'الحالة' : 'Status'}
+                          </th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            {language === 'ar' ? 'الإجراءات' : 'Actions'}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        {timeSlots.map((slot) => (
+                          <tr key={slot.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                              <input
+                                type="checkbox"
+                                checked={selectedTimeSlots.has(slot.id!)}
+                                onChange={() => handleSelectSlot(slot.id!)}
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                              />
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                              <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                {new Date(slot.date).toLocaleDateString()}
+                              </div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                                {slot.time}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                              <div className="text-sm text-gray-900 dark:text-white">
+                                {language === 'ar' ? slot.priest : slot.priestEn}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                              <div className="text-sm text-gray-900 dark:text-white">
+                                {slot.maxAppointments}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                              <div className="text-sm text-gray-900 dark:text-white">
+                                {slot.currentAppointments}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                              <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mx-auto max-w-20">
+                                <div
+                                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                                  style={{ width: `${(slot.currentAppointments / slot.maxAppointments) * 100}%` }}
+                                ></div>
+                              </div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                {Math.round((slot.currentAppointments / slot.maxAppointments) * 100)}%
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                slot.currentAppointments >= slot.maxAppointments
+                                  ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                                  : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                              }`}>
+                                {slot.currentAppointments >= slot.maxAppointments
+                                  ? (language === 'ar' ? 'محجوز' : 'Full')
+                                  : (language === 'ar' ? 'متاح' : 'Available')
+                                }
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                              <div className="flex items-center justify-center space-x-2 rtl:space-x-reverse">
+                                <button
+                                  onClick={() => {
+                                    setEditingSlot(slot);
+                                    setShowScheduleModal(true);
+                                  }}
+                                  className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                                  title={language === 'ar' ? 'تعديل' : 'Edit'}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => slot.id && deleteTimeSlot(slot.id)}
+                                  className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                                  title={language === 'ar' ? 'حذف' : 'Delete'}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                ))}
-              </div>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Clock className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                    {language === 'ar' ? 'لا توجد أوقات متاحة' : 'No time slots available'}
+                  </h3>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    {language === 'ar' 
+                      ? 'ابدأ بإضافة أوقات متاحة للاعتراف'
+                      : 'Start by adding available confession time slots'
+                    }
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
@@ -932,6 +1180,8 @@ const ConfessionsManagement: React.FC = () => {
       {/* Modals */}
       {showAppointmentModal && <AppointmentModal />}
       {showScheduleModal && <ScheduleModal />}
+        </>
+      )}
     </div>
   );
 };
