@@ -22,6 +22,7 @@ import Contact from './pages/Contact';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
 import ImageGallery from './components/ImageGallery';
+import ReadBible from './pages/ReadBible';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -98,6 +99,13 @@ function App() {
                     <Footer />
                   </>
                 } />
+                <Route path="/read-bible" element={
+                  <>
+                    <Navigation />
+                    <ReadBible />
+                    <Footer />
+                  </>
+                } />
                 <Route path="/contact" element={
                   <>
                     <Navigation />
@@ -105,6 +113,7 @@ function App() {
                     <Footer />
                   </>
                 } />
+                
                 <Route path="/login" element={<Login />} />
                 <Route path="/admin" element={
                   <ProtectedRoute>

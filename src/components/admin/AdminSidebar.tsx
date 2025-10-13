@@ -106,6 +106,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           icon: MapPin,
           description: 'تخطيط وإدارة الرحلات',
           descriptionEn: 'Plan and manage trips'
+        },
+        {
+          id: 'trips-payments',
+          label: 'مدفوعات الرحلات',
+          labelEn: 'Trips Payments',
+          icon: CreditCard,
+          badge: 'new',
+          description: 'عرض مدفوعات الرحلات',
+          descriptionEn: 'View trips payments'
         }
       ]
     },
@@ -153,6 +162,61 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           description: 'إدارة تبرعات المستخدمين',
           descriptionEn: 'Manage user donations'
         }
+      ]
+    },
+    {
+      id: 'Services',
+      label: 'الخدمات فى الكنيسة',
+      labelEn: 'Services in Church',
+      icon: BarChart3,
+      priority: 'high',
+      color: 'from-orange-500 to-red-600',
+      items: [
+        { 
+          id: 'Elementary', 
+          label: 'خدمة المرحلة الأبتدائية', 
+          labelEn: 'Elementary Service', 
+          icon: Users,
+          badge: 'growing',
+          description: 'إدارة خدمة المرحلة الأبتدائية',
+          descriptionEn: 'Manage service for Elementary stage'
+        },
+        { 
+          id: 'Preparatory', 
+          label: 'خدمة المرحلة الاعدادية', 
+          labelEn: 'Preparatory Service', 
+          icon: Users,
+          badge: 'growing',
+          description: 'إدارة خدمة المرحلة الأعدادية',
+          descriptionEn: 'Manage service for Preparatory stage'
+        },
+        { 
+          id: 'Secondary', 
+          label: 'خدمة المرحلة الثانوية', 
+          labelEn: 'Secondary Service', 
+          icon: Users,
+          badge: 'growing',
+          description: 'إدارة خدمة المرحلة الثانوية',
+          descriptionEn: 'Manage service for Secondary stage'
+        },
+        { 
+          id: 'University', 
+          label: 'خدمة جامعة', 
+          labelEn: 'university Service', 
+          icon: Users,
+          badge: 'growing',
+          description: 'إدارة خدمة جامعة',
+          descriptionEn: 'Manage service for university stage'
+        },
+        { 
+          id: 'Missing', 
+          label: 'الأفتقاد', 
+          labelEn: 'Missing Service', 
+          icon: Users,
+          badge: 'growing',
+          description: 'إدارة خدمة الأفتقاد',
+          descriptionEn: 'Manage service for Missing'
+        },
       ]
     },
     {
@@ -242,25 +306,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           icon: Save,
           description: 'النسخ الاحتياطي واستعادة البيانات',
           descriptionEn: 'Backup and data recovery'
-        }
-      ]
-    },
-    {
-      id: 'spiritual',
-      label: 'الخدمات الروحية',
-      labelEn: 'Spiritual Services',
-      icon: Book,
-      priority: 'medium',
-      color: 'from-amber-500 to-yellow-600',
-      items: [
-        { 
-          id: 'bible', 
-          label: 'قراءة الكتاب', 
-          labelEn: 'Bible Reading', 
-          icon: Book,
-          badge: 'featured',
-          description: 'خدمة قراءة الكتاب المقدس',
-          descriptionEn: 'Bible reading service'
         }
       ]
     }
