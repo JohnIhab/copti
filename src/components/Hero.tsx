@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -11,6 +12,8 @@ const Hero: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { t } = useLanguage();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Desktop images
   const desktopImages = [
@@ -178,14 +181,34 @@ const Hero: React.FC = () => {
           
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-6 py-3 sm:px-8 sm:py-4 bg-red-500 text-white rounded-lg font-semibold
+            <button
+              onClick={() => navigate('/contact')}
+              className="px-6 py-3 sm:px-8 sm:py-4 bg-red-500 text-white rounded-lg font-semibold
                             hover:bg-transparent hover:border-2 hover:border-white hover:text-white 
                             transition-all duration-300 transform hover:scale-105
-                            shadow-lg hover:shadow-xl">
+                            shadow-lg hover:shadow-xl"
+            >
               {t('joinUs')}
             </button>
-            <button className="px-6 py-3 sm:px-8 sm:py-4 bg-transparent border-2 border-white text-white rounded-lg font-semibold
-                            hover:bg-red-500 hover:text-white hover:border-0 transition-all duration-300 transform hover:scale-105">
+
+            <button
+              onClick={() => {
+                // If already on home, just smooth-scroll to the about section.
+                if (location.pathname === '/' || location.pathname === '') {
+                  const el = document.getElementById('about');
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                  // Navigate to home first, then smooth-scroll after a short delay to allow render
+                  navigate('/');
+                  setTimeout(() => {
+                    const el = document.getElementById('about');
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }, 200);
+                }
+              }}
+              className="px-6 py-3 sm:px-8 sm:py-4 bg-transparent border-2 border-white text-white rounded-lg font-semibold
+                            hover:bg-red-500 hover:text-white hover:border-0 transition-all duration-300 transform hover:scale-105"
+            >
               {t('learnMore')}
             </button>
           </div>

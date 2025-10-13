@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from '../services/firebase';
 import { auth } from '../services/firebase';
+import { usersService } from '../services/usersService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Mail, Lock, X } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -23,13 +24,27 @@ const Login: React.FC = () => {
     setLoading(true);
     
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+          const cred = await signInWithEmailAndPassword(auth, email, password);
       toast.success(
         language === 'ar' 
           ? 'تم تسجيل الدخول بنجاح'
           : 'Successfully logged in'
       );
-      navigate('/admin', { replace: true });
+          // After sign-in, fetch the Firestore user record to determine role
+          try {
+            const firebaseUser = cred.user;
+            // Use the fallback that checks both 'users' and 'admins' collections
+            const appUser = await usersService.getUserByAuthUidOrAdmin(firebaseUser.uid, firebaseUser.email || undefined);
+            console.log('Login: resolved appUser ->', appUser);
+            // If the user has role 'خادم' (service), send them to services dashboard
+            if (appUser && appUser.role === 'خادم') {
+              navigate('/services-dashboard', { replace: true });
+            } else {
+              navigate('/admin', { replace: true });
+            }
+          } catch (e) {
+            navigate('/admin', { replace: true });
+          }
     } catch (error: any) {
       console.error('Login error:', error);
       toast.error(

@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { currentUser, loading } = useAuth();
+  const { currentUser, loading, appUser } = useAuth() as any;
   const { language } = useLanguage();
 
   if (loading) {
@@ -24,7 +24,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  if (!currentUser) {
+  if (!currentUser || !appUser) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
         <div className="max-w-md w-full text-center">
@@ -43,6 +43,23 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
           >
             {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Ensure the Firestore app user has admin role
+  if (appUser.role !== 'admin') {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
+        <div className="max-w-md w-full text-center">
+          <Shield className="h-16 w-16 mx-auto text-yellow-500 mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            {language === 'ar' ? 'غير مصرح' : 'Unauthorized'}
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            {language === 'ar' ? 'ليس لديك صلاحية الوصول إلى هذه الصفحة.' : "You don't have permission to access this page."}
+          </p>
         </div>
       </div>
     );

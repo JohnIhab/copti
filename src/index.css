@@ -150,14 +150,6 @@ html {
   }
 }
 
-/* Focus styles for accessibility */
-button:focus,
-a:focus,
-input:focus,
-textarea:focus {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
 
 /* Print styles */
 @media print {
@@ -398,6 +390,15 @@ textarea:focus {
 .meeting-card:hover {
   transform: translateY(-8px) scale(1.02);
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* NotFound specific tweaks: force nav text to white for better contrast */
+body.notfound-mode .nav-override, body.notfound-mode nav a, body.notfound-mode nav h1, body.notfound-mode nav button {
+  color: white !important;
+}
+
+body.notfound-mode nav {
+  background: transparent !important;
 }
 
 /* Gradient text */

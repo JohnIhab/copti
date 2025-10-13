@@ -261,6 +261,78 @@ class UsersService {
     }
   }
 
+  // Get user by their Firebase Auth UID (authUid)
+  async getUserByAuthUid(authUid: string): Promise<User | null> {
+    try {
+      const usersRef = collection(db, this.collectionName);
+      const authQuery = query(usersRef, where('authUid', '==', authUid));
+      const snapshot = await getDocs(authQuery);
+
+      if (snapshot.empty) return null;
+
+      const docSnap = snapshot.docs[0];
+      const data = docSnap.data();
+      return {
+        id: docSnap.id,
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        role: data.role,
+        status: data.status,
+        joinDate: data.joinDate?.toDate() || new Date(),
+        lastLogin: data.lastLogin?.toDate(),
+        avatar: data.avatar || '',
+        permissions: data.permissions || [],
+        verified: data.verified || false,
+        securityNumber: data.securityNumber,
+        createdAt: data.createdAt?.toDate(),
+        updatedAt: data.updatedAt?.toDate()
+      };
+    } catch (error) {
+      console.error('Error fetching user by authUid:', error);
+      throw error;
+    }
+  }
+
+  async getUserByAuthUidOrAdmin(authUid: string, email?: string): Promise<User | null> {
+    try {
+      const user = await this.getUserByAuthUid(authUid);
+      if (user) return user;
+
+      if (!email) return null;
+
+      const adminsRef = collection(db, 'admins');
+      const adminQuery = query(adminsRef, where('email', '==', email));
+      const snapshot = await getDocs(adminQuery);
+
+      if (snapshot.empty) return null;
+
+      const docSnap = snapshot.docs[0];
+      const data: any = docSnap.data();
+
+      // Map admin document fields to the User interface
+      return {
+        id: docSnap.id,
+        name: data.name || '',
+        email: data.email || email,
+        phone: data.phone || '',
+        role: data.role || 'admin',
+        status: data.active ? 'active' : (data.status || 'active'),
+        joinDate: data.createdAt?.toDate() || new Date(),
+        lastLogin: data.lastLogin?.toDate(),
+        avatar: data.avatar || '',
+        permissions: data.permissions || [],
+        verified: data.verified || true,
+        securityNumber: data.security || data.securityNumber || '',
+        createdAt: data.createdAt?.toDate(),
+        updatedAt: data.updatedAt?.toDate()
+      };
+    } catch (error) {
+      console.error('Error fetching user by authUid or admin fallback:', error);
+      throw error;
+    }
+  }
+
   // Update user
   async updateUser(userId: string, userData: UpdateUserData): Promise<void> {
     try {

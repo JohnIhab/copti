@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { LanguageProvider } from './contexts/LanguageContext';
@@ -13,6 +13,8 @@ import Footer from './components/Footer';
 import PageLoader from './components/PageLoader';
 import BibleVerseModal from './components/BibleVerseModal';
 import ProtectedRoute from './components/ProtectedRoute';
+import ServiceProtectedRoute from './components/ServiceProtectedRoute';
+import ServicesDashboard from './pages/ServicesDashboard';
 import Meetings from './pages/Meetings';
 import Events from './pages/Events';
 import Trips from './pages/Trips';
@@ -23,6 +25,8 @@ import Admin from './pages/Admin';
 import Login from './pages/Login';
 import ImageGallery from './components/ImageGallery';
 import ReadBible from './pages/ReadBible';
+import NotFound from './pages/NotFound';
+import ThreeDWaveGallery from './components/ThreeDWaveGallery';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -58,6 +62,7 @@ function App() {
                   <>
                     <Navigation />
                     <Hero />
+                    <ThreeDWaveGallery />
                     <Features />
                     <ImageGallery />
                     <About />
@@ -116,15 +121,29 @@ function App() {
                 
                 <Route path="/login" element={<Login />} />
                 <Route path="/admin" element={
+                  
                   <ProtectedRoute>
+                    <Navigation />
                     <Admin />
                   </ProtectedRoute>
                 } />
-                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="/services-dashboard" element={
+                  <ServiceProtectedRoute>
+                    <Navigation />
+                    <ServicesDashboard />
+                  </ServiceProtectedRoute>
+                } />
+                <Route path="*" element={
+                  <>
+                    <Navigation />
+                    <NotFound />
+                    <Footer />
+                  </>
+                } />
               </Routes>
               </div>
               <ToastContainer
-                position="top-right"
+                position="top-center"
                 autoClose={5000}
                 hideProgressBar={false}
                 newestOnTop={true}
