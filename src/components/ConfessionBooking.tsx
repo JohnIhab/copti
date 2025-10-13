@@ -76,21 +76,13 @@ const ConfessionBooking: React.FC = () => {
       setAvailableSlots(futureSlots);
       
       if (futureSlots.length > 0) {
-        toast.success(
-          language === 'ar' 
-            ? `تم تحميل ${futureSlots.length} موعد متاح`
-            : `Loaded ${futureSlots.length} available appointments`
-        );
+        
       } else {
         console.log('No future slots available. Current date:', today.toISOString().split('T')[0]);
         console.log('Slots from Firebase:', slots.length);
         
         if (slots.length > 0) {
-          toast.info(
-            language === 'ar'
-              ? `تم العثور على ${slots.length} مواعيد ولكنها في الماضي. يرجى إضافة مواعيد جديدة.`
-              : `Found ${slots.length} appointments but they are in the past. Please add new appointments.`
-          );
+          
         }
       }
     } catch (error) {
@@ -256,7 +248,7 @@ const ConfessionBooking: React.FC = () => {
   const groupedSlots = groupSlotsByDate(availableSlots);
 
   return (
-    <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 py-8 ${language === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div className={`mt-40 min-h-screen bg-gray-50 dark:bg-gray-900 py-8 ${language === 'ar' ? 'rtl' : 'ltr'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">

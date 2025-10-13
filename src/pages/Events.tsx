@@ -98,58 +98,7 @@ const Events: React.FC = () => {
           </p>
         </div>
 
-        {/* Featured Events */}
-        {featuredEvents.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-              <Star className="h-6 w-6 text-yellow-500 mr-2" />
-              الفعاليات المميزة
-            </h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {featuredEvents.map((event) => (
-                <div
-                  key={event.id}
-                  className="featured-card bg-white dark:bg-gray-800 rounded-2xl overflow-hidden
-                           shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2
-                           border border-gray-100 dark:border-gray-700 group"
-                >
-                  <div className="relative h-48 overflow-hidden">
-                    <img 
-                      src={event.image} 
-                      alt={language === 'ar' ? event.title : event.titleEn}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                    <div className="absolute top-4 right-4 bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                      مميز
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                      {language === 'ar' ? event.title : event.titleEn}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">
-                      {language === 'ar' ? event.description : event.descriptionEn}
-                    </p>
-                    <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-1" />
-                        <span>{new Date(event.date).toLocaleDateString('ar-EG')}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-1" />
-                        <span>{event.time}</span>
-                      </div>
-                    </div>
-                    <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg
-                                     font-semibold transition-all duration-300 transform hover:scale-105">
-                      سجل الآن
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+
 
         {/* Category Filter */}
         <div className="mb-8">

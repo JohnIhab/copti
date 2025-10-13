@@ -19,9 +19,15 @@ import {
   ContactMessagesManagement,
   ConfessionsManagement,
   UsersManagement,
-  UnderDevelopment
+  UnderDevelopment,
+  AdminTripsPayments,
+  ElementaryService,
+  PreparatoryService
 } from '../components/admin';
 import FirestoreTest from '../components/FirestoreTest';
+import SecondaryService from '../components/admin/SecondaryService';
+import UniversityService from '../components/admin/UniversityService';
+import MissingServe from '../components/admin/MissingService';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -212,6 +218,8 @@ const Admin: React.FC = () => {
         return <DonationsManagement />;
       case 'donation-transactions':
         return <DonationTransactions />;
+      case 'trips-payments':
+        return <AdminTripsPayments />;
       case 'confessions':
         return <ConfessionsManagement />;
       case 'users':
@@ -224,6 +232,16 @@ const Admin: React.FC = () => {
         return <MeetingsManagement />;
       case 'firestore-test':
         return <FirestoreTest />;
+      case 'Elementary':
+        return <ElementaryService />;
+      case 'Preparatory':
+        return <PreparatoryService />;
+      case 'Secondary':
+        return <SecondaryService />;
+      case 'University':
+        return <UniversityService />;
+      case 'Missing':
+        return <MissingServe />;
       case 'reports':
       case 'analytics':
       case 'notifications':
