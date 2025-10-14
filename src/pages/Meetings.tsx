@@ -30,6 +30,7 @@ interface Meeting {
   recurrenceType?: 'weekly' | 'monthly' | 'yearly';
   status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
   category?: string;
+  image?: string;
 }
 
 const Meetings: React.FC = () => {
@@ -67,7 +68,8 @@ const Meetings: React.FC = () => {
         meetingsData.push({
           id: doc.id,
           ...data,
-          category: data.type // Map type to category for filtering compatibility
+          category: data.type, // Map type to category for filtering compatibility
+          image: data.image || undefined
         } as Meeting);
       });
       
@@ -218,6 +220,7 @@ const Meetings: React.FC = () => {
                   category={language === 'ar' ? categories.find(c => c.key === meeting.category)?.label || meeting.type : categories.find(c => c.key === meeting.category)?.labelEn || meeting.typeEn}
                   capacity={meeting.maxAttendees}
                   registered={meeting.currentAttendees}
+                  image={meeting.image}
                   onJoin={() => {
                     console.log(`Joining meeting: ${meeting.title}`);
                   }}

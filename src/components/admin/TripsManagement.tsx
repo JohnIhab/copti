@@ -1,10 +1,12 @@
 ﻿import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 import { Plus, Edit, Trash2, X, Loader, Save } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { tripsService, Trip } from '../../services/tripsService';
 
 const TripsManagement: React.FC = () => {
-  const { language } = useLanguage();
+  useLanguage();
   
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,6 +29,63 @@ const TripsManagement: React.FC = () => {
     capacity: 0,
     cost: 0
   });
+  const [imageUploading, setImageUploading] = useState(false);
+  const [imageUploadProgress, setImageUploadProgress] = useState(0);
+  const [imageUploadError, setImageUploadError] = useState('');
+
+  const uploadImage = async (file: File) => {
+    try {
+      setImageUploading(true);
+      setImageUploadError('');
+      setImageUploadProgress(0);
+
+      const cloudName = (import.meta as any).env.VITE_CLOUDINARY_CLOUD_NAME as string;
+      const preset = (import.meta as any).env.VITE_CLOUDINARY_UPLOAD_PRESET as string;
+      const resourceType = 'image';
+      if (!cloudName || !preset) {
+        const missing = !cloudName ? 'VITE_CLOUDINARY_CLOUD_NAME' : 'VITE_CLOUDINARY_UPLOAD_PRESET';
+        const msg = `المتغير ${missing} غير مضبوط. الرجاء ضبط إعدادات Cloudinary في ملف البيئة.`;
+        setImageUploading(false);
+        setImageUploadError(msg);
+        toast.error(msg);
+        return null;
+      }
+
+      const url = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', preset);
+
+      const res = await axios.post(url, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: (progressEvent: any) => {
+          const percent = progressEvent.total ? Math.round((progressEvent.loaded * 100) / progressEvent.total) : 0;
+          setImageUploadProgress(percent);
+        }
+      });
+
+      setImageUploadProgress(100);
+      setImageUploading(false);
+      return res.data.secure_url as string;
+    } catch (error: any) {
+      setImageUploading(false);
+      setImageUploadProgress(0);
+      let msg = 'فشل رفع الصورة';
+      // Try to extract Cloudinary error details
+      if (error?.response?.data) {
+        console.error('Cloudinary response data:', error.response.data);
+        msg = error.response.data?.error?.message || JSON.stringify(error.response.data);
+      } else if (error?.message) {
+        msg = error.message;
+      }
+      setImageUploadError(msg);
+      console.error('image upload error:', error);
+      toast.error(`فشل رفع الصورة: ${msg}`);
+      return null;
+    }
+  };
 
   useEffect(() => {
     loadTrips();
@@ -80,7 +139,7 @@ const TripsManagement: React.FC = () => {
       setSubmitting(false);
     }
   };
-
+  
   const resetForm = () => {
     setFormData({
       title: '',
@@ -393,6 +452,31 @@ const TripsManagement: React.FC = () => {
                   placeholder="أدخل رابط صورة الرحلة"
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
+                <div className="mt-2 flex items-center space-x-3 space-x-reverse">
+                  <label className="cursor-pointer inline-flex items-center px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600">
+                    رفع صورة
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const url = await uploadImage(file);
+                          if (url) {
+                            setFormData(prev => ({ ...prev, image: url }));
+                          }
+                        }
+                      }}
+                      className="hidden"
+                    />
+                  </label>
+                  {imageUploading && (
+                    <div className="text-sm text-gray-600 dark:text-gray-300">جاري الرفع {imageUploadProgress}%</div>
+                  )}
+                  {imageUploadError && (
+                    <div className="text-sm text-red-500">{imageUploadError}</div>
+                  )}
+                </div>
               </div>
               
               <div>

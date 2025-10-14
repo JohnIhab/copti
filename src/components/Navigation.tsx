@@ -4,6 +4,7 @@ import { Menu, X, Church, LogOut } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { signOut, auth } from '../services/firebase';
+import LoginButton from './LoginButton';
 
 const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -111,14 +112,17 @@ const Navigation: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <Link
-                to="/login"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-3 lg:px-4 py-2 rounded-lg 
-                        transition-all duration-200 font-medium focus:outline-none text-sm lg:text-base
-                        shadow-md hover:shadow-lg border border-blue-600 hover:border-blue-700"
-              >
-                {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
+              <Link to="/login" className="focus:outline-none">
+              <LoginButton />
               </Link>
+              // <Link
+              //   to="/login"
+              //   className="bg-blue-600 hover:bg-blue-700 text-white px-3 lg:px-4 py-2 rounded-lg 
+              //           transition-all duration-200 font-medium focus:outline-none text-sm lg:text-base
+              //           shadow-md hover:shadow-lg border border-blue-600 hover:border-blue-700"
+              // >
+              //   {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
+              // </Link>
             )}
           </div>
 

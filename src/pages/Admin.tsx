@@ -28,6 +28,7 @@ import FirestoreTest from '../components/FirestoreTest';
 import SecondaryService from '../components/admin/SecondaryService';
 import UniversityService from '../components/admin/UniversityService';
 import MissingServe from '../components/admin/MissingService';
+import SettingsPage from '../components/admin/SettingsPage';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -248,8 +249,9 @@ const Admin: React.FC = () => {
       case 'backup':
       case 'security':
       case 'permissions':
-      case 'settings':
         return <UnderDevelopment title="الإعدادات" titleEn="Settings" />;
+      case 'settings':
+        return <SettingsPage />;
       default:
         return <UnderDevelopment title="القسم غير متوفر" titleEn="Section Not Available" />;
     }
@@ -282,7 +284,7 @@ const Admin: React.FC = () => {
       />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen relative z-10">
+      <div className="flex-1 flex flex-col min-h-screen relative z-10 ">
         {/* Top Bar */}
         <AdminTopbar
           activeTab={activeTab}

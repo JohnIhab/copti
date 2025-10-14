@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Calendar, Edit, Trash2, X, Save } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { toast } from 'react-toastify';
+import { uploadEventImage } from '../../services/eventsService';
 import ConfirmDialog from '../ConfirmDialog';
 import { db } from '../../services/firebase';
 import { 
@@ -57,6 +58,7 @@ interface MeetingFormData {
   isRecurring: boolean;
   recurrenceType: 'weekly' | 'monthly' | 'yearly';
   status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
+  image?: File | null;
 }
 
 const MeetingsManagement: React.FC = () => {
@@ -91,6 +93,25 @@ const MeetingsManagement: React.FC = () => {
     recurrenceType: 'weekly',
     status: 'scheduled'
   });
+  const [meetingImageFile, setMeetingImageFile] = useState<File | null>(null);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [imageUploadProgress, setImageUploadProgress] = useState(0);
+  const [imageUploadError, setImageUploadError] = useState('');
+  
+  const handleMeetingImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        toast.error(language === 'ar' ? 'يرجى اختيار ملف صورة صالح' : 'Please select a valid image file');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(language === 'ar' ? 'حجم الصورة يجب أن يكون أقل من 5 ميجابايت' : 'Image size must be less than 5MB');
+        return;
+      }
+    }
+    setMeetingImageFile(file);
+  };
 
   const meetingTypes = [
     { value: 'general', label: 'اجتماع عام', labelEn: 'General Meeting' },
@@ -228,7 +249,7 @@ const MeetingsManagement: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const meetingData = {
+      const meetingData: any = {
         title: formData.title.trim(),
         titleEn: formData.titleEn.trim(),
         date: formData.date,
@@ -251,6 +272,24 @@ const MeetingsManagement: React.FC = () => {
         updatedAt: serverTimestamp()
       };
 
+      // If an image file is selected, upload it to Cloudinary first
+      if (meetingImageFile) {
+        try {
+          setImageUploading(true);
+          setImageUploadError('');
+          setImageUploadProgress(0);
+          const imageUrl = await uploadEventImage(meetingImageFile);
+          meetingData['image'] = imageUrl;
+          setImageUploading(false);
+          setImageUploadProgress(100);
+        } catch (imgErr: any) {
+          console.error('Meeting image upload failed:', imgErr);
+          setImageUploading(false);
+          setImageUploadError(imgErr?.message || 'فشل رفع الصورة');
+          toast.error(imageUploadError || 'فشل رفع الصورة');
+        }
+      }
+
       if (editingMeeting) {
         // Update existing meeting
         const meetingRef = doc(db, 'meetings', editingMeeting.id);
@@ -267,8 +306,8 @@ const MeetingsManagement: React.FC = () => {
         setShowEditModal(false);
         setEditingMeeting(null);
       } else {
-        // Add new meeting
-        await addDoc(collection(db, 'meetings'), meetingData);
+  // Add new meeting
+  await addDoc(collection(db, 'meetings'), meetingData);
         
         toast.success(
           language === 'ar' 
@@ -857,6 +896,50 @@ const MeetingsManagement: React.FC = () => {
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
+              </div>
+
+              {/* Image Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {language === 'ar' ? 'صورة الاجتماع' : 'Meeting Image'}
+                </label>
+                <div className="flex items-center justify-center w-full">
+                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <svg className="w-8 h-8 mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16V4m0 0l-4 4m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"></path></svg>
+                      <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                        <span className="font-semibold">{language === 'ar' ? 'انقر لرفع صورة' : 'Click to upload'}</span>
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG or GIF (MAX 5MB)</p>
+                    </div>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleMeetingImageChange}
+                    />
+                  </label>
+                </div>
+
+                {(meetingImageFile || (editingMeeting && (editingMeeting as any).image)) && (
+                  <div className="mt-2 flex items-center space-x-4">
+                    {meetingImageFile ? (
+                      <img src={URL.createObjectURL(meetingImageFile)} alt="preview" className="h-20 w-32 object-cover rounded" />
+                    ) : editingMeeting && (editingMeeting as any).image ? (
+                      <img src={(editingMeeting as any).image} alt="current" className="h-20 w-32 object-cover rounded" />
+                    ) : null}
+                    <div className="text-sm text-gray-600 dark:text-gray-300">
+                      {meetingImageFile ? meetingImageFile.name : editingMeeting && (editingMeeting as any).image ? (language === 'ar' ? 'الصورة الحالية' : 'Current image') : ''}
+                    </div>
+                  </div>
+                )}
+
+                {imageUploading && (
+                  <div className="mt-2 text-sm text-gray-600">{language === 'ar' ? 'جاري رفع الصورة' : 'Uploading...'} {imageUploadProgress}%</div>
+                )}
+                {imageUploadError && (
+                  <div className="mt-2 text-sm text-red-500">{imageUploadError}</div>
+                )}
               </div>
 
               {/* Form Actions */}

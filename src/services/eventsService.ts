@@ -10,13 +10,9 @@ import {
   orderBy,
   where,
   Timestamp,
-  onSnapshot,
-  ref,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject
+  onSnapshot
 } from './firebase';
-import { db, storage } from './firebase';
+import { db } from './firebase';
 
 export interface Event {
   id?: string;
@@ -54,17 +50,33 @@ export interface EventFormData {
 }
 
 const EVENTS_COLLECTION = 'events';
-const IMAGES_PATH = 'events';
+// Using Cloudinary for image hosting; no local images path required here.
 
 // Helper function to upload image
-export const uploadEventImage = async (file: File, eventId: string): Promise<string> => {
+export const uploadEventImage = async (file: File): Promise<string> => {
   try {
-    const imageRef = ref(storage, `${IMAGES_PATH}/${eventId}_${Date.now()}_${file.name}`);
-    const snapshot = await uploadBytes(imageRef, file);
-    const downloadURL = await getDownloadURL(snapshot.ref);
-    return downloadURL;
+    // Use Cloudinary unsigned upload from client
+    const cloudName = (import.meta as any).env.VITE_CLOUDINARY_CLOUD_NAME as string;
+    const preset = (import.meta as any).env.VITE_CLOUDINARY_UPLOAD_PRESET as string;
+    if (!cloudName || !preset) {
+      throw new Error('Cloudinary upload not configured. Set VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET');
+    }
+
+    const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', preset);
+    // Optionally include context/public_id/folder
+    const res = await fetch(url, { method: 'POST', body: fd });
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      const errMsg = body?.error?.message || res.statusText;
+      throw new Error(`Cloudinary upload failed: ${errMsg}`);
+    }
+    const data = await res.json();
+    return data.secure_url as string;
   } catch (error) {
-    console.error('Error uploading image:', error);
+    console.error('Error uploading image to Cloudinary:', error);
     throw new Error('Failed to upload image');
   }
 };
@@ -72,13 +84,19 @@ export const uploadEventImage = async (file: File, eventId: string): Promise<str
 // Helper function to delete image
 export const deleteEventImage = async (imageUrl: string): Promise<void> => {
   try {
-    if (imageUrl && imageUrl.includes('firebase')) {
-      const imageRef = ref(storage, imageUrl);
-      await deleteObject(imageRef);
+    // For Firebase-stored images we used to delete via storage reference.
+    // Cloudinary image deletion requires an authenticated server-side request (signed).
+    // So when using Cloudinary client-side uploads we cannot safely delete images from the client.
+    // Log and skip deletion for Cloudinary URLs.
+    if (!imageUrl) return;
+    if (imageUrl.includes('firebase')) {
+      // If in future you still have firebase URLs, deletion logic can be re-added here with storage access.
+      console.warn('Firebase image deletion requested but storage deletion code was removed.');
+    } else if (imageUrl.includes('cloudinary.com')) {
+      console.warn('Cloudinary image detected. Deletion must be done server-side with API key/secret. Skipping.');
     }
   } catch (error) {
     console.error('Error deleting image:', error);
-    // Don't throw error for image deletion as it's not critical
   }
 };
 
@@ -187,7 +205,7 @@ export const addEvent = async (eventData: EventFormData): Promise<string> => {
     // Upload image if provided
     if (eventData.image) {
       try {
-        const imageUrl = await uploadEventImage(eventData.image, docRef.id);
+        const imageUrl = await uploadEventImage(eventData.image);
         await updateDoc(docRef, { image: imageUrl });
       } catch (imageError) {
         console.error('Error uploading image:', imageError);
@@ -228,7 +246,7 @@ export const updateEvent = async (id: string, eventData: Partial<EventFormData>,
         }
         
         // Upload new image
-        const imageUrl = await uploadEventImage(newImage, id);
+        const imageUrl = await uploadEventImage(newImage);
         updateData.image = imageUrl;
       } catch (imageError) {
         console.error('Error updating image:', imageError);

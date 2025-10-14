@@ -3,6 +3,8 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Church, Cross, Users, Heart } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import LearnMoreBtn from './LearnMoreBtn';
+import { Link } from 'react-router-dom';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -66,7 +68,7 @@ const About: React.FC = () => {
                   <Church className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h4 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">تأسست عام 2000</h4>
+                  <h4 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">تأسست عام 1930</h4>
                   <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm">25 سنة من الخدمة</p>
                 </div>
               </div>
@@ -101,12 +103,10 @@ const About: React.FC = () => {
                 </div>
               </div>
             </div>
+            <Link to="/aboutpage">
+              <LearnMoreBtn />
+            </Link>
             
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-lg font-semibold
-                             transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl
-                             text-sm sm:text-base w-full sm:w-auto">
-              {t('learnMore')}
-            </button>
           </div>
 
           {/* Image/Visual */}

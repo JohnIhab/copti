@@ -236,23 +236,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           badge: 'growing',
           description: 'إدارة حسابات المستخدمين',
           descriptionEn: 'Manage user accounts'
-        },
-        { 
-          id: 'reports', 
-          label: 'التقارير', 
-          labelEn: 'Reports', 
-          icon: BarChart3,
-          description: 'تقارير مفصلة ومخصصة',
-          descriptionEn: 'Detailed custom reports'
-        },
-        { 
-          id: 'analytics', 
-          label: 'الإحصائيات', 
-          labelEn: 'Analytics', 
-          icon: TrendingUp,
-          badge: 'insights',
-          description: 'تحليلات متقدمة للبيانات',
-          descriptionEn: 'Advanced data analytics'
         }
       ]
     },
@@ -271,41 +254,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           icon: Settings,
           description: 'إعدادات النظام العامة',
           descriptionEn: 'General system settings'
-        },
-        { 
-          id: 'security', 
-          label: 'الأمان', 
-          labelEn: 'Security', 
-          icon: Shield,
-          badge: 'important',
-          description: 'إعدادات الأمان والحماية',
-          descriptionEn: 'Security and protection settings'
-        },
-        { 
-          id: 'firestore-test', 
-          label: 'اختبار Firestore', 
-          labelEn: 'Firestore Test', 
-          icon: Activity,
-          badge: 'debug',
-          description: 'اختبار الاتصال بقاعدة البيانات',
-          descriptionEn: 'Test database connection'
-        },
-        { 
-          id: 'notifications', 
-          label: 'الإشعارات', 
-          labelEn: 'Notifications', 
-          icon: Bell,
-          count: 7,
-          description: 'إدارة إشعارات النظام',
-          descriptionEn: 'Manage system notifications'
-        },
-        { 
-          id: 'backup', 
-          label: 'النسخ الاحتياطي', 
-          labelEn: 'Backup', 
-          icon: Save,
-          description: 'النسخ الاحتياطي واستعادة البيانات',
-          descriptionEn: 'Backup and data recovery'
         }
       ]
     }

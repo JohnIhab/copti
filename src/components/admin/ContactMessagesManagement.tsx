@@ -301,9 +301,7 @@ const ContactMessagesManagement: React.FC = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   {language === 'ar' ? 'الحالة' : 'Status'}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  {language === 'ar' ? 'الأولوية' : 'Priority'}
-                </th>
+                
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   {language === 'ar' ? 'الاسم' : 'Name'}
                 </th>
@@ -338,9 +336,7 @@ const ContactMessagesManagement: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     {getStatusBadge(message)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {getPriorityBadge(message.priority || 'low')}
-                  </td>
+                  
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div>

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Calendar, MapPin, Users, Clock, Star } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Event, getAllEvents } from '../services/eventsService';
 
@@ -47,7 +47,7 @@ const Events: React.FC = () => {
     selectedCategory === 'all' || event.category === selectedCategory
   );
 
-  const featuredEvents = events.filter(event => event.featured);
+  // const featuredEvents = events.filter(event => event.featured);
 
   useEffect(() => {
     if (!sectionRef.current) return;

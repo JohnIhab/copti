@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getMaintenanceMode } from './services/maintenanceService';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -27,25 +28,52 @@ import ImageGallery from './components/ImageGallery';
 import ReadBible from './pages/ReadBible';
 import NotFound from './pages/NotFound';
 import ThreeDWaveGallery from './components/ThreeDWaveGallery';
+import AboutPage from './pages/About';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [showBibleVerse, setShowBibleVerse] = useState(false);
+  const [maintenance, setMaintenance] = useState(false);
+  const [maintenanceLoading, setMaintenanceLoading] = useState(true);
 
   useEffect(() => {
     // Simulate loading time for animations to initialize
     const timer = setTimeout(() => {
       setIsLoading(false);
-      // Show Bible verse modal after loading is complete
       setShowBibleVerse(true);
     }, 2000);
-
     return () => clearTimeout(timer);
   }, []);
 
-  if (isLoading) {
+  useEffect(() => {
+    let mounted = true;
+    setMaintenanceLoading(true);
+    getMaintenanceMode().then((enabled) => {
+      if (mounted) setMaintenance(enabled);
+    }).finally(() => {
+      if (mounted) setMaintenanceLoading(false);
+    });
+    return () => { mounted = false; };
+  }, []);
+
+  if (isLoading || maintenanceLoading) {
     return <PageLoader />;
   }
+
+  if (maintenance && window.location.pathname !== '/admin' && window.location.pathname !== '/login') {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-gray-900">
+      <div className="p-8 rounded-2xl shadow-xl bg-white dark:bg-gray-900 border border-yellow-400 dark:border-yellow-600 text-center">
+        <h1 className="text-2xl font-bold text-yellow-700 dark:text-yellow-400 mb-4">
+          الموقع الآن تحت الصيانة 🚧
+        </h1>
+        <p className="text-gray-700 dark:text-gray-200">
+          This site is currently under maintenance for updates.
+        </p>
+      </div>
+    </div>
+  );
+}
 
   return (
     <ThemeProvider>
@@ -66,6 +94,13 @@ function App() {
                     <Features />
                     <ImageGallery />
                     <About />
+                    <Footer />
+                  </>
+                } />
+                <Route path='/aboutpage' element={
+                  <>
+                    <Navigation />
+                    <AboutPage />
                     <Footer />
                   </>
                 } />
@@ -123,7 +158,6 @@ function App() {
                 <Route path="/admin" element={
                   
                   <ProtectedRoute>
-                    <Navigation />
                     <Admin />
                   </ProtectedRoute>
                 } />
