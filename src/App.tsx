@@ -29,6 +29,7 @@ import ReadBible from './pages/ReadBible';
 import NotFound from './pages/NotFound';
 import ThreeDWaveGallery from './components/ThreeDWaveGallery';
 import AboutPage from './pages/About';
+import CherchRole from './components/CherchRole';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -90,9 +91,9 @@ function App() {
                   <>
                     <Navigation />
                     <Hero />
-                    <ThreeDWaveGallery />
-                    <Features />
                     <ImageGallery />
+                    <Features />
+                    <CherchRole />
                     <About />
                     <Footer />
                   </>

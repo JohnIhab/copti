@@ -38,14 +38,25 @@ export default function Features() {
         </div>
 
         {/* Centered card for confession */}
-        <div className="flex justify-center">
-          <Link to="/confession" style={{ width: '100%' }}>
-            <Card3D
-              coverImage="https://static.thenounproject.com/png/3462527-200.png"
-              title="حجز موعد أعتراف"
-              characterImage="https://png.pngtree.com/png-clipart/20230917/original/pngtree-an-icon-of-people-at-the-cross-or-church-with-the-png-image_12277174.png"
-            />
-          </Link>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-8">
+          <div className="flex justify-center">
+            <Link to="/confession" style={{ width: '100%' }}>
+              <Card3D
+                coverImage="https://static.thenounproject.com/png/3462527-200.png"
+                title="حجز موعد أعتراف"
+                characterImage="https://png.pngtree.com/png-clipart/20230917/original/pngtree-an-icon-of-people-at-the-cross-or-church-with-the-png-image_12277174.png"
+              />
+            </Link>
+          </div>
+          <div className="flex justify-center">
+            <Link to="/events" style={{ width: '100%' }}>
+              <Card3D
+                coverImage="https://i1.wp.com/www.light-dark.net/wp-content/uploads/2025/01/2018_4_8_10_47_37_884-561-1024x717.jpg"
+                title="فعاليات الكنيسة"
+                characterImage="https://i1.wp.com/www.light-dark.net/wp-content/uploads/2025/06/261_687_073740-461-1140x815.jpg"
+              />
+            </Link>
+          </div>
         </div>
       </div>
     </div>

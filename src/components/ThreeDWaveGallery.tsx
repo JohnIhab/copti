@@ -57,8 +57,7 @@ body{
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 80vh;
-    background: antiquewhite;
+    height: 60vh;
 }
 
 .items{

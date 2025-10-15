@@ -1,7 +1,10 @@
 
 import { useEffect, useRef } from 'react';
-import { fathers, choirs, awards, sundaySchools, oldChurch, newChurch } from './aboutData';
+import { choirs, awards, sundaySchools, oldChurch, newChurch } from './aboutData';
 import gsap from 'gsap';
+import Fathers from '../components/Fathers';
+import CherchRole from '../components/CherchRole';
+import ThreeDWaveGallery from '../components/ThreeDWaveGallery';
 
 const sectionClass =
   'mb-12 p-6 bg-white/80 rounded-xl shadow-lg border border-gray-200';
@@ -26,27 +29,10 @@ export default function AboutPage() {
   }, []);
 
   return (
+
     <div className="max-w-4xl mx-auto px-4 py-10 mt-24" ref={containerRef}>
       {/* Section 1: Fathers */}
-      <section className={sectionClass}>
-        <h2 className="text-2xl font-bold mb-6 text-center text-blue-900">آباء الكنيسة</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {fathers.map((father, idx) => (
-            <div
-              key={idx}
-              className="flex flex-col items-center bg-blue-50 rounded-lg p-4 shadow hover:scale-105 transition-transform duration-300"
-            >
-              <img
-                src={father.image}
-                alt={father.name}
-                className="w-24 h-24 object-cover rounded-full border-4 border-blue-200 mb-3 shadow"
-                loading="lazy"
-              />
-              <span className="font-semibold text-lg text-blue-800 text-center">{father.name}</span>
-            </div>
-          ))}
-        </div>
-      </section>
+      <Fathers />
 
       {/* Section 2: Church Role & Distinction */}
       <section className={sectionClass}>
@@ -76,6 +62,8 @@ export default function AboutPage() {
           </ul>
         </div>
       </section>
+      
+      <ThreeDWaveGallery />
 
       {/* Section 3: Old Church */}
       <section className={sectionClass}>

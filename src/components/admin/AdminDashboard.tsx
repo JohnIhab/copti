@@ -52,6 +52,25 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ setActiveTab }) => {
   const [upcomingTrips, setUpcomingTrips] = useState(0);
   const [loadingMembers, setLoadingMembers] = useState(true);
   const [loadingTrips, setLoadingTrips] = useState(true);
+  const [totalTrips, setTotalTrips] = useState(0);
+  const [loadingTotalTrips, setLoadingTotalTrips] = useState(true);
+  // Load total trips count from Firebase
+  const loadTotalTrips = async () => {
+    try {
+      setLoadingTotalTrips(true);
+      const trips = await tripsService.getTrips();
+      setTotalTrips(trips.length);
+    } catch (error) {
+      console.error('Error loading total trips:', error);
+      toast.error(
+        language === 'ar'
+          ? 'حدث خطأ في تحميل عدد الرحلات'
+          : 'Error loading total trips count'
+      );
+    } finally {
+      setLoadingTotalTrips(false);
+    }
+  };
 
   // Load meetings from Firebase
   const loadMeetings = async () => {
@@ -143,6 +162,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ setActiveTab }) => {
     loadDonationStats();
     loadMembersCount();
     loadUpcomingTrips();
+    loadTotalTrips();
   }, []);
 
   // Update meeting function
@@ -225,6 +245,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ setActiveTab }) => {
       value: loadingStats ? (language === 'ar' ? 'جاري التحميل...' : 'Loading...') : formatCurrency(donationStats.completedAmount), 
       change: loadingStats ? '' : `${donationStats.completed} ${language === 'ar' ? 'مكتملة' : 'completed'}`, 
       color: 'bg-yellow-500' 
+    },
+    {
+      title: 'عدد الرحلات',
+      titleEn: 'Total Trips',
+      value: loadingTotalTrips ? (language === 'ar' ? 'جاري التحميل...' : 'Loading...') : totalTrips.toString(),
+      change: loadingTotalTrips ? '' : `${totalTrips} ${language === 'ar' ? 'رحلة' : 'trips'}`,
+      color: 'bg-indigo-500'
     },
     { 
       title: 'الرحلات القادمة', 
