@@ -37,7 +37,7 @@ const ThreeDWaveGallery: React.FC = () => {
         ))}
       </div>
 
-      <style>{`
+  <style>{`
 * {
     margin: 0;
     padding: 0;
@@ -50,33 +50,71 @@ const ThreeDWaveGallery: React.FC = () => {
 }
 
 body{
-    background-color: #282A36;
+    // background-color: #282A36;
 }
 
-.wrapper{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 60vh;
-}
+    .wrapper{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 60vh;
+    }
 
-.items{
-    display: flex;
-    gap: 0.4rem;
-    perspective: calc(var(--index) * 35);
-}
+    .items{
+        display: flex;
+        gap: 0.4rem;
+        perspective: calc(var(--index) * 35);
+    }
 
-.item{
-    width: calc(var(--index) * 3);
-    height: calc(var(--index) * 12);
-    background-color: #222;
-    background-size: cover;
-    background-position: center;
-    cursor: pointer;
-    filter: grayscale(.1) brightness(.6);
-    transition: transform 1.25s var(--transition), filter 3s var(--transition), width 1.25s var(--transition);
-    will-change: transform, filter, rotateY, width;
-}
+    .item{
+        width: calc(var(--index) * 3);
+        height: calc(var(--index) * 12);
+        background-color: #222;
+        background-size: cover;
+        background-position: center;
+        cursor: pointer;
+        filter: grayscale(.1) brightness(.6);
+        transition: transform 1.25s var(--transition), filter 3s var(--transition), width 1.25s var(--transition);
+        will-change: transform, filter, rotateY, width;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 900px) {
+      .wrapper {
+        height: 40vh;
+      }
+      .item {
+        width: calc(var(--index) * 2.2);
+        height: calc(var(--index) * 8.5);
+      }
+      .items .item:active, .items .item:focus {
+        width: 45vw;
+      }
+    }
+    @media (max-width: 600px) {
+      .wrapper {
+        height: 28vh;
+      }
+      .item {
+        width: calc(var(--index) * 1.3);
+        height: calc(var(--index) * 5.5);
+      }
+      .items .item:active, .items .item:focus {
+        width: 70vw;
+      }
+    }
+    @media (max-width: 400px) {
+      .wrapper {
+        height: 18vh;
+      }
+      .item {
+        width: calc(var(--index) * 0.9);
+        height: calc(var(--index) * 3.5);
+      }
+      .items .item:active, .items .item:focus {
+        width: 90vw;
+      }
+    }
 
 .item::before, .item::after{
     content: '';

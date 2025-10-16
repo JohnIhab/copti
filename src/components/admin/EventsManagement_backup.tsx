@@ -252,7 +252,7 @@ const EventsManagement: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 tab-content">
+    <div className="space-y-8 tab-content mt-10">
       <div className="content-header">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
           <div>

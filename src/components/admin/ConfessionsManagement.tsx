@@ -722,7 +722,7 @@ const ConfessionsManagement: React.FC = () => {
   };
 
   return (
-    <div ref={contentRef} className={`space-y-6 ${language === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div ref={contentRef} className={`space-y-6 mt-10 ${language === 'ar' ? 'rtl' : 'ltr'}`}>
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <Loader className="w-8 h-8 animate-spin text-blue-600 mr-3" />
@@ -831,8 +831,48 @@ const ConfessionsManagement: React.FC = () => {
                 </button>
               </div>
 
-              {/* Appointments List */}
-              <div className="overflow-x-auto">
+              {/* Mobile: stacked cards for appointments */}
+              <div className="sm:hidden space-y-4">
+                {filteredAppointments.map(appointment => (
+                  <div key={appointment.id} className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow border border-gray-200 dark:border-gray-700">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">{appointment.userName}</p>
+                        <p className="text-sm text-gray-500" dir="ltr">{appointment.userPhone}</p>
+                        <p className="text-xs text-gray-500">{new Date(appointment.date).toLocaleDateString()} {appointment.time}</p>
+                        <p className="text-xs text-gray-500">{language === 'ar' ? appointment.priest : appointment.priestEn}</p>
+                        <span className={`inline-block mt-2 px-2 py-1 rounded text-xs font-semibold ${getStatusColor(appointment.status)}`}>{language === 'ar' ? {
+                          pending: 'في الانتظار',
+                          confirmed: 'مؤكد',
+                          completed: 'مكتمل',
+                          cancelled: 'ملغي'
+                        }[appointment.status] : appointment.status}</span>
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <button
+                          onClick={() => { setSelectedAppointment(appointment); setShowAppointmentModal(true); }}
+                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
+                        >
+                          عرض
+                        </button>
+                        <button
+                          onClick={() => appointment.id && deleteAppointment(appointment.id)}
+                          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm"
+                        >
+                          حذف
+                        </button>
+                      </div>
+                    </div>
+                    {appointment.notes && <div className="mt-2 text-xs text-gray-600 dark:text-gray-300">{appointment.notes}</div>}
+                  </div>
+                ))}
+                {filteredAppointments.length === 0 && (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">لا توجد مواعيد</div>
+                )}
+              </div>
+
+              {/* Desktop/table for sm and up */}
+              <div className="hidden sm:block overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                   <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
@@ -922,7 +962,6 @@ const ConfessionsManagement: React.FC = () => {
                     ))}
                   </tbody>
                 </table>
-                
                 {filteredAppointments.length === 0 && (
                   <div className="text-center py-12">
                     <AlertCircle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
@@ -975,141 +1014,193 @@ const ConfessionsManagement: React.FC = () => {
                 </div>
               </div>
 
-              {timeSlots.length > 0 ? (
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            <input
-                              type="checkbox"
-                              checked={selectAll}
-                              onChange={handleSelectAll}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                            />
-                          </th>
-                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            {language === 'ar' ? 'التاريخ والوقت' : 'Date & Time'}
-                          </th>
-                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            {language === 'ar' ? 'الكاهن' : 'Priest'}
-                          </th>
-                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            {language === 'ar' ? 'الحد الأقصى' : 'Max Slots'}
-                          </th>
-                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            {language === 'ar' ? 'المحجوزة' : 'Booked'}
-                          </th>
-                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            {language === 'ar' ? 'التقدم' : 'Progress'}
-                          </th>
-                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            {language === 'ar' ? 'الحالة' : 'Status'}
-                          </th>
-                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            {language === 'ar' ? 'الإجراءات' : 'Actions'}
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        {timeSlots.map((slot) => (
-                          <tr key={slot.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
+              {/* Mobile: stacked cards for time slots */}
+              <div className="sm:hidden space-y-4">
+                {timeSlots.length > 0 ? (
+                  timeSlots.map(slot => (
+                    <div key={slot.id} className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow border border-gray-200 dark:border-gray-700">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">{new Date(slot.date).toLocaleDateString()} {slot.time}</p>
+                          <p className="text-xs text-gray-500">{language === 'ar' ? slot.priest : slot.priestEn}</p>
+                          <p className="text-xs text-gray-500">{slot.maxAppointments} مواعيد</p>
+                          <p className="text-xs text-gray-500">محجوز: {slot.currentAppointments}</p>
+                          <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 my-2 max-w-32">
+                            <div
+                              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                              style={{ width: `${(slot.currentAppointments / slot.maxAppointments) * 100}%` }}
+                            ></div>
+                          </div>
+                          <span className={`inline-block mt-2 px-2 py-1 rounded text-xs font-semibold ${
+                            slot.currentAppointments >= slot.maxAppointments
+                              ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                              : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                          }`}>
+                            {slot.currentAppointments >= slot.maxAppointments
+                              ? (language === 'ar' ? 'محجوز' : 'Full')
+                              : (language === 'ar' ? 'متاح' : 'Available')}
+                          </span>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <button
+                            onClick={() => { setEditingSlot(slot); setShowScheduleModal(true); }}
+                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
+                          >
+                            تعديل
+                          </button>
+                          <button
+                            onClick={() => slot.id && deleteTimeSlot(slot.id)}
+                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm"
+                          >
+                            حذف
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">لا توجد أوقات متاحة</div>
+                )}
+              </div>
+
+              {/* Desktop/table for sm and up */}
+              <div className="hidden sm:block">
+                {timeSlots.length > 0 ? (
+                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-gray-50 dark:bg-gray-700">
+                          <tr>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                               <input
                                 type="checkbox"
-                                checked={selectedTimeSlots.has(slot.id!)}
-                                onChange={() => handleSelectSlot(slot.id!)}
+                                checked={selectAll}
+                                onChange={handleSelectAll}
                                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                               />
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                {new Date(slot.date).toLocaleDateString()}
-                              </div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">
-                                {slot.time}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <div className="text-sm text-gray-900 dark:text-white">
-                                {language === 'ar' ? slot.priest : slot.priestEn}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <div className="text-sm text-gray-900 dark:text-white">
-                                {slot.maxAppointments}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <div className="text-sm text-gray-900 dark:text-white">
-                                {slot.currentAppointments}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mx-auto max-w-20">
-                                <div
-                                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                                  style={{ width: `${(slot.currentAppointments / slot.maxAppointments) * 100}%` }}
-                                ></div>
-                              </div>
-                              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                {Math.round((slot.currentAppointments / slot.maxAppointments) * 100)}%
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                slot.currentAppointments >= slot.maxAppointments
-                                  ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                                  : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                              }`}>
-                                {slot.currentAppointments >= slot.maxAppointments
-                                  ? (language === 'ar' ? 'محجوز' : 'Full')
-                                  : (language === 'ar' ? 'متاح' : 'Available')
-                                }
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <div className="flex items-center justify-center space-x-2 rtl:space-x-reverse">
-                                <button
-                                  onClick={() => {
-                                    setEditingSlot(slot);
-                                    setShowScheduleModal(true);
-                                  }}
-                                  className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                                  title={language === 'ar' ? 'تعديل' : 'Edit'}
-                                >
-                                  <Edit className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={() => slot.id && deleteTimeSlot(slot.id)}
-                                  className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                                  title={language === 'ar' ? 'حذف' : 'Delete'}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </td>
+                            </th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                              {language === 'ar' ? 'التاريخ والوقت' : 'Date & Time'}
+                            </th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                              {language === 'ar' ? 'الكاهن' : 'Priest'}
+                            </th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                              {language === 'ar' ? 'الحد الأقصى' : 'Max Slots'}
+                            </th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                              {language === 'ar' ? 'المحجوزة' : 'Booked'}
+                            </th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                              {language === 'ar' ? 'التقدم' : 'Progress'}
+                            </th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                              {language === 'ar' ? 'الحالة' : 'Status'}
+                            </th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                              {language === 'ar' ? 'الإجراءات' : 'Actions'}
+                            </th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                          {timeSlots.map((slot) => (
+                            <tr key={slot.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                              <td className="px-6 py-4 whitespace-nowrap text-center">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedTimeSlots.has(slot.id!)}
+                                  onChange={() => handleSelectSlot(slot.id!)}
+                                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                />
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-center">
+                                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                  {new Date(slot.date).toLocaleDateString()}
+                                </div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                  {slot.time}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-center">
+                                <div className="text-sm text-gray-900 dark:text-white">
+                                  {language === 'ar' ? slot.priest : slot.priestEn}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-center">
+                                <div className="text-sm text-gray-900 dark:text-white">
+                                  {slot.maxAppointments}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-center">
+                                <div className="text-sm text-gray-900 dark:text-white">
+                                  {slot.currentAppointments}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-center">
+                                <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mx-auto max-w-20">
+                                  <div
+                                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                                    style={{ width: `${(slot.currentAppointments / slot.maxAppointments) * 100}%` }}
+                                  ></div>
+                                </div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                  {Math.round((slot.currentAppointments / slot.maxAppointments) * 100)}%
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-center">
+                                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                  slot.currentAppointments >= slot.maxAppointments
+                                    ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                                    : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                }`}>
+                                  {slot.currentAppointments >= slot.maxAppointments
+                                    ? (language === 'ar' ? 'محجوز' : 'Full')
+                                    : (language === 'ar' ? 'متاح' : 'Available')
+                                  }
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-center">
+                                <div className="flex items-center justify-center space-x-2 rtl:space-x-reverse">
+                                  <button
+                                    onClick={() => {
+                                      setEditingSlot(slot);
+                                      setShowScheduleModal(true);
+                                    }}
+                                    className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                                    title={language === 'ar' ? 'تعديل' : 'Edit'}
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => slot.id && deleteTimeSlot(slot.id)}
+                                    className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                                    title={language === 'ar' ? 'حذف' : 'Delete'}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <Clock className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    {language === 'ar' ? 'لا توجد أوقات متاحة' : 'No time slots available'}
-                  </h3>
-                  <p className="text-gray-500 dark:text-gray-400">
-                    {language === 'ar' 
-                      ? 'ابدأ بإضافة أوقات متاحة للاعتراف'
-                      : 'Start by adding available confession time slots'
-                    }
-                  </p>
-                </div>
-              )}
+                ) : (
+                  <div className="text-center py-12">
+                    <Clock className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                      {language === 'ar' ? 'لا توجد أوقات متاحة' : 'No time slots available'}
+                    </h3>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      {language === 'ar' 
+                        ? 'ابدأ بإضافة أوقات متاحة للاعتراف'
+                        : 'Start by adding available confession time slots'
+                      }
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

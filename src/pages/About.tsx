@@ -29,7 +29,7 @@ export default function AboutPage() {
   }, []);
 
   return (
-
+    
     <div className="max-w-4xl mx-auto px-4 py-10 mt-24" ref={containerRef}>
       {/* Section 1: Fathers */}
       <Fathers />

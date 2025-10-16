@@ -304,14 +304,20 @@ const Contact: React.FC = () => {
                 موقع الكنيسة
               </h2>
               
-              {/* Map Placeholder */}
+              {/* Embedded Google Map */}
               <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 mb-6">
-                <div className="bg-gray-200 dark:bg-gray-700 rounded-lg h-64 flex items-center justify-center">
-                  <div className="text-center">
-                    <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-500 dark:text-gray-400">خريطة الموقع</p>
-                    <p className="text-sm text-gray-400 dark:text-gray-500">كفر فرج جرجس، الشرقية</p>
-                  </div>
+                <div className="bg-gray-200 dark:bg-gray-700 rounded-lg flex flex-col items-center justify-center p-2" style={{ minHeight: '16rem' }}>
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3110.5195066690103!2d31.3321065!3d30.5143667!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14f7e6b7ce326ae9%3A0xb78e347a37a6ed97!2z2YPZhtmK2LPYqSDYp9mE2LPZitiv2Kkg2KfZhNi52LDYsdin2KEg2YXYsdmK2YUg2YjYp9mE2YLYr9mK2LMg2KfZhNij2YbYqNinINix2YjZitizINio2YPZgdixINmB2LHYrCDYp9mK2KjYp9ix2LTZitipINin2YTYstmC2KfYstmK2YIg2Ygg2YXZhtmK2KfYp9mE2YLZhdit!5e1!3m2!1sar!2seg!4v1760547205236!5m2!1sar!2seg"
+                    width="100%"
+                    height="250"
+                    style={{ border: 0, borderRadius: '0.5rem', width: '100%', minHeight: '200px', maxWidth: '100%' }}
+                    allowFullScreen={true}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  ></iframe>
+                  <div className="text-center mt-2">
+                    </div>
                 </div>
               </div>
             </div>
@@ -350,7 +356,7 @@ const Contact: React.FC = () => {
                     key={index}
                     href={social.href}
                     className={`p-3 bg-gray-100 dark:bg-gray-700 rounded-full ${social.color} 
-                             transition-all duration-300 transform hover:scale-110 hover:shadow-lg`}
+                            transition-all duration-300 transform hover:scale-110 hover:shadow-lg`}
                     title={social.name}
                   >
                     <social.icon className="h-5 w-5" />

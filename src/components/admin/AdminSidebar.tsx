@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { 
-  X, ChevronRight, Search, TrendingUp, Clock, Zap, Activity, 
-  Users, Calendar, MapPin, DollarSign, Book, MessageSquare, Settings, BarChart3, 
-  Bell, Shield, Star, Save, Home, Sparkles, CreditCard,
-  ChevronDown, Target, AlertCircle
+import {
+  X, ChevronRight, Search, Activity,
+  Users, Calendar, MapPin, DollarSign, MessageSquare, Settings, BarChart3,
+  Shield, Star, Home, Sparkles, CreditCard,
+  ChevronDown, AlertCircle
 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -56,208 +56,208 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     icon?: any;
     items: MenuItem[];
   }[] = [
-    {
-      id: 'overview',
-      label: 'نظرة عامة',
-      labelEn: 'Overview',
-      priority: 'high',
-      color: 'from-blue-500 to-indigo-600',
-      items: [
-        { 
-          id: 'dashboard', 
-          label: 'لوحة التحكم', 
-          labelEn: 'Dashboard', 
-          icon: Home, 
-          badge: 'main',
-          description: 'نظرة شاملة على النظام',
-          descriptionEn: 'Complete system overview'
-        }
-      ]
-    },
-    {
-      id: 'management',
-      label: 'إدارة المحتوى',
-      labelEn: 'Content Management',
-      icon: Calendar,
-      priority: 'high',
-      color: 'from-green-500 to-emerald-600',
-      items: [
-        { 
-          id: 'meetings', 
-          label: 'الاجتماعات', 
-          labelEn: 'Meetings', 
-          icon: Calendar,
-          badge: 'active',
-          description: 'إدارة الاجتماعات والأنشطة',
-          descriptionEn: 'Manage meetings and activities'
-        },
-        { 
-          id: 'events', 
-          label: 'الفعاليات', 
-          labelEn: 'Events', 
-          icon: Star,
-          description: 'تنظيم الفعاليات الخاصة',
-          descriptionEn: 'Organize special events'
-        },
-        { 
-          id: 'trips', 
-          label: 'الرحلات', 
-          labelEn: 'Trips', 
-          icon: MapPin,
-          description: 'تخطيط وإدارة الرحلات',
-          descriptionEn: 'Plan and manage trips'
-        },
-        {
-          id: 'trips-payments',
-          label: 'مدفوعات الرحلات',
-          labelEn: 'Trips Payments',
-          icon: CreditCard,
-          badge: 'new',
-          description: 'عرض مدفوعات الرحلات',
-          descriptionEn: 'View trips payments'
-        }
-      ]
-    },
-    {
-      id: 'communication',
-      label: 'التواصل والخدمات',
-      labelEn: 'Communication & Services',
-      icon: MessageSquare,
-      priority: 'medium',
-      color: 'from-purple-500 to-pink-600',
-      items: [
-        { 
-          id: 'confessions', 
-          label: 'الاعتراف', 
-          labelEn: 'Confessions', 
-          icon: MessageSquare,
-          badge: 'new',
-          description: 'خدمة الاعتراف الرقمية',
-          descriptionEn: 'Digital confession service'
-        },
-        { 
-          id: 'contact', 
-          label: 'رسائل التواصل', 
-          labelEn: 'Contact Messages', 
-          icon: MessageSquare,
-          badge: 'urgent',
-          description: 'إدارة رسائل المستخدمين',
-          descriptionEn: 'Manage user messages'
-        },
-        { 
-          id: 'donations', 
-          label: 'صناديق التبرعات', 
-          labelEn: 'Donation Boxes', 
-          icon: DollarSign,
-          badge: 'trending',
-          description: 'إدارة أنواع وصناديق التبرعات',
-          descriptionEn: 'Manage donation types and boxes'
-        },
-        { 
-          id: 'donation-transactions', 
-          label: 'معاملات التبرعات', 
-          labelEn: 'Donation Transactions', 
-          icon: CreditCard,
-          badge: 'new',
-          description: 'إدارة تبرعات المستخدمين',
-          descriptionEn: 'Manage user donations'
-        }
-      ]
-    },
-    {
-      id: 'Services',
-      label: 'الخدمات فى الكنيسة',
-      labelEn: 'Services in Church',
-      icon: BarChart3,
-      priority: 'high',
-      color: 'from-orange-500 to-red-600',
-      items: [
-        { 
-          id: 'Elementary', 
-          label: 'خدمة المرحلة الأبتدائية', 
-          labelEn: 'Elementary Service', 
-          icon: Users,
-          badge: 'growing',
-          description: 'إدارة خدمة المرحلة الأبتدائية',
-          descriptionEn: 'Manage service for Elementary stage'
-        },
-        { 
-          id: 'Preparatory', 
-          label: 'خدمة المرحلة الاعدادية', 
-          labelEn: 'Preparatory Service', 
-          icon: Users,
-          badge: 'growing',
-          description: 'إدارة خدمة المرحلة الأعدادية',
-          descriptionEn: 'Manage service for Preparatory stage'
-        },
-        { 
-          id: 'Secondary', 
-          label: 'خدمة المرحلة الثانوية', 
-          labelEn: 'Secondary Service', 
-          icon: Users,
-          badge: 'growing',
-          description: 'إدارة خدمة المرحلة الثانوية',
-          descriptionEn: 'Manage service for Secondary stage'
-        },
-        { 
-          id: 'University', 
-          label: 'خدمة جامعة', 
-          labelEn: 'university Service', 
-          icon: Users,
-          badge: 'growing',
-          description: 'إدارة خدمة جامعة',
-          descriptionEn: 'Manage service for university stage'
-        },
-        { 
-          id: 'Missing', 
-          label: 'الأفتقاد', 
-          labelEn: 'Missing Service', 
-          icon: Users,
-          badge: 'growing',
-          description: 'إدارة خدمة الأفتقاد',
-          descriptionEn: 'Manage service for Missing'
-        },
-      ]
-    },
-    {
-      id: 'analytics',
-      label: 'البيانات والتحليل',
-      labelEn: 'Analytics & Insights',
-      icon: BarChart3,
-      priority: 'medium',
-      color: 'from-orange-500 to-red-600',
-      items: [
-        { 
-          id: 'users', 
-          label: 'المستخدمين', 
-          labelEn: 'Users', 
-          icon: Users,
-          count: 1247,
-          badge: 'growing',
-          description: 'إدارة حسابات المستخدمين',
-          descriptionEn: 'Manage user accounts'
-        }
-      ]
-    },
-    {
-      id: 'system',
-      label: 'إدارة النظام',
-      labelEn: 'System Management',
-      icon: Settings,
-      priority: 'low',
-      color: 'from-gray-500 to-slate-600',
-      items: [
-        { 
-          id: 'settings', 
-          label: 'الإعدادات', 
-          labelEn: 'Settings', 
-          icon: Settings,
-          description: 'إعدادات النظام العامة',
-          descriptionEn: 'General system settings'
-        }
-      ]
-    }
-  ];
+      {
+        id: 'overview',
+        label: 'نظرة عامة',
+        labelEn: 'Overview',
+        priority: 'high',
+        color: 'from-blue-500 to-indigo-600',
+        items: [
+          {
+            id: 'dashboard',
+            label: 'لوحة التحكم',
+            labelEn: 'Dashboard',
+            icon: Home,
+            badge: 'main',
+            description: 'نظرة شاملة على النظام',
+            descriptionEn: 'Complete system overview'
+          }
+        ]
+      },
+      {
+        id: 'management',
+        label: 'إدارة المحتوى',
+        labelEn: 'Content Management',
+        icon: Calendar,
+        priority: 'high',
+        color: 'from-green-500 to-emerald-600',
+        items: [
+          {
+            id: 'meetings',
+            label: 'الاجتماعات',
+            labelEn: 'Meetings',
+            icon: Calendar,
+            badge: 'active',
+            description: 'إدارة الاجتماعات والأنشطة',
+            descriptionEn: 'Manage meetings and activities'
+          },
+          {
+            id: 'events',
+            label: 'الفعاليات',
+            labelEn: 'Events',
+            icon: Star,
+            description: 'تنظيم الفعاليات الخاصة',
+            descriptionEn: 'Organize special events'
+          },
+          {
+            id: 'trips',
+            label: 'الرحلات',
+            labelEn: 'Trips',
+            icon: MapPin,
+            description: 'تخطيط وإدارة الرحلات',
+            descriptionEn: 'Plan and manage trips'
+          },
+          {
+            id: 'trips-payments',
+            label: 'مدفوعات الرحلات',
+            labelEn: 'Trips Payments',
+            icon: CreditCard,
+            badge: 'new',
+            description: 'عرض مدفوعات الرحلات',
+            descriptionEn: 'View trips payments'
+          }
+        ]
+      },
+      {
+        id: 'communication',
+        label: 'التواصل والخدمات',
+        labelEn: 'Communication & Services',
+        icon: MessageSquare,
+        priority: 'medium',
+        color: 'from-purple-500 to-pink-600',
+        items: [
+          {
+            id: 'confessions',
+            label: 'الاعتراف',
+            labelEn: 'Confessions',
+            icon: MessageSquare,
+            badge: 'new',
+            description: 'خدمة الاعتراف الرقمية',
+            descriptionEn: 'Digital confession service'
+          },
+          {
+            id: 'contact',
+            label: 'رسائل التواصل',
+            labelEn: 'Contact Messages',
+            icon: MessageSquare,
+            badge: 'urgent',
+            description: 'إدارة رسائل المستخدمين',
+            descriptionEn: 'Manage user messages'
+          },
+          {
+            id: 'donations',
+            label: 'صناديق التبرعات',
+            labelEn: 'Donation Boxes',
+            icon: DollarSign,
+            badge: 'trending',
+            description: 'إدارة أنواع وصناديق التبرعات',
+            descriptionEn: 'Manage donation types and boxes'
+          },
+          {
+            id: 'donation-transactions',
+            label: 'معاملات التبرعات',
+            labelEn: 'Donation Transactions',
+            icon: CreditCard,
+            badge: 'new',
+            description: 'إدارة تبرعات المستخدمين',
+            descriptionEn: 'Manage user donations'
+          }
+        ]
+      },
+      {
+        id: 'Services',
+        label: 'الخدمات فى الكنيسة',
+        labelEn: 'Services in Church',
+        icon: BarChart3,
+        priority: 'high',
+        color: 'from-orange-500 to-red-600',
+        items: [
+          {
+            id: 'Elementary',
+            label: 'خدمة المرحلة الأبتدائية',
+            labelEn: 'Elementary Service',
+            icon: Users,
+            badge: 'growing',
+            description: 'إدارة خدمة المرحلة الأبتدائية',
+            descriptionEn: 'Manage service for Elementary stage'
+          },
+          {
+            id: 'Preparatory',
+            label: 'خدمة المرحلة الاعدادية',
+            labelEn: 'Preparatory Service',
+            icon: Users,
+            badge: 'growing',
+            description: 'إدارة خدمة المرحلة الأعدادية',
+            descriptionEn: 'Manage service for Preparatory stage'
+          },
+          {
+            id: 'Secondary',
+            label: 'خدمة المرحلة الثانوية',
+            labelEn: 'Secondary Service',
+            icon: Users,
+            badge: 'growing',
+            description: 'إدارة خدمة المرحلة الثانوية',
+            descriptionEn: 'Manage service for Secondary stage'
+          },
+          {
+            id: 'University',
+            label: 'خدمة جامعة',
+            labelEn: 'university Service',
+            icon: Users,
+            badge: 'growing',
+            description: 'إدارة خدمة جامعة',
+            descriptionEn: 'Manage service for university stage'
+          },
+          {
+            id: 'Missing',
+            label: 'الأفتقاد',
+            labelEn: 'Missing Service',
+            icon: Users,
+            badge: 'growing',
+            description: 'إدارة خدمة الأفتقاد',
+            descriptionEn: 'Manage service for Missing'
+          },
+        ]
+      },
+      {
+        id: 'analytics',
+        label: 'البيانات والتحليل',
+        labelEn: 'Analytics & Insights',
+        icon: BarChart3,
+        priority: 'medium',
+        color: 'from-orange-500 to-red-600',
+        items: [
+          {
+            id: 'users',
+            label: 'المستخدمين',
+            labelEn: 'Users',
+            icon: Users,
+            count: 1247,
+            badge: 'growing',
+            description: 'إدارة حسابات المستخدمين',
+            descriptionEn: 'Manage user accounts'
+          }
+        ]
+      },
+      {
+        id: 'system',
+        label: 'إدارة النظام',
+        labelEn: 'System Management',
+        icon: Settings,
+        priority: 'low',
+        color: 'from-gray-500 to-slate-600',
+        items: [
+          {
+            id: 'settings',
+            label: 'الإعدادات',
+            labelEn: 'Settings',
+            icon: Settings,
+            description: 'إعدادات النظام العامة',
+            descriptionEn: 'General system settings'
+          }
+        ]
+      }
+    ];
 
   // Quick access items based on recent activity
   const quickAccessItems = [
@@ -270,8 +270,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
   // Filter menu items based on search
   const filteredGroups = menuGroups.map(group => ({
     ...group,
-    items: group.items.filter(item => 
-      searchQuery === '' || 
+    items: group.items.filter(item =>
+      searchQuery === '' ||
       (language === 'ar' ? item.label : item.labelEn).toLowerCase().includes(searchQuery.toLowerCase()) ||
       (language === 'ar' ? item.description : item.descriptionEn).toLowerCase().includes(searchQuery.toLowerCase())
     )
@@ -319,27 +319,27 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     <>
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Smart Enhanced Sidebar */}
-      <div className={`admin-sidebar fixed lg:static inset-y-0 ${language === 'ar' ? 'right-0' : 'left-0'} z-50 
-                      w-80 min-w-80 max-w-80 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl
-                      shadow-2xl border-r border-gray-200/20 dark:border-gray-700/20
-                      flex flex-col overflow-hidden
-                      transform transition-all duration-500 ease-out
-                      ${sidebarOpen ? 'translate-x-0' : 'lg:translate-x-0 -translate-x-full'}
-                      ${language === 'ar' && !sidebarOpen ? 'translate-x-full lg:translate-x-0' : ''}`}
-      >
+  <div className={`admin-sidebar fixed lg:static inset-y-0 ${language === 'ar' ? 'right-0' : 'left-0'} z-50 
+          w-80 min-w-80 max-w-80 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl
+          shadow-2xl border-r border-gray-200/20 dark:border-gray-700/20
+          flex flex-col overflow-hidden
+          transform transition-all duration-500 ease-out
+          ${sidebarOpen ? 'visible translate-x-0' : 'invisible lg:visible lg:translate-x-0 -translate-x-full'}
+          ${language === 'ar' && !sidebarOpen ? 'translate-x-full lg:translate-x-0' : ''}`}
+  >
         {/* Modern Header with Glassmorphism */}
         <div className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700"></div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
           <div className="absolute inset-0 backdrop-blur-xl bg-white/10"></div>
-          
+
           <div className="relative p-6 text-white">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3 rtl:space-x-reverse">
@@ -358,13 +358,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                   </p>
                 </div>
               </div>
-              
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="lg:hidden p-2.5 rounded-xl bg-white/20 hover:bg-white/30 text-white transition-all duration-300 hover:scale-110 hover:rotate-90"
-              >
-                <X className="h-5 w-5" />
-              </button>
+
             </div>
 
             {/* Smart Search Bar */}
@@ -414,10 +408,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                   key={item.id}
                   onClick={() => handleItemClick(item.id)}
                   className={`relative p-2 rounded-lg text-center transition-all duration-200 hover:scale-105
-                            ${activeTab === item.id 
-                              ? 'bg-blue-500 text-white shadow-lg' 
-                              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700'
-                            }`}
+                            ${activeTab === item.id
+                      ? 'bg-blue-500 text-white shadow-lg'
+                      : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700'
+                    }`}
                 >
                   <item.icon className="h-4 w-4 mx-auto mb-1" />
                   <span className="text-xs font-medium block truncate">
@@ -449,29 +443,26 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                                hover:bg-gradient-to-r ${group.color} hover:text-white hover:shadow-lg hover:scale-[1.02]`}
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    
+
                     <div className="flex items-center space-x-3 rtl:space-x-reverse relative z-10">
                       {group.icon && <group.icon className="h-5 w-5" />}
                       <span>{language === 'ar' ? group.label : group.labelEn}</span>
-                      <div className={`h-2 w-2 rounded-full ${
-                        group.priority === 'high' ? 'bg-red-400' : 
+                      <div className={`h-2 w-2 rounded-full ${group.priority === 'high' ? 'bg-red-400' :
                         group.priority === 'medium' ? 'bg-yellow-400' : 'bg-gray-400'
-                      }`}></div>
+                        }`}></div>
                     </div>
-                    
-                    <ChevronRight 
-                      className={`h-4 w-4 transition-transform duration-300 relative z-10 ${
-                        expandedGroups[group.id] ? 'rotate-90' : ''
-                      } ${language === 'ar' ? 'rotate-180' : ''}`} 
+
+                    <ChevronRight
+                      className={`h-4 w-4 transition-transform duration-300 relative z-10 ${expandedGroups[group.id] ? 'rotate-90' : ''
+                        } ${language === 'ar' ? 'rotate-180' : ''}`}
                     />
                   </button>
                 </div>
               ) : null}
 
               {/* Smart Menu Items */}
-              <div className={`${group.items.length > 1 ? `overflow-hidden transition-all duration-500 ease-out ${
-                expandedGroups[group.id] ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-              }` : ''}`}>
+              <div className={`${group.items.length > 1 ? `overflow-hidden transition-all duration-500 ease-out ${expandedGroups[group.id] ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                }` : ''}`}>
                 {group.items.map((item) => (
                   <div key={item.id} className={`relative ${group.items.length > 1 ? 'mx-4' : ''}`}>
                     <button
@@ -481,17 +472,16 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
                                 transform hover:scale-[1.02] group relative overflow-hidden
                                 ${activeTab === item.id
-                                  ? 'bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-600 text-white shadow-xl scale-[1.02]'
-                                  : 'text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/80 dark:hover:bg-blue-900/20 hover:shadow-md'
-                                }`}
+                          ? 'bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-600 text-white shadow-xl scale-[1.02]'
+                          : 'text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/80 dark:hover:bg-blue-900/20 hover:shadow-md'
+                        }`}
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      
+
                       <div className="flex items-center space-x-3 rtl:space-x-reverse relative z-10">
                         <div className="relative">
-                          <item.icon className={`h-5 w-5 transition-colors duration-300 ${
-                            activeTab === item.id ? 'text-white' : 'text-gray-500 dark:text-gray-400 group-hover:text-blue-500'
-                          }`} />
+                          <item.icon className={`h-5 w-5 transition-colors duration-300 ${activeTab === item.id ? 'text-white' : 'text-gray-500 dark:text-gray-400 group-hover:text-blue-500'
+                            }`} />
                           {item.badge && (
                             <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
                           )}
@@ -501,14 +491,13 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                             <span className="truncate">{language === 'ar' ? item.label : item.labelEn}</span>
                             {item.badge && <Badge type={item.badge} />}
                           </div>
-                          <p className={`text-xs truncate ${
-                            activeTab === item.id ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'
-                          }`}>
+                          <p className={`text-xs truncate ${activeTab === item.id ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'
+                            }`}>
                             {language === 'ar' ? item.description : item.descriptionEn}
                           </p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center space-x-2 rtl:space-x-reverse relative z-10">
                         {'count' in item && item.count && <Badge count={item.count} />}
                         {activeTab === item.id && (
@@ -572,10 +561,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 </p>
               </div>
             </div>
-            
-            
+
+
           </div>
-          
+
           {/* Enhanced Logout Button */}
           <button
             onClick={onLogout}

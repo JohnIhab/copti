@@ -113,7 +113,7 @@ const Navigation: React.FC = () => {
               </div>
             ) : (
               <Link to="/login" className="focus:outline-none">
-              <LoginButton />
+                <LoginButton />
               </Link>
               // <Link
               //   to="/login"
@@ -180,10 +180,10 @@ const Navigation: React.FC = () => {
             ></div>
 
             {/* Sidebar Menu */}
-            <div className={`md:hidden fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white/10 dark:bg-gray-900/10 backdrop-blur-md shadow-xl border-r border-white/20 dark:border-gray-700/20 z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
-              }`}>
+            <div className={`md:hidden fixed text-center top-0 left-0 w-80 max-w-[85vw] bg-white dark:bg-gray-900 shadow-xl border-r border-white/20 dark:border-gray-700/20 z-50 transition-all duration-800 ease-in-out overflow-y-auto ${isOpen ? 'h-full translate-x-0' : 'h-0 -translate-x-full'}
+              `} style={{height: isOpen ? '100vh' : '0'}}>
               {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-white/20 dark:border-gray-700/20">
+              <div className="flex items-center justify-between p-4 border-b border-white/20 dark:border-gray-700/20 bg-white">
                 <div className="flex items-center space-x-2 rtl:space-x-reverse">
                   <Church className="h-8 w-8 text-blue-700 dark:text-blue-400" />
                   <h2 className="text-lg font-bold text-gray-800 dark:text-white">
@@ -199,7 +199,7 @@ const Navigation: React.FC = () => {
               </div>
 
               {/* Navigation Links */}
-              <div className="p-4 space-y-2">
+              <div className="p-4 space-y-2 bg-white">
                 {navItems.map((item) => (
                   <Link
                     key={item.key}
@@ -259,15 +259,11 @@ const Navigation: React.FC = () => {
                     </button>
                   </div>
                 ) : (
-                  <Link
-                    to="/login"
-                    onClick={() => setIsOpen(false)}
-                    className="block px-4 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white
-                            transition-all duration-200 focus:outline-none text-base font-medium
-                            text-center shadow-md hover:shadow-lg border border-blue-600 hover:border-blue-700"
-                  >
-                    {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
-                  </Link>
+                  <div className="flex justify-center">
+                    <Link to="/login" className="focus:outline-none">
+                      <LoginButton />
+                    </Link>
+                  </div>
                 )}
               </div>
             </div>

@@ -201,7 +201,7 @@ const TripsManagement: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8 tab-content" dir="rtl">
+    <div className="space-y-8 tab-content mt-10" dir="rtl">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white">إدارة الرحلات</h2>
         <button 
@@ -218,65 +218,47 @@ const TripsManagement: React.FC = () => {
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700">
-        <div className="overflow-x-auto">
+        {/* Desktop Table */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-700">
-              <tr>
-                <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">الرحلة</th>
-                <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">الوجهة</th>
-                <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">التاريخ</th>
-                <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">السعة</th>
-                <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">التكلفة</th>
-                <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">الإجراءات</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {trips.map((trip) => (
-                <tr key={trip.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <td className="px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900 dark:text-white">{trip.title}</div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">{trip.duration}</div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{trip.destination}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{new Date(trip.date).toLocaleDateString('ar-EG')}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{trip.registered}/{trip.capacity}</td>
-                  <td className="px-6 py-4 text-sm text-green-600 dark:text-green-400 font-medium">{trip.cost} ج.م</td>
-                  <td className="px-6 py-4 text-sm font-medium">
-                    <div className="flex space-x-2 space-x-reverse">
-                      <button 
-                        onClick={() => handleEdit(trip)} 
-                        className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
-                        title="تعديل"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button 
-                        onClick={() => trip.id && handleDelete(trip.id)} 
-                        className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                        title="حذف"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+            {/* ...existing code... */}
           </table>
         </div>
-        {trips.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500 dark:text-gray-400">
-              لا توجد رحلات مسجلة
-            </p>
-          </div>
-        )}
+        {/* Mobile Cards */}
+        <div className="block sm:hidden p-2 space-y-4">
+          {trips.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 dark:text-gray-400">لا توجد رحلات مسجلة</p>
+            </div>
+          ) : (
+            trips.map((trip) => (
+              <div key={trip.id} className="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 flex flex-col gap-2">
+                <div className="font-bold text-base text-gray-900 dark:text-white">{trip.title}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">{trip.duration}</div>
+                <div className="text-sm text-gray-900 dark:text-white">{trip.destination}</div>
+                <div className="text-sm text-gray-900 dark:text-white">{new Date(trip.date).toLocaleDateString('ar-EG')}</div>
+                <div className="flex items-center gap-2 text-sm text-gray-900 dark:text-white">
+                  <span>السعة:</span>
+                  <span className="font-bold">{trip.registered}/{trip.capacity}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400 font-medium">
+                  <span>التكلفة:</span>
+                  <span>{trip.cost} ج.م</span>
+                </div>
+                <div className="flex gap-2 mt-2">
+                  <button onClick={() => handleEdit(trip)} className="flex-1 flex items-center justify-center p-2 text-green-600 hover:text-white hover:bg-green-600 dark:text-green-400 dark:hover:text-white dark:hover:bg-green-500 rounded-lg transition-all duration-200 hover:shadow-lg" title="تعديل"><Edit className="h-4 w-4 mr-1" />تعديل</button>
+                  <button onClick={() => trip.id && handleDelete(trip.id)} className="flex-1 flex items-center justify-center p-2 text-red-600 hover:text-white hover:bg-red-600 dark:text-red-400 dark:hover:text-white dark:hover:bg-red-500 rounded-lg transition-all duration-200 hover:shadow-lg" title="حذف"><Trash2 className="h-4 w-4 mr-1" />حذف</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
       {showAddForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" style={{ transform: 'translateX(-70px)' }} dir="rtl">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" dir="rtl">
+            <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{editingTrip ? 'تعديل الرحلة' : 'إضافة رحلة جديدة'}</h3>
                 <button 
@@ -292,8 +274,8 @@ const TripsManagement: React.FC = () => {
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     العنوان بالعربية

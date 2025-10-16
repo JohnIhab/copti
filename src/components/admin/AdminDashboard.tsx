@@ -49,7 +49,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ setActiveTab }) => {
   });
   const [loadingStats, setLoadingStats] = useState(true);
   const [totalMembers, setTotalMembers] = useState(0);
-  const [upcomingTrips, setUpcomingTrips] = useState(0);
   const [loadingMembers, setLoadingMembers] = useState(true);
   const [loadingTrips, setLoadingTrips] = useState(true);
   const [totalTrips, setTotalTrips] = useState(0);
@@ -140,11 +139,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ setActiveTab }) => {
       setLoadingTrips(true);
       const trips = await tripsService.getTrips();
       const currentDate = new Date();
-      const upcoming = trips.filter(trip => {
-        const tripDate = new Date(trip.date);
-        return tripDate >= currentDate;
-      });
-      setUpcomingTrips(upcoming.length);
+      const _upcomingCount = trips.filter(trip => new Date(trip.date) >= currentDate).length;
+      // keep a debug log for visibility in development
+      console.debug('upcoming trips count:', _upcomingCount);
     } catch (error) {
       console.error('Error loading upcoming trips:', error);
       toast.error(
@@ -238,7 +235,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ setActiveTab }) => {
       change: loadingMembers ? '' : `${totalMembers} ${language === 'ar' ? 'عضو' : 'members'}`, 
       color: 'bg-blue-500' 
     },
-    { title: 'إجمالي الاجتماعات', titleEn: 'Total Meetings', value: meetings.length.toString(), change: `${meetings.length} ${language === 'ar' ? 'اجتماع' : 'meetings'}`, color: 'bg-green-500' },
+  { title: 'إجمالي الاجتماعات', titleEn: 'Total Meetings', value: meetings.length.toString(), change: `${meetings.length} ${language === 'ar' ? 'اجتماع' : 'meetings'}`, color: 'bg-green-500' },
     { 
       title: 'إجمالي التبرعات', 
       titleEn: 'Total Donations', 
@@ -252,13 +249,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ setActiveTab }) => {
       value: loadingTotalTrips ? (language === 'ar' ? 'جاري التحميل...' : 'Loading...') : totalTrips.toString(),
       change: loadingTotalTrips ? '' : `${totalTrips} ${language === 'ar' ? 'رحلة' : 'trips'}`,
       color: 'bg-indigo-500'
-    },
-    { 
-      title: 'الرحلات القادمة', 
-      titleEn: 'Upcoming Trips', 
-      value: loadingTrips ? (language === 'ar' ? 'جاري التحميل...' : 'Loading...') : upcomingTrips.toString(),
-      change: loadingTrips ? '' : `${upcomingTrips} ${language === 'ar' ? 'رحلة' : 'trips'}`, 
-      color: 'bg-purple-500' 
     }
   ];
 
@@ -303,7 +293,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ setActiveTab }) => {
   };
 
   return (
-    <div className="space-y-8 tab-content">
+    <div className="space-y-8 tab-content mt-10">
       {/* Enhanced Header */}
       <div className="content-header">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
@@ -490,14 +480,23 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ setActiveTab }) => {
                     <div className="flex items-center">
                       <div className="text-right">
                         <div className="flex items-center">
-                          <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-2">
+                          <div className="w-16 sm:w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-2">
                             <div
                               className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                              style={{ width: `${Math.min(((meeting.currentAttendees || 0) / meeting.maxAttendees) * 100, 100)}%` }}
+                              style={{
+                                width: `${Math.min(
+                                  meeting.maxAttendees && meeting.maxAttendees > 0
+                                    ? ((meeting.currentAttendees || 0) / meeting.maxAttendees) * 100
+                                    : 0,
+                                  100
+                                )}%`
+                              }}
                             />
                           </div>
                           <span className="text-xs text-gray-600 dark:text-gray-400">
-                            {Math.round(((meeting.currentAttendees || 0) / meeting.maxAttendees) * 100)}%
+                            {meeting.maxAttendees && meeting.maxAttendees > 0
+                              ? `${Math.round(((meeting.currentAttendees || 0) / meeting.maxAttendees) * 100)}%`
+                              : '0%'}
                           </span>
                         </div>
                       </div>
@@ -521,10 +520,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ setActiveTab }) => {
                         onChange={(e) => setEditForm({...editForm, time: e.target.value})}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm"
                       />
-                      <div className="flex space-x-2">
+                      <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
                         <button
                           onClick={() => handleSaveEdit(meeting.id)}
-                          className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                          className="w-full sm:flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
                         >
                           {language === 'ar' ? 'حفظ' : 'Save'}
                         </button>
@@ -533,7 +532,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ setActiveTab }) => {
                             setEditingMeeting(null);
                             setEditForm({});
                           }}
-                          className="flex-1 px-3 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
+                          className="w-full sm:flex-1 px-3 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
                         >
                           {language === 'ar' ? 'إلغاء' : 'Cancel'}
                         </button>

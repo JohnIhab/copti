@@ -395,7 +395,43 @@ export default function ElementaryService() {
 
                 {error && <div className="text-red-600 mb-2">{error}</div>}
 
-                <div className="overflow-x-auto">
+                {/* Mobile: stacked cards for students */}
+                <div className="sm:hidden space-y-4">
+                    {filteredRows.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">لا يوجد أسماء بعد</div>
+                    ) : (
+                        filteredRows.map((r, idx) => (
+                            <div key={r.id} className="bg-white rounded-lg p-4 shadow border border-gray-200">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <span className="font-bold text-lg">{idx + 1}</span>
+                                        <span className="ml-2 text-gray-800">{r.name}</span>
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        checked={!!selected[`${selectedGrade}_${r.id}`]}
+                                        onChange={() => toggleSelect(r.id)}
+                                    />
+                                </div>
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                    {r.attendance.map((att, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => toggleAttend(r.id, i)}
+                                            className={`w-8 h-8 rounded ${att ? 'bg-green-600' : 'bg-white'} border shadow-sm hover:scale-105 transition-transform`}
+                                            aria-pressed={att}
+                                            title={fridays[i].toLocaleDateString('ar-EG')}
+                                        >
+                                            {fridays[i].toLocaleDateString('ar-EG').slice(0, 5)}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+                {/* Desktop/table for sm and up */}
+                <div className="hidden sm:block overflow-x-auto">
                     <table className="min-w-full border table-fixed" dir="rtl">
                         <thead>
                             <tr className="bg-gray-100">
@@ -477,7 +513,49 @@ export default function ElementaryService() {
                         }} className="bg-red-600 text-white px-3 py-1 rounded">حذف المحدد - خدام</button>
                         <button onClick={() => { setWhoRowsByGroup(prev => ({ ...prev, [selectedGrade]: [] })); setSelectedWho({}) }} className="bg-red-800 text-white px-3 py-1 rounded mr-2 ">حذف الكل - خدام</button>
                     </div>
-                    <div className="overflow-x-auto">
+                    {/* Mobile: stacked cards for servants */}
+                    <div className="sm:hidden space-y-4">
+                        {whoFilteredRows.length === 0 ? (
+                            <div className="text-center py-8 text-gray-500">لا يوجد أسماء بعد</div>
+                        ) : (
+                            whoFilteredRows.map((r, idx) => (
+                                <div key={r.id} className="bg-white rounded-lg p-4 shadow border border-gray-200">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <span className="font-bold text-lg">{idx + 1}</span>
+                                            <span className="ml-2 text-gray-800">{r.name}</span>
+                                        </div>
+                                        <input
+                                            type="checkbox"
+                                            checked={!!selectedWho[`${selectedGrade}_${r.id}`]}
+                                            onChange={() => toggleSelectWho(r.id)}
+                                        />
+                                    </div>
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                        {r.attendance.map((att, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => {
+                                                    setWhoRowsByGroup(prev => {
+                                                        const list = prev[selectedGrade] || []
+                                                        const updated = list.map(rr => rr.id === r.id ? { ...rr, attendance: rr.attendance.map((a, ii) => ii === i ? !a : a) } : rr)
+                                                        return { ...prev, [selectedGrade]: updated }
+                                                    })
+                                                }}
+                                                className={`w-8 h-8 rounded ${att ? 'bg-green-600' : 'bg-white'} border shadow-sm hover:scale-105 transition-transform`}
+                                                aria-pressed={att}
+                                                title={fridays[i].toLocaleDateString('ar-EG')}
+                                            >
+                                                {fridays[i].toLocaleDateString('ar-EG').slice(0, 5)}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                    {/* Desktop/table for sm and up */}
+                    <div className="hidden sm:block overflow-x-auto">
                         <table className="min-w-full border table-fixed" dir="rtl">
                             <thead>
                                 <tr className="bg-gray-100">

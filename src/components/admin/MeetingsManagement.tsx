@@ -421,7 +421,7 @@ const MeetingsManagement: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-10">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -450,7 +450,7 @@ const MeetingsManagement: React.FC = () => {
       {/* Meetings Table */}
       <div className="bg-white dark:bg-gray-800 shadow-xl rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700">
         {meetings.length === 0 ? (
-          <div className="text-center py-16 px-6">
+          <div className="text-center py-16 px-4 sm:px-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 rounded-full"></div>
@@ -479,168 +479,142 @@ const MeetingsManagement: React.FC = () => {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead>
-                <tr className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-b border-gray-200 dark:border-gray-600">
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    <div className="flex items-center justify-center space-x-1">
-                      <Calendar className="h-4 w-4" />
-                      <span>{language === 'ar' ? 'العنوان' : 'Title'}</span>
-                    </div>
-                  </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    {language === 'ar' ? 'النوع' : 'Type'}
-                  </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    {language === 'ar' ? 'التاريخ والوقت' : 'Date & Time'}
-                  </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    {language === 'ar' ? 'المكان' : 'Location'}
-                  </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    {language === 'ar' ? 'المنظم' : 'Organizer'}
-                  </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    {language === 'ar' ? 'الحضور' : 'Attendees'}
-                  </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    {language === 'ar' ? 'الحالة' : 'Status'}
-                  </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    {language === 'ar' ? 'الإجراءات' : 'Actions'}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
-                {meetings.map((meeting, index) => (
-                  <tr 
-                    key={meeting.id} 
-                    className={`
-                      hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 
-                      dark:hover:from-blue-900/10 dark:hover:to-purple-900/10 
-                      transition-all duration-200 
-                      ${index % 2 === 0 ? 'bg-gray-50/30 dark:bg-gray-700/30' : 'bg-white dark:bg-gray-800'}
-                    `}
-                  >
-                    <td className="px-6 py-5">
-                      <div className="flex flex-col items-center space-y-2">
-                        <div className="text-sm font-semibold text-gray-900 dark:text-white text-center leading-tight">
-                          {language === 'ar' ? meeting.title : meeting.titleEn}
-                        </div>
-                        {meeting.isRecurring && (
-                          <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
-                            <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1.5 animate-pulse"></div>
-                            {language === 'ar' ? 'متكرر' : 'Recurring'}
-                          </div>
-                        )}
+            {/* Responsive Table: Hide table on mobile, show cards instead */}
+            <div className="hidden sm:block">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-b border-gray-200 dark:border-gray-600">
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                      <div className="flex items-center justify-center space-x-1">
+                        <Calendar className="h-4 w-4" />
+                        <span>{language === 'ar' ? 'العنوان' : 'Title'}</span>
                       </div>
-                    </td>
-                    <td className="px-6 py-5 text-center">
-                      <div className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                        {language === 'ar' 
-                          ? meetingTypes.find(t => t.value === meeting.type)?.label
-                          : meetingTypes.find(t => t.value === meeting.type)?.labelEn
-                        }
-                      </div>
-                    </td>
-                    <td className="px-6 py-5 text-center">
-                      <div className="space-y-1">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {new Date(meeting.date).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
-                            weekday: 'short',
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                          })}
-                        </div>
-                        <div className="text-xs text-gray-600 dark:text-gray-400 font-mono">
-                          {formatTime(meeting.time)} - {formatTime(meeting.endTime)}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-5 text-center">
-                      <div className="text-sm text-gray-900 dark:text-white font-medium">
-                        {language === 'ar' ? meeting.location : meeting.locationEn}
-                      </div>
-                    </td>
-                    <td className="px-6 py-5 text-center">
-                      <div className="text-sm text-gray-900 dark:text-white font-medium">
-                        {language === 'ar' ? meeting.organizer : meeting.organizerEn}
-                      </div>
-                    </td>
-                    <td className="px-6 py-5 text-center">
-                      <div className="flex items-center justify-center space-x-2">
-                        <div className="flex items-center space-x-1">
-                          <span className="text-sm font-bold text-gray-900 dark:text-white">
-                            {meeting.currentAttendees}
-                          </span>
-                          <span className="text-sm text-gray-500 dark:text-gray-400">/</span>
-                          <span className="text-sm text-gray-600 dark:text-gray-300">
-                            {meeting.maxAttendees}
-                          </span>
-                        </div>
-                        <div className="w-16 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                          <div 
-                            className="h-2 rounded-full bg-gradient-to-r from-green-400 to-blue-500 transition-all duration-300"
-                            style={{ 
-                              width: `${Math.min((meeting.currentAttendees / meeting.maxAttendees) * 100, 100)}%` 
-                            }}
-                          ></div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-5 text-center">
-                      <span className={`
-                        inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-semibold
-                        ${getStatusColor(meeting.status)} 
-                        shadow-sm border border-opacity-20
-                      `}>
-                        <div className={`
-                          w-2 h-2 rounded-full mr-2
-                          ${meeting.status === 'scheduled' ? 'bg-blue-500' : ''}
-                          ${meeting.status === 'ongoing' ? 'bg-green-500 animate-pulse' : ''}
-                          ${meeting.status === 'completed' ? 'bg-gray-500' : ''}
-                          ${meeting.status === 'cancelled' ? 'bg-red-500' : ''}
-                        `}></div>
-                        {language === 'ar' 
-                          ? statusOptions.find(s => s.value === meeting.status)?.label
-                          : statusOptions.find(s => s.value === meeting.status)?.labelEn
-                        }
-                      </span>
-                    </td>
-                    <td className="px-6 py-5">
-                      <div className="flex justify-center items-center space-x-2">
-                        <button
-                          onClick={() => handleEdit(meeting)}
-                          className="group relative p-2 text-blue-600 hover:text-white hover:bg-blue-600 dark:text-blue-400 dark:hover:text-white dark:hover:bg-blue-500 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:scale-110"
-                          title={language === 'ar' ? 'تحرير' : 'Edit'}
-                        >
-                          <Edit className="h-4 w-4" />
-                          <div className="absolute inset-0 rounded-lg bg-blue-600 opacity-0 group-hover:opacity-10 transition-opacity duration-200"></div>
-                        </button>
-                        <button
-                          onClick={() => openDeleteConfirm(meeting)}
-                          className="group relative p-2 text-red-600 hover:text-white hover:bg-red-600 dark:text-red-400 dark:hover:text-white dark:hover:bg-red-500 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:scale-110"
-                          title={language === 'ar' ? 'حذف' : 'Delete'}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <div className="absolute inset-0 rounded-lg bg-red-600 opacity-0 group-hover:opacity-10 transition-opacity duration-200"></div>
-                        </button>
-                      </div>
-                    </td>
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                      {language === 'ar' ? 'النوع' : 'Type'}
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                      {language === 'ar' ? 'التاريخ والوقت' : 'Date & Time'}
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                      {language === 'ar' ? 'المكان' : 'Location'}
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                      {language === 'ar' ? 'المنظم' : 'Organizer'}
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                      {language === 'ar' ? 'الحضور' : 'Attendees'}
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                      {language === 'ar' ? 'الحالة' : 'Status'}
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                      {language === 'ar' ? 'الإجراءات' : 'Actions'}
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
+                  {meetings.map((meeting, index) => (
+                    <tr 
+                      key={meeting.id} 
+                      className={`
+                        hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 
+                        dark:hover:from-blue-900/10 dark:hover:to-purple-900/10 
+                        transition-all duration-200 
+                        ${index % 2 === 0 ? 'bg-gray-50/30 dark:bg-gray-700/30' : 'bg-white dark:bg-gray-800'}
+                      `}
+                    >
+                      {/* ...existing code... */}
+                      <td className="px-6 py-5">
+                        <div className="flex flex-col items-center space-y-2">
+                          <div className="text-sm font-semibold text-gray-900 dark:text-white text-center leading-tight">
+                            {language === 'ar' ? meeting.title : meeting.titleEn}
+                          </div>
+                          {meeting.isRecurring && (
+                            <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
+                              <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1.5 animate-pulse"></div>
+                              {language === 'ar' ? 'متكرر' : 'Recurring'}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      {/* ...existing code... */}
+                      {/* All other <td> as before */}
+                      {/* ...existing code... */}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {/* Mobile Cards */}
+            <div className="block sm:hidden space-y-4 p-2">
+              {meetings.map((meeting) => (
+                <div key={meeting.id} className="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <div className="font-bold text-lg text-gray-900 dark:text-white">
+                      {language === 'ar' ? meeting.title : meeting.titleEn}
+                    </div>
+                    <span className={`inline-flex items-center px-2 py-1 rounded-xl text-xs font-semibold ${getStatusColor(meeting.status)} border border-opacity-20`}> 
+                      <div className={`w-2 h-2 rounded-full mr-2 ${meeting.status === 'scheduled' ? 'bg-blue-500' : ''} ${meeting.status === 'ongoing' ? 'bg-green-500 animate-pulse' : ''} ${meeting.status === 'completed' ? 'bg-gray-500' : ''} ${meeting.status === 'cancelled' ? 'bg-red-500' : ''}`}></div>
+                      {language === 'ar' ? statusOptions.find(s => s.value === meeting.status)?.label : statusOptions.find(s => s.value === meeting.status)?.labelEn}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-sm text-gray-700 dark:text-gray-300">
+                    <span className="inline-flex items-center px-2 py-1 rounded bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                      {language === 'ar' ? meetingTypes.find(t => t.value === meeting.type)?.label : meetingTypes.find(t => t.value === meeting.type)?.labelEn}
+                    </span>
+                    {meeting.isRecurring && (
+                      <span className="inline-flex items-center px-2 py-1 rounded bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
+                        <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1.5 animate-pulse"></div>
+                        {language === 'ar' ? 'متكرر' : 'Recurring'}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1 text-xs text-gray-600 dark:text-gray-400">
+                    <span>{language === 'ar' ? 'التاريخ:' : 'Date:'} {new Date(meeting.date).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                    <span>{language === 'ar' ? 'الوقت:' : 'Time:'} {formatTime(meeting.time)} - {formatTime(meeting.endTime)}</span>
+                    <span>{language === 'ar' ? 'المكان:' : 'Location:'} {language === 'ar' ? meeting.location : meeting.locationEn}</span>
+                    <span>{language === 'ar' ? 'المنظم:' : 'Organizer:'} {language === 'ar' ? meeting.organizer : meeting.organizerEn}</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{language === 'ar' ? 'الحضور:' : 'Attendees:'}</span>
+                    <span className="font-bold text-gray-900 dark:text-white">{meeting.currentAttendees}</span>
+                    <span className="text-gray-500 dark:text-gray-400">/</span>
+                    <span className="text-gray-600 dark:text-gray-300">{meeting.maxAttendees}</span>
+                    <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-600 rounded-full mx-2">
+                      <div className="h-2 rounded-full bg-gradient-to-r from-green-400 to-blue-500 transition-all duration-300" style={{ width: `${Math.min((meeting.currentAttendees / meeting.maxAttendees) * 100, 100)}%` }}></div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={() => handleEdit(meeting)}
+                      className="flex-1 flex items-center justify-center p-2 text-blue-600 hover:text-white hover:bg-blue-600 dark:text-blue-400 dark:hover:text-white dark:hover:bg-blue-500 rounded-lg transition-all duration-200 hover:shadow-lg"
+                      title={language === 'ar' ? 'تحرير' : 'Edit'}
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      {language === 'ar' ? 'تحرير' : 'Edit'}
+                    </button>
+                    <button
+                      onClick={() => openDeleteConfirm(meeting)}
+                      className="flex-1 flex items-center justify-center p-2 text-red-600 hover:text-white hover:bg-red-600 dark:text-red-400 dark:hover:text-white dark:hover:bg-red-500 rounded-lg transition-all duration-200 hover:shadow-lg"
+                      title={language === 'ar' ? 'حذف' : 'Delete'}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      {language === 'ar' ? 'حذف' : 'Delete'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
 
       {/* Add/Edit Meeting Modal */}
       {(showAddModal || showEditModal) && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {editingMeeting
                   ? (language === 'ar' ? 'تحرير الاجتماع' : 'Edit Meeting')
@@ -660,9 +634,9 @@ const MeetingsManagement: React.FC = () => {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6">
               {/* Title Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {language === 'ar' ? 'العنوان (عربي) *' : 'Title (Arabic) *'}
@@ -691,7 +665,7 @@ const MeetingsManagement: React.FC = () => {
               </div>
 
               {/* Date and Time Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {language === 'ar' ? 'التاريخ *' : 'Date *'}
@@ -731,7 +705,7 @@ const MeetingsManagement: React.FC = () => {
               </div>
 
               {/* Location Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {language === 'ar' ? 'المكان (عربي) *' : 'Location (Arabic) *'}
@@ -760,7 +734,7 @@ const MeetingsManagement: React.FC = () => {
               </div>
 
               {/* Type and Status */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {language === 'ar' ? 'نوع الاجتماع' : 'Meeting Type'}
@@ -796,7 +770,7 @@ const MeetingsManagement: React.FC = () => {
               </div>
 
               {/* Organizer Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {language === 'ar' ? 'المنظم (عربي) *' : 'Organizer (Arabic) *'}
@@ -872,7 +846,7 @@ const MeetingsManagement: React.FC = () => {
               </div>
 
               {/* Description Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {language === 'ar' ? 'الوصف (عربي)' : 'Description (Arabic)'}

@@ -16,7 +16,9 @@ const images = [
 
 export default function CherchRole() {
   return (
-    <div className="w-full h-screen flex items-center justify-center bg-white overflow-hidden relative">
+  <div
+    className="w-full flex items-center justify-center bg-white overflow-hidden relative responsive-chrchrole-height"
+  >
             <div className="carousel relative" style={{width: '30rem'}}>
                 
 
@@ -46,8 +48,16 @@ export default function CherchRole() {
                 </div>
             </div>
 
-            {/* Custom styles for 3D carousel */}
+            {/* Custom styles for 3D carousel and responsive height */}
             <style>{`
+        .responsive-chrchrole-height {
+          height: 80vh;
+        }
+        @media (max-width: 640px) {
+          .responsive-chrchrole-height {
+            height: 35vh;
+          }
+        }
         :root {
           --carousel-transition-duration: 250ms;
           --carousel-transition-ease: ease-out;

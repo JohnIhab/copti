@@ -338,7 +338,7 @@ const DonationTransactions: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-10">
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-200 dark:border-gray-700">
@@ -413,8 +413,45 @@ const DonationTransactions: React.FC = () => {
         </div>
       </div>
 
-      {/* Donations Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+      {/* Mobile: stacked cards for donations */}
+      <div className="sm:hidden space-y-4">
+        {filteredDonations.length === 0 ? (
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">لا توجد تبرعات</div>
+        ) : (
+          filteredDonations.map(donation => {
+            const statusInfo = getStatusBadge(donation.status);
+            const StatusIcon = statusInfo.icon;
+            return (
+              <div key={donation.id} className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow border border-gray-200 dark:border-gray-700">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">{donation.donorName}</p>
+                    <p className="text-xs text-gray-500" dir="ltr">{donation.donorPhone}</p>
+                    <p className="text-xs text-gray-500">{language === 'ar' ? donation.donationTypeTitle : donation.donationTypeTitleEn}</p>
+                    <p className="text-xs font-bold text-green-600">{donation.amount.toLocaleString()} جنيه</p>
+                    <span className={`inline-block mt-2 px-2 py-1 rounded text-xs font-semibold ${statusInfo.color}`}>
+                      <StatusIcon className="h-3 w-3 mr-1 rtl:mr-0 rtl:ml-1" />
+                      {statusInfo.label}
+                    </span>
+                    <p className="text-xs text-gray-500 mt-2">{formatDate(donation.createdAt)}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-2">
+                    <button
+                      onClick={() => { setSelectedDonation(donation); setShowModal(true); }}
+                      className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm"
+                    >
+                      عرض
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Desktop/table for sm and up */}
+      <div className="hidden sm:block bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
         {filteredDonations.length === 0 ? (
           <div className="text-center py-12">
             <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />

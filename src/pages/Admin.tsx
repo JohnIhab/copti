@@ -2,14 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Book } from 'lucide-react';
+import { Book, Menu } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { signOut, auth } from '../services/firebase';
 import { toast } from 'react-toastify';
 import {
   AdminSidebar,
-  AdminTopbar,
   AdminDashboard,
   EventsManagement,
   TripsManagement,
@@ -41,7 +40,6 @@ const Admin: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   
   const adminRef = useRef<HTMLDivElement>(null);
@@ -262,8 +260,16 @@ const Admin: React.FC = () => {
       ref={adminRef}
       className={`min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30
                   dark:from-gray-900 dark:via-blue-900/10 dark:to-purple-900/10 
-                  flex ${language === 'ar' ? 'rtl' : 'ltr'} relative`}
+                  flex ${language === 'ar' ? 'rtl' : 'ltr'} relative overflow-x-hidden`}
     >
+      {/* Mobile Menu Icon */}
+      <button
+        className={`lg:hidden fixed top-4 ${language === 'ar' ? 'right-4' : 'left-4'} z-50 p-2 rounded-full bg-white/80 dark:bg-gray-900/80 shadow-md border border-gray-200 dark:border-gray-700 flex items-center justify-center`}
+        onClick={() => setSidebarOpen(true)}
+        aria-label={language === 'ar' ? 'فتح القائمة' : 'Open menu'}
+      >
+        <Menu className="h-7 w-7 text-gray-700 dark:text-white" />
+      </button>
       {/* Enhanced background pattern */}
       <div className="absolute inset-0 opacity-5 dark:opacity-10">
         <div className="absolute top-20 left-20 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
@@ -284,19 +290,10 @@ const Admin: React.FC = () => {
       />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen relative z-10 ">
-        {/* Top Bar */}
-        <AdminTopbar
-          activeTab={activeTab}
-          setSidebarOpen={setSidebarOpen}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          currentUserEmail={currentUser?.email || undefined}
-        />
-        
+      <div className="flex-1 flex flex-col min-h-screen relative z-10">
         {/* Page Content */}
-        <div className="flex-1 p-8 overflow-y-auto">
-          <div ref={contentRef} className="max-w-full relative">
+        <div className="flex-1 px-4 sm:px-6 lg:px-8 pb-8 overflow-y-auto">
+          <div ref={contentRef} className="w-full max-w-full relative">
             {renderContent()}
           </div>
         </div>

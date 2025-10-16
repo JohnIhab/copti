@@ -17,6 +17,13 @@ const About: React.FC = () => {
   useEffect(() => {
     if (!sectionRef.current) return;
 
+    // Always show on mobile (<= 640px)
+    if (window.innerWidth <= 640) {
+      if (contentRef.current) contentRef.current.style.opacity = '1';
+      if (imageRef.current) imageRef.current.style.opacity = '1';
+      return;
+    }
+
     gsap.set([contentRef.current, imageRef.current], { opacity: 0 });
 
     const tl = gsap.timeline({
@@ -48,7 +55,7 @@ const About: React.FC = () => {
     <section 
       id="about"
       ref={sectionRef}
-      className="py-12 sm:py-16 lg:py-20 xl:py-24 bg-white dark:bg-gray-800 transition-colors duration-300"
+      className="py-6 sm:py-16 lg:py-20 xl:py-24 bg-white dark:bg-gray-800 transition-colors duration-300"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 xl:gap-16 items-center">

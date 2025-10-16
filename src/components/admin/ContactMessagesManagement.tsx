@@ -228,7 +228,7 @@ const ContactMessagesManagement: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8 tab-content">
+    <div className="space-y-8 tab-content mt-10">
       <div className="content-header">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
           <div>
@@ -284,8 +284,35 @@ const ContactMessagesManagement: React.FC = () => {
         )}
       </div>
 
-      {/* Messages Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+      {/* Mobile: stacked cards for messages */}
+      <div className="sm:hidden space-y-4">
+        {messages.map(message => (
+          <div key={message.id} className={`bg-white dark:bg-gray-800 rounded-lg p-4 shadow border border-gray-200 dark:border-gray-700 ${!message.isRead ? 'bg-blue-50 dark:bg-blue-900/10' : ''}`}>
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">{message.name}</p>
+                <p className="text-xs text-gray-500">{message.subject}</p>
+                <p className="text-xs text-gray-500">{message.email}</p>
+                <p className="text-xs text-gray-500">{message.phone}</p>
+                <p className="text-xs text-gray-500">{formatRelativeTime(message.timestamp)}</p>
+                <span className="block mt-2">{getStatusBadge(message)}</span>
+              </div>
+              <div className="flex flex-col items-end gap-2">
+                <button onClick={() => openPreview(message)} className="text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-300 text-sm">معاينة</button>
+                <button onClick={() => handleWhatsApp(message)} className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 text-sm">واتساب</button>
+                <button onClick={() => message.id && handleReply(message.id)} className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 text-sm">إيميل</button>
+                <button onClick={() => message.id && handleDeleteSingle(message.id)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm">حذف</button>
+              </div>
+            </div>
+          </div>
+        ))}
+        {messages.length === 0 && (
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">لا توجد رسائل</div>
+        )}
+      </div>
+
+      {/* Desktop/table for sm and up */}
+      <div className="hidden sm:block bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-900">
@@ -398,7 +425,6 @@ const ContactMessagesManagement: React.FC = () => {
             </tbody>
           </table>
         </div>
-        
         {messages.length === 0 && (
           <div className="text-center py-12">
             <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />

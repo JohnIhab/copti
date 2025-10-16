@@ -252,7 +252,7 @@ const EventsManagement: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 tab-content">
+    <div className="space-y-8 tab-content mt-10">
       <div className="content-header">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
           <div>
@@ -312,159 +312,58 @@ const EventsManagement: React.FC = () => {
       {!loading && (
         <>
           {viewMode === 'table' ? (
-            /* Table View */
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700">
-              <div className="overflow-x-auto">
+              {/* Desktop Table */}
+              <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50 dark:bg-gray-700">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        {language === 'ar' ? 'الفعالية' : 'Event'}
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        {language === 'ar' ? 'التاريخ والوقت' : 'Date & Time'}
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        {language === 'ar' ? 'الموقع' : 'Location'}
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        {language === 'ar' ? 'الفئة' : 'Category'}
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        {language === 'ar' ? 'المشاركين' : 'Participants'}
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        {language === 'ar' ? 'الحالة' : 'Status'}
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        {language === 'ar' ? 'الإجراءات' : 'Actions'}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
-                    {events.length === 0 ? (
-                      <tr>
-                        <td colSpan={7} className="px-6 py-12 text-center">
-                          <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                            {language === 'ar' ? 'لا توجد فعاليات' : 'No Events Found'}
-                          </h3>
-                          <p className="text-gray-500 dark:text-gray-400">
-                            {language === 'ar' ? 'ابدأ بإضافة فعالية جديدة' : 'Start by adding a new event'}
-                          </p>
-                        </td>
-                      </tr>
-                    ) : (
-                      events.map((event) => (
-                        <tr key={event.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <img 
-                                src={event.image} 
-                                alt={language === 'ar' ? event.title : event.titleEn}
-                                className="h-12 w-12 rounded-lg object-cover mr-3 rtl:ml-3 rtl:mr-0"
-                                onError={(e) => {
-                                  e.currentTarget.src = '/Images/hero.jpg';
-                                }}
-                              />
-                              <div>
-                                <div className="text-sm font-medium text-gray-900 dark:text-white flex items-center">
-                                  {language === 'ar' ? event.title : event.titleEn}
-                                  {event.featured && (
-                                    <Star className="h-4 w-4 text-yellow-500 ml-2 rtl:mr-2 rtl:ml-0" />
-                                  )}
-                                </div>
-                                <div className="text-sm text-gray-500 dark:text-gray-400">
-                                  {(language === 'ar' ? event.description : event.descriptionEn).substring(0, 50)}...
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                            <div className="flex flex-col">
-                              <div className="flex items-center">
-                                <Calendar className="h-4 w-4 mr-1 rtl:ml-1 rtl:mr-0 text-gray-400" />
-                                {event.date}
-                              </div>
-                              <div className="flex items-center mt-1">
-                                <Clock className="h-4 w-4 mr-1 rtl:ml-1 rtl:mr-0 text-gray-400" />
-                                {event.time}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                            <div className="flex items-center">
-                              <MapPin className="h-4 w-4 mr-1 rtl:ml-1 rtl:mr-0 text-gray-400" />
-                              {language === 'ar' ? event.location : event.locationEn}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-xs font-medium">
-                              {language === 'ar' ? event.category : event.categoryEn}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                            <div className="flex items-center">
-                              <Users className="h-4 w-4 mr-1 rtl:ml-1 rtl:mr-0 text-gray-400" />
-                              <span>{event.registered}/{event.capacity}</span>
-                            </div>
-                            <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-1">
-                              <div 
-                                className="bg-blue-600 h-2 rounded-full" 
-                                style={{ width: `${(event.registered / event.capacity) * 100}%` }}
-                              ></div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              event.registered >= event.capacity
-                                ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
-                                : event.registered / event.capacity > 0.8
-                                ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200'
-                                : 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
-                            }`}>
-                              {event.registered >= event.capacity
-                                ? (language === 'ar' ? 'مكتمل' : 'Full')
-                                : event.registered / event.capacity > 0.8
-                                ? (language === 'ar' ? 'شبه مكتمل' : 'Almost Full')
-                                : (language === 'ar' ? 'متاح' : 'Available')
-                              }
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div className="flex space-x-2 rtl:space-x-reverse">
-                              <button 
-                                className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                                title={language === 'ar' ? 'عرض' : 'View'}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </button>
-                              <button 
-                                onClick={() => handleEdit(event)}
-                                className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
-                                title={language === 'ar' ? 'تعديل' : 'Edit'}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </button>
-                              <button 
-                                onClick={() => handleDelete(event)}
-                                className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                                title={language === 'ar' ? 'حذف' : 'Delete'}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
+                  {/* ...existing code... */}
                 </table>
+              </div>
+              {/* Mobile Cards */}
+              <div className="block sm:hidden p-2 space-y-4">
+                {events.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                      {language === 'ar' ? 'لا توجد فعاليات' : 'No Events Found'}
+                    </h3>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      {language === 'ar' ? 'ابدأ بإضافة فعالية جديدة' : 'Start by adding a new event'}
+                    </p>
+                  </div>
+                ) : (
+                  events.map((event) => (
+                    <div key={event.id} className="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 flex flex-col gap-2">
+                      <div className="flex items-center gap-3">
+                        <img src={event.image} alt={language === 'ar' ? event.title : event.titleEn} className="h-16 w-16 rounded-lg object-cover" onError={(e) => { e.currentTarget.src = '/Images/hero.jpg'; }} />
+                        <div className="flex-1">
+                          <div className="font-bold text-base text-gray-900 dark:text-white flex items-center">
+                            {language === 'ar' ? event.title : event.titleEn}
+                            {event.featured && <Star className="h-4 w-4 text-yellow-500 ml-2 rtl:mr-2 rtl:ml-0" />}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{(language === 'ar' ? event.description : event.descriptionEn).substring(0, 50)}...</div>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2 text-xs text-gray-700 dark:text-gray-300 mt-2">
+                        <span className="inline-flex items-center px-2 py-1 rounded bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">{language === 'ar' ? event.category : event.categoryEn}</span>
+                        <span className="inline-flex items-center px-2 py-1 rounded bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"><Calendar className="h-3 w-3 mr-1 rtl:ml-1 rtl:mr-0" />{event.date} <Clock className="h-3 w-3 mx-1" />{event.time}</span>
+                        <span className="inline-flex items-center px-2 py-1 rounded bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"><MapPin className="h-3 w-3 mr-1 rtl:ml-1 rtl:mr-0" />{language === 'ar' ? event.location : event.locationEn}</span>
+                        <span className="inline-flex items-center px-2 py-1 rounded bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"><Users className="h-3 w-3 mr-1 rtl:ml-1 rtl:mr-0" />{event.registered}/{event.capacity}</span>
+                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${event.registered >= event.capacity ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200' : event.registered / event.capacity > 0.8 ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' : 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'}`}>{event.registered >= event.capacity ? (language === 'ar' ? 'مكتمل' : 'Full') : event.registered / event.capacity > 0.8 ? (language === 'ar' ? 'شبه مكتمل' : 'Almost Full') : (language === 'ar' ? 'متاح' : 'Available')}</span>
+                      </div>
+                      <div className="flex gap-2 mt-2">
+                        <button className="flex-1 flex items-center justify-center p-2 text-blue-600 hover:text-white hover:bg-blue-600 dark:text-blue-400 dark:hover:text-white dark:hover:bg-blue-500 rounded-lg transition-all duration-200 hover:shadow-lg" title={language === 'ar' ? 'عرض' : 'View'}><Eye className="h-4 w-4 mr-1" />{language === 'ar' ? 'عرض' : 'View'}</button>
+                        <button onClick={() => handleEdit(event)} className="flex-1 flex items-center justify-center p-2 text-green-600 hover:text-white hover:bg-green-600 dark:text-green-400 dark:hover:text-white dark:hover:bg-green-500 rounded-lg transition-all duration-200 hover:shadow-lg" title={language === 'ar' ? 'تعديل' : 'Edit'}><Edit className="h-4 w-4 mr-1" />{language === 'ar' ? 'تعديل' : 'Edit'}</button>
+                        <button onClick={() => handleDelete(event)} className="flex-1 flex items-center justify-center p-2 text-red-600 hover:text-white hover:bg-red-600 dark:text-red-400 dark:hover:text-white dark:hover:bg-red-500 rounded-lg transition-all duration-200 hover:shadow-lg" title={language === 'ar' ? 'حذف' : 'Delete'}><Trash2 className="h-4 w-4 mr-1" />{language === 'ar' ? 'حذف' : 'Delete'}</button>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           ) : (
             /* Grid View */
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {events.length === 0 ? (
                 <div className="col-span-full text-center py-12">
                   <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4" />
@@ -550,9 +449,9 @@ const EventsManagement: React.FC = () => {
 
       {/* Add Event Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto transform -translate-x-[70px]">
-            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-4 flex items-center justify-between">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                 {language === 'ar' ? 'إضافة فعالية جديدة' : 'Add New Event'}
               </h3>
@@ -567,9 +466,9 @@ const EventsManagement: React.FC = () => {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6">
               {/* Title Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {language === 'ar' ? 'العنوان (عربي) *' : 'Title (Arabic) *'}
@@ -599,7 +498,7 @@ const EventsManagement: React.FC = () => {
               </div>
 
               {/* Date and Time */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {language === 'ar' ? 'التاريخ *' : 'Date *'}
@@ -639,7 +538,7 @@ const EventsManagement: React.FC = () => {
               </div>
 
               {/* Location Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {language === 'ar' ? 'الموقع (عربي) *' : 'Location (Arabic) *'}
@@ -669,7 +568,7 @@ const EventsManagement: React.FC = () => {
               </div>
 
               {/* Category and Featured */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {language === 'ar' ? 'الفئة' : 'Category'}
@@ -701,7 +600,7 @@ const EventsManagement: React.FC = () => {
               </div>
 
               {/* Description Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {language === 'ar' ? 'الوصف (عربي)' : 'Description (Arabic)'}
@@ -798,9 +697,9 @@ const EventsManagement: React.FC = () => {
 
       {/* Edit Event Modal */}
       {showEditModal && editingEvent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-4 flex items-center justify-between">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                 {language === 'ar' ? 'تعديل الفعالية' : 'Edit Event'}
               </h3>
@@ -816,9 +715,9 @@ const EventsManagement: React.FC = () => {
               </button>
             </div>
 
-            <form onSubmit={handleUpdate} className="p-6 space-y-6">
+            <form onSubmit={handleUpdate} className="p-4 sm:p-6 space-y-6">
               {/* Same fields as Add Modal */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {language === 'ar' ? 'العنوان (عربي) *' : 'Title (Arabic) *'}
@@ -848,7 +747,7 @@ const EventsManagement: React.FC = () => {
               </div>
 
               {/* Other fields identical to Add Modal */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {language === 'ar' ? 'التاريخ *' : 'Date *'}
@@ -887,7 +786,7 @@ const EventsManagement: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {language === 'ar' ? 'الموقع (عربي) *' : 'Location (Arabic) *'}
@@ -916,7 +815,7 @@ const EventsManagement: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {language === 'ar' ? 'الفئة' : 'Category'}
@@ -947,7 +846,7 @@ const EventsManagement: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {language === 'ar' ? 'الوصف (عربي)' : 'Description (Arabic)'}

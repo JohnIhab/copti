@@ -7,4 +7,8 @@ export default defineConfig({
   optimizeDeps: {
     include: ['lucide-react'],
   },
+  server: {
+    host: '0.0.0.0',
+    port: 8888,
+  },
 });

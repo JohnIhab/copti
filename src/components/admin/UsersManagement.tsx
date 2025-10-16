@@ -544,8 +544,65 @@ const UsersManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* Users Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden admin-card">
+      {/* Mobile: stacked cards for users */}
+      <div className="sm:hidden space-y-4">
+        {paginatedUsers.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">{language === 'ar' ? 'لا يوجد مستخدمين' : 'No users found'}</div>
+        ) : (
+          paginatedUsers.map((user) => (
+            <div key={user.id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-gray-900 dark:text-white">{user.name}</p>
+                    {user.verified && <UserCheck className="h-4 w-4 text-green-500" />}
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="flex items-center gap-1"><Mail className="h-3 w-3" />{user.email}</div>
+                    {user.phone && <div className="flex items-center gap-1"><Phone className="h-3 w-3" />{user.phone}</div>}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg"><Shield className="h-4 w-4 text-gray-600 dark:text-gray-400" /></div>
+                <span className="font-mono text-sm text-gray-900 dark:text-white font-medium">{user.securityNumber}</span>
+              </div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>{language === 'ar' ? user.status === 'active' ? 'نشط' : user.status === 'inactive' ? 'غير نشط' : 'معلق' : user.status.charAt(0).toUpperCase() + user.status.slice(1)}</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">{formatDate(user.joinDate)}</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">{formatLastLogin(user.lastLogin)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={() => handleEditUser(user)} className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-lg transition-colors" title={language === 'ar' ? 'تعديل' : 'Edit'}><Edit className="h-4 w-4" /></button>
+                {user.status !== 'suspended' ? (
+                  <button onClick={() => user.id && handleStatusChange(user.id, 'suspended')} className="p-2 text-yellow-600 hover:text-yellow-800 hover:bg-yellow-100 dark:hover:bg-yellow-900/20 rounded-lg transition-colors" title={language === 'ar' ? 'تعليق' : 'Suspend'}><UserX className="h-4 w-4" /></button>
+                ) : (
+                  <button onClick={() => user.id && handleStatusChange(user.id, 'active')} className="p-2 text-green-600 hover:text-green-800 hover:bg-green-100 dark:hover:bg-green-900/20 rounded-lg transition-colors" title={language === 'ar' ? 'تفعيل' : 'Activate'}><UserCheck className="h-4 w-4" /></button>
+                )}
+                <button onClick={() => user.id && handleDeleteUser(user.id)} className="p-2 text-red-600 hover:text-red-800 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-colors" title={language === 'ar' ? 'حذف' : 'Delete'}><Trash2 className="h-4 w-4" /></button>
+              </div>
+            </div>
+          ))
+        )}
+        {/* Pagination for mobile */}
+        {totalPages > 1 && (
+          <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600 mt-4 rounded-b-xl">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-600 dark:text-gray-400">{language === 'ar' ? `عرض ${startIndex + 1}-${Math.min(startIndex + itemsPerPage, filteredUsers.length)} من ${filteredUsers.length}` : `Showing ${startIndex + 1}-${Math.min(startIndex + itemsPerPage, filteredUsers.length)} of ${filteredUsers.length}`}</p>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="px-3 py-1 text-sm bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">{language === 'ar' ? 'السابق' : 'Previous'}</button>
+                <span className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg">{currentPage}</span>
+                <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} className="px-3 py-1 text-sm bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">{language === 'ar' ? 'التالي' : 'Next'}</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      {/* Desktop/table for sm and up */}
+      <div className="hidden sm:block bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden admin-card">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-700">
@@ -576,95 +633,39 @@ const UsersManagement: React.FC = () => {
                   <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full 
-                                      flex items-center justify-center text-white font-semibold">
-                          {user.name.charAt(0).toUpperCase()}
-                        </div>
+                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">{user.name.charAt(0).toUpperCase()}</div>
                         <div>
                           <div className="flex items-center gap-2">
                             <p className="font-medium text-gray-900 dark:text-white">{user.name}</p>
-                            {user.verified && (
-                              <UserCheck className="h-4 w-4 text-green-500" />
-                            )}
+                            {user.verified && (<UserCheck className="h-4 w-4 text-green-500" />)}
                           </div>
                           <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                            <div className="flex items-center gap-1">
-                              <Mail className="h-3 w-3" />
-                              {user.email}
-                            </div>
-                            {user.phone && (
-                              <div className="flex items-center gap-1">
-                                <Phone className="h-3 w-3" />
-                                {user.phone}
-                              </div>
-                            )}
+                            <div className="flex items-center gap-1"><Mail className="h-3 w-3" />{user.email}</div>
+                            {user.phone && (<div className="flex items-center gap-1"><Phone className="h-3 w-3" />{user.phone}</div>)}
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                          <Shield className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                        </div>
-                        <span className="font-mono text-sm text-gray-900 dark:text-white font-medium">
-                          {user.securityNumber}
-                        </span>
+                        <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg"><Shield className="h-4 w-4 text-gray-600 dark:text-gray-400" /></div>
+                        <span className="font-mono text-sm text-gray-900 dark:text-white font-medium">{user.securityNumber}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
-                        {language === 'ar' 
-                          ? user.status === 'active' ? 'نشط' : user.status === 'inactive' ? 'غير نشط' : 'معلق'
-                          : user.status.charAt(0).toUpperCase() + user.status.slice(1)
-                        }
-                      </span>
+                      <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>{language === 'ar' ? user.status === 'active' ? 'نشط' : user.status === 'inactive' ? 'غير نشط' : 'معلق' : user.status.charAt(0).toUpperCase() + user.status.slice(1)}</span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                      {formatDate(user.joinDate)}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                      {formatLastLogin(user.lastLogin)}
-                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{formatDate(user.joinDate)}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{formatLastLogin(user.lastLogin)}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleEditUser(user)}
-                          className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/20 
-                                   rounded-lg transition-colors"
-                          title={language === 'ar' ? 'تعديل' : 'Edit'}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        
+                        <button onClick={() => handleEditUser(user)} className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-lg transition-colors" title={language === 'ar' ? 'تعديل' : 'Edit'}><Edit className="h-4 w-4" /></button>
                         {user.status !== 'suspended' ? (
-                          <button
-                            onClick={() => user.id && handleStatusChange(user.id, 'suspended')}
-                            className="p-2 text-yellow-600 hover:text-yellow-800 hover:bg-yellow-100 dark:hover:bg-yellow-900/20 
-                                     rounded-lg transition-colors"
-                            title={language === 'ar' ? 'تعليق' : 'Suspend'}
-                          >
-                            <UserX className="h-4 w-4" />
-                          </button>
+                          <button onClick={() => user.id && handleStatusChange(user.id, 'suspended')} className="p-2 text-yellow-600 hover:text-yellow-800 hover:bg-yellow-100 dark:hover:bg-yellow-900/20 rounded-lg transition-colors" title={language === 'ar' ? 'تعليق' : 'Suspend'}><UserX className="h-4 w-4" /></button>
                         ) : (
-                          <button
-                            onClick={() => user.id && handleStatusChange(user.id, 'active')}
-                            className="p-2 text-green-600 hover:text-green-800 hover:bg-green-100 dark:hover:bg-green-900/20 
-                                     rounded-lg transition-colors"
-                            title={language === 'ar' ? 'تفعيل' : 'Activate'}
-                          >
-                            <UserCheck className="h-4 w-4" />
-                          </button>
+                          <button onClick={() => user.id && handleStatusChange(user.id, 'active')} className="p-2 text-green-600 hover:text-green-800 hover:bg-green-100 dark:hover:bg-green-900/20 rounded-lg transition-colors" title={language === 'ar' ? 'تفعيل' : 'Activate'}><UserCheck className="h-4 w-4" /></button>
                         )}
-                        
-                        <button
-                          onClick={() => user.id && handleDeleteUser(user.id)}
-                          className="p-2 text-red-600 hover:text-red-800 hover:bg-red-100 dark:hover:bg-red-900/20 
-                                   rounded-lg transition-colors"
-                          title={language === 'ar' ? 'حذف' : 'Delete'}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        <button onClick={() => user.id && handleDeleteUser(user.id)} className="p-2 text-red-600 hover:text-red-800 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-colors" title={language === 'ar' ? 'حذف' : 'Delete'}><Trash2 className="h-4 w-4" /></button>
                       </div>
                     </td>
                   </tr>
@@ -673,42 +674,15 @@ const UsersManagement: React.FC = () => {
             </tbody>
           </table>
         </div>
-
-        {/* Pagination */}
+        {/* Pagination for desktop */}
         {totalPages > 1 && (
           <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {language === 'ar' 
-                  ? `عرض ${startIndex + 1}-${Math.min(startIndex + itemsPerPage, filteredUsers.length)} من ${filteredUsers.length}`
-                  : `Showing ${startIndex + 1}-${Math.min(startIndex + itemsPerPage, filteredUsers.length)} of ${filteredUsers.length}`
-                }
-              </p>
-              
+              <p className="text-sm text-gray-600 dark:text-gray-400">{language === 'ar' ? `عرض ${startIndex + 1}-${Math.min(startIndex + itemsPerPage, filteredUsers.length)} من ${filteredUsers.length}` : `Showing ${startIndex + 1}-${Math.min(startIndex + itemsPerPage, filteredUsers.length)} of ${filteredUsers.length}`}</p>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 text-sm bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 
-                           rounded-lg disabled:opacity-50 disabled:cursor-not-allowed
-                           hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  {language === 'ar' ? 'السابق' : 'Previous'}
-                </button>
-                
-                <span className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg">
-                  {currentPage}
-                </span>
-                
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1 text-sm bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 
-                           rounded-lg disabled:opacity-50 disabled:cursor-not-allowed
-                           hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  {language === 'ar' ? 'التالي' : 'Next'}
-                </button>
+                <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="px-3 py-1 text-sm bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">{language === 'ar' ? 'السابق' : 'Previous'}</button>
+                <span className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg">{currentPage}</span>
+                <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} className="px-3 py-1 text-sm bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">{language === 'ar' ? 'التالي' : 'Next'}</button>
               </div>
             </div>
           </div>

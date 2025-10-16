@@ -17,13 +17,17 @@ const PaymentDetailsModal: React.FC<{
     };
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto flex flex-col items-center justify-center">
-                <div className="p-6 w-full flex flex-col items-center justify-center">
-                    <div className="flex items-center justify-between mb-6 w-full">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col items-center justify-center mx-2 sm:mx-0 relative">
+                <button
+                    onClick={onClose}
+                    className="absolute top-3 right-3 p-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full z-10"
+                    aria-label="إغلاق"
+                >
+                    <svg className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+                <div className="p-4 sm:p-6 w-full flex flex-col items-center justify-center">
+                    <div className="mb-6 w-full">
                         <h2 className="text-2xl font-bold text-gray-900 dark:text-white text-center w-full">تفاصيل الحجز</h2>
-                        <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors absolute top-4 left-4">
-                            <svg className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                        </button>
                     </div>
                     <div className="space-y-6 w-full flex flex-col items-center justify-center text-center">
                         <div className="flex flex-col items-center space-y-2">
@@ -140,8 +144,42 @@ const AdminTripsPayments: React.FC = () => {
                         <p className="text-gray-500 dark:text-gray-400">لا توجد مدفوعات</p>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
+                    <>
+                        {/* Mobile: stacked cards */}
+                        <div className="sm:hidden space-y-4 p-4">
+                            {filteredPayments.map(payment => (
+                                <div key={payment.id} className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow border border-gray-200 dark:border-gray-700">
+                                    <div className="flex items-start justify-between">
+                                        <div>
+                                            <p className="font-medium text-gray-900 dark:text-white">{payment.name}</p>
+                                            <p className="text-sm text-gray-500" dir="ltr">{payment.phone}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="font-bold text-green-600">{payment.total} جنيه</p>
+                                            <p className="text-xs text-gray-500">{payment.createdAt instanceof Date ? payment.createdAt.toLocaleString('ar-EG') : ''}</p>
+                                        </div>
+                                    </div>
+                                    <div className="mt-3">
+                                        <h4 className="text-sm font-semibold mb-1">الرحلات</h4>
+                                        <ul className="list-disc pl-5 rtl:pl-0 rtl:pr-5">
+                                            {payment.tripIds.map(id => <li key={id} className="text-sm">{getTripName(id)}</li>)}
+                                        </ul>
+                                    </div>
+                                    <div className="mt-3 flex items-center justify-between">
+                                        <button
+                                            onClick={() => { setSelectedPayment(payment); setShowModal(true); }}
+                                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
+                                        >
+                                            عرض
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Desktop/table for sm and up */}
+                        <div className="hidden sm:block overflow-x-auto">
+                            <table className="w-full">
                             <thead className="bg-gray-50 dark:bg-gray-700">
                                 <tr>
                                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">الاسم</th>
@@ -177,7 +215,8 @@ const AdminTripsPayments: React.FC = () => {
                                 ))}
                             </tbody>
                         </table>
-                    </div>
+                        </div>
+                    </>
                 )}
             </div>
             <PaymentDetailsModal

@@ -295,7 +295,43 @@ export default function PreparatoryService() {
 
                 {error && <div className="text-red-600 mb-2">{error}</div>}
 
-                <div className="overflow-x-auto">
+                {/* Mobile: stacked cards for students */}
+                <div className="sm:hidden space-y-4">
+                    {currentRows.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">لا يوجد أسماء بعد</div>
+                    ) : (
+                        currentRows.map((r, idx) => (
+                            <div key={r.id} className="bg-white rounded-lg p-4 shadow border border-gray-200">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <span className="font-bold text-lg">{idx + 1}</span>
+                                        <span className="ml-2 text-gray-800">{r.name}</span>
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        checked={!!selected[`${currentKey}_${r.id}`]}
+                                        onChange={() => toggleSelect(`${currentKey}_${r.id}`)}
+                                    />
+                                </div>
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                    {r.attendance.map((att, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => toggleAttend(selectedCategory, selectedGradeIdx, r.id, i)}
+                                            className={`w-8 h-8 rounded ${att ? 'bg-green-600' : 'bg-white'} border shadow-sm hover:scale-105 transition-transform`}
+                                            aria-pressed={att}
+                                            title={fridays[i].toLocaleDateString('ar-EG')}
+                                        >
+                                            {fridays[i].toLocaleDateString('ar-EG').slice(0, 5)}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+                {/* Desktop/table for sm and up */}
+                <div className="hidden sm:block overflow-x-auto">
                     <table className="min-w-full border table-fixed" dir="rtl">
                         <thead>
                             <tr className="bg-gray-100">
@@ -354,7 +390,43 @@ export default function PreparatoryService() {
                         <button onClick={() => { setWhoRowsByCategory(prev => ({ ...prev, [selectedCategory]: [] })); setSelectedWho({}) }} className="bg-red-800 text-white px-3 py-1 rounded mr-2">حذف الكل - خدام</button>
                     </div>
 
-                    <div className="overflow-x-auto">
+                    {/* Mobile: stacked cards for servants */}
+                    <div className="sm:hidden space-y-4">
+                        {(whoCurrentRows || []).length === 0 ? (
+                            <div className="text-center py-8 text-gray-500">لا يوجد أسماء بعد</div>
+                        ) : (
+                            whoCurrentRows.map((r, idx) => (
+                                <div key={r.id} className="bg-white rounded-lg p-4 shadow border border-gray-200">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <span className="font-bold text-lg">{idx + 1}</span>
+                                            <span className="ml-2 text-gray-800">{r.name}</span>
+                                        </div>
+                                        <input
+                                            type="checkbox"
+                                            checked={!!selectedWho[`${selectedCategory}_${r.id}`]}
+                                            onChange={() => toggleSelectWho(`${selectedCategory}_${r.id}`)}
+                                        />
+                                    </div>
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                        {r.attendance.map((att, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => toggleAttendWho(selectedCategory, r.id, i)}
+                                                className={`w-8 h-8 rounded ${att ? 'bg-green-600' : 'bg-white'} border shadow-sm hover:scale-105 transition-transform`}
+                                                aria-pressed={att}
+                                                title={fridays[i].toLocaleDateString('ar-EG')}
+                                            >
+                                                {fridays[i].toLocaleDateString('ar-EG').slice(0, 5)}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                    {/* Desktop/table for sm and up */}
+                    <div className="hidden sm:block overflow-x-auto">
                         <table className="min-w-full border table-fixed" dir="rtl">
                             <thead>
                                 <tr className="bg-gray-100">
