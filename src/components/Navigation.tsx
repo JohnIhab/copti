@@ -180,8 +180,8 @@ const Navigation: React.FC = () => {
             ></div>
 
             {/* Sidebar Menu */}
-            <div className={`md:hidden fixed text-center top-0 left-0 w-80 max-w-[85vw] bg-white dark:bg-gray-900 shadow-xl border-r border-white/20 dark:border-gray-700/20 z-50 transition-all duration-800 ease-in-out overflow-y-auto ${isOpen ? 'h-full translate-x-0' : 'h-0 -translate-x-full'}
-              `} style={{height: isOpen ? '100vh' : '0'}}>
+            <div className={`md:hidden fixed text-center top-0 left-0 w-80 max-w-[85vw] bg-white dark:bg-gray-900 shadow-xl border-r border-white/20 dark:border-gray-700/20 z-50 transition-all duration-800 ease-in-out  !overflow-x-hidden ${isOpen ? 'h-full translate-x-0' : 'h-0 -translate-x-full'}
+              `} style={{height: isOpen ? '100vh' : '0', overflowX: 'hidden'}}>
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-white/20 dark:border-gray-700/20 bg-white">
                 <div className="flex items-center space-x-2 rtl:space-x-reverse">

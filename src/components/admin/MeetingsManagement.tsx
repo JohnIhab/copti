@@ -25,18 +25,9 @@ interface Meeting {
   time: string;
   endTime: string;
   location: string;
-  locationEn: string;
   type: string;
-  typeEn: string;
   description: string;
-  descriptionEn: string;
   organizer: string;
-  organizerEn: string;
-  maxAttendees: number;
-  currentAttendees: number;
-  isRecurring: boolean;
-  recurrenceType?: 'weekly' | 'monthly' | 'yearly';
-  status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
   createdAt: any;
   updatedAt: any;
 }
@@ -48,16 +39,9 @@ interface MeetingFormData {
   time: string;
   endTime: string;
   location: string;
-  locationEn: string;
   type: string;
   description: string;
-  descriptionEn: string;
   organizer: string;
-  organizerEn: string;
-  maxAttendees: number;
-  isRecurring: boolean;
-  recurrenceType: 'weekly' | 'monthly' | 'yearly';
-  status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
   image?: File | null;
 }
 
@@ -83,7 +67,7 @@ const MeetingsManagement: React.FC = () => {
     endTime: '',
     location: '',
     locationEn: '',
-    type: 'general',
+    type: '',
     description: '',
     descriptionEn: '',
     organizer: '',
@@ -113,16 +97,6 @@ const MeetingsManagement: React.FC = () => {
     setMeetingImageFile(file);
   };
 
-  const meetingTypes = [
-    { value: 'general', label: 'اجتماع عام', labelEn: 'General Meeting' },
-    { value: 'prayer', label: 'اجتماع صلاة', labelEn: 'Prayer Meeting' },
-    { value: 'bible-study', label: 'دراسة كتابية', labelEn: 'Bible Study' },
-    { value: 'youth', label: 'اجتماع شباب', labelEn: 'Youth Meeting' },
-    { value: 'children', label: 'اجتماع أطفال', labelEn: 'Children Meeting' },
-    { value: 'worship', label: 'اجتماع تسبيح', labelEn: 'Worship Meeting' },
-    { value: 'leadership', label: 'اجتماع قيادة', labelEn: 'Leadership Meeting' },
-    { value: 'committee', label: 'اجتماع لجنة', labelEn: 'Committee Meeting' }
-  ];
 
   const statusOptions = [
     { value: 'scheduled', label: 'مجدول', labelEn: 'Scheduled' },
@@ -180,7 +154,7 @@ const MeetingsManagement: React.FC = () => {
       endTime: '',
       location: '',
       locationEn: '',
-      type: 'general',
+      type: '',
       description: '',
       descriptionEn: '',
       organizer: '',
@@ -220,19 +194,19 @@ const MeetingsManagement: React.FC = () => {
       return false;
     }
 
-    if (!formData.location.trim() || !formData.locationEn.trim()) {
+      if (!formData.location.trim()) {
       toast.error(
         language === 'ar' 
-          ? 'يرجى إدخال مكان الاجتماع باللغتين'
+           ? 'يرجى إدخال مكان الاجتماع'
           : 'Please enter meeting location in both languages'
-      );
+        );
       return false;
     }
 
-    if (!formData.organizer.trim() || !formData.organizerEn.trim()) {
+      if (!formData.organizer.trim()) {
       toast.error(
         language === 'ar' 
-          ? 'يرجى إدخال اسم المنظم باللغتين'
+            ? 'يرجى إدخال اسم المنظم'
           : 'Please enter organizer name in both languages'
       );
       return false;
@@ -256,18 +230,9 @@ const MeetingsManagement: React.FC = () => {
         time: formData.time,
         endTime: formData.endTime,
         location: formData.location.trim(),
-        locationEn: formData.locationEn.trim(),
         type: formData.type,
-        typeEn: meetingTypes.find(type => type.value === formData.type)?.labelEn || 'General Meeting',
         description: formData.description.trim(),
-        descriptionEn: formData.descriptionEn.trim(),
         organizer: formData.organizer.trim(),
-        organizerEn: formData.organizerEn.trim(),
-        maxAttendees: formData.maxAttendees,
-        currentAttendees: 0,
-        isRecurring: formData.isRecurring,
-        recurrenceType: formData.isRecurring ? formData.recurrenceType : null,
-        status: formData.status,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
@@ -479,7 +444,7 @@ const MeetingsManagement: React.FC = () => {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            {/* Responsive Table: Hide table on mobile, show cards instead */}
+            {/* Table: only visible on desktop/tablet */}
             <div className="hidden sm:block">
               <table className="min-w-full">
                 <thead>
@@ -502,12 +467,7 @@ const MeetingsManagement: React.FC = () => {
                     <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       {language === 'ar' ? 'المنظم' : 'Organizer'}
                     </th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                      {language === 'ar' ? 'الحضور' : 'Attendees'}
-                    </th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                      {language === 'ar' ? 'الحالة' : 'Status'}
-                    </th>
+                    {/* Removed Attendees and Status columns */}
                     <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       {language === 'ar' ? 'الإجراءات' : 'Actions'}
                     </th>
@@ -524,7 +484,6 @@ const MeetingsManagement: React.FC = () => {
                         ${index % 2 === 0 ? 'bg-gray-50/30 dark:bg-gray-700/30' : 'bg-white dark:bg-gray-800'}
                       `}
                     >
-                      {/* ...existing code... */}
                       <td className="px-6 py-5">
                         <div className="flex flex-col items-center space-y-2">
                           <div className="text-sm font-semibold text-gray-900 dark:text-white text-center leading-tight">
@@ -538,15 +497,44 @@ const MeetingsManagement: React.FC = () => {
                           )}
                         </div>
                       </td>
-                      {/* ...existing code... */}
-                      {/* All other <td> as before */}
-                      {/* ...existing code... */}
+                      <td className="px-6 text-center">
+                        <span className="inline-flex items-center px-2 py-1 rounded bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                          {meeting.type}
+                        </span>
+                      </td>
+                      <td className="px-6 text-center">
+                        <span>{new Date(meeting.date).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span><br />
+                        <span>{formatTime(meeting.time)} - {formatTime(meeting.endTime)}</span>
+                      </td>
+                      <td className="px-6 text-center">
+                        <span>{language === 'ar' ? meeting.location : meeting.locationEn}</span>
+                      </td>
+                      <td className="px-6 text-center">
+                        <span>{language === 'ar' ? meeting.organizer : meeting.organizerEn}</span>
+                      </td>
+                      {/* Removed Attendees and Status cells */}
+                      <td className="px-6 text-center">
+                        <button
+                          onClick={() => handleEdit(meeting)}
+                          className="inline-flex items-center justify-center p-2 text-blue-600 hover:text-white hover:bg-blue-600 dark:text-blue-400 dark:hover:text-white dark:hover:bg-blue-500 rounded-lg transition-all duration-200 hover:shadow-lg mr-2"
+                          title={language === 'ar' ? 'تحرير' : 'Edit'}
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                        </button>
+                        <button
+                          onClick={() => openDeleteConfirm(meeting)}
+                          className="inline-flex items-center justify-center p-2 text-red-600 hover:text-white hover:bg-red-600 dark:text-red-400 dark:hover:text-white dark:hover:bg-red-500 rounded-lg transition-all duration-200 hover:shadow-lg"
+                          title={language === 'ar' ? 'حذف' : 'Delete'}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            {/* Mobile Cards */}
+            {/* Mobile Cards: only visible on mobile */}
             <div className="block sm:hidden space-y-4 p-2">
               {meetings.map((meeting) => (
                 <div key={meeting.id} className="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 flex flex-col gap-2">
@@ -554,37 +542,21 @@ const MeetingsManagement: React.FC = () => {
                     <div className="font-bold text-lg text-gray-900 dark:text-white">
                       {language === 'ar' ? meeting.title : meeting.titleEn}
                     </div>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-xl text-xs font-semibold ${getStatusColor(meeting.status)} border border-opacity-20`}> 
-                      <div className={`w-2 h-2 rounded-full mr-2 ${meeting.status === 'scheduled' ? 'bg-blue-500' : ''} ${meeting.status === 'ongoing' ? 'bg-green-500 animate-pulse' : ''} ${meeting.status === 'completed' ? 'bg-gray-500' : ''} ${meeting.status === 'cancelled' ? 'bg-red-500' : ''}`}></div>
-                      {language === 'ar' ? statusOptions.find(s => s.value === meeting.status)?.label : statusOptions.find(s => s.value === meeting.status)?.labelEn}
-                    </span>
+                    {/* Removed Status from mobile card */}
                   </div>
                   <div className="flex flex-wrap gap-2 text-sm text-gray-700 dark:text-gray-300">
                     <span className="inline-flex items-center px-2 py-1 rounded bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                      {language === 'ar' ? meetingTypes.find(t => t.value === meeting.type)?.label : meetingTypes.find(t => t.value === meeting.type)?.labelEn}
+                      {meeting.type}
                     </span>
-                    {meeting.isRecurring && (
-                      <span className="inline-flex items-center px-2 py-1 rounded bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
-                        <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1.5 animate-pulse"></div>
-                        {language === 'ar' ? 'متكرر' : 'Recurring'}
-                      </span>
-                    )}
+                    {/* Removed recurring indicator from mobile card */}
                   </div>
                   <div className="flex flex-col gap-1 text-xs text-gray-600 dark:text-gray-400">
                     <span>{language === 'ar' ? 'التاريخ:' : 'Date:'} {new Date(meeting.date).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span>
                     <span>{language === 'ar' ? 'الوقت:' : 'Time:'} {formatTime(meeting.time)} - {formatTime(meeting.endTime)}</span>
-                    <span>{language === 'ar' ? 'المكان:' : 'Location:'} {language === 'ar' ? meeting.location : meeting.locationEn}</span>
-                    <span>{language === 'ar' ? 'المنظم:' : 'Organizer:'} {language === 'ar' ? meeting.organizer : meeting.organizerEn}</span>
+                    <span>{language === 'ar' ? 'المكان:' : 'Location:'} {meeting.location}</span>
+                    <span>{language === 'ar' ? 'المنظم:' : 'Organizer:'} {meeting.organizer}</span>
                   </div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{language === 'ar' ? 'الحضور:' : 'Attendees:'}</span>
-                    <span className="font-bold text-gray-900 dark:text-white">{meeting.currentAttendees}</span>
-                    <span className="text-gray-500 dark:text-gray-400">/</span>
-                    <span className="text-gray-600 dark:text-gray-300">{meeting.maxAttendees}</span>
-                    <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-600 rounded-full mx-2">
-                      <div className="h-2 rounded-full bg-gradient-to-r from-green-400 to-blue-500 transition-all duration-300" style={{ width: `${Math.min((meeting.currentAttendees / meeting.maxAttendees) * 100, 100)}%` }}></div>
-                    </div>
-                  </div>
+                  {/* Removed attendees progress bar from mobile card */}
                   <div className="flex gap-2 mt-2">
                     <button
                       onClick={() => handleEdit(meeting)}
@@ -704,172 +676,64 @@ const MeetingsManagement: React.FC = () => {
                 </div>
               </div>
 
-              {/* Location Fields */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {language === 'ar' ? 'المكان (عربي) *' : 'Location (Arabic) *'}
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.location}
-                    onChange={(e) => handleInputChange('location', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    required
-                    dir="rtl"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {language === 'ar' ? 'المكان (إنجليزي) *' : 'Location (English) *'}
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.locationEn}
-                    onChange={(e) => handleInputChange('locationEn', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Type and Status */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {language === 'ar' ? 'نوع الاجتماع' : 'Meeting Type'}
-                  </label>
-                  <select
-                    value={formData.type}
-                    onChange={(e) => handleInputChange('type', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  >
-                    {meetingTypes.map((type) => (
-                      <option key={type.value} value={type.value}>
-                        {language === 'ar' ? type.label : type.labelEn}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {language === 'ar' ? 'الحالة' : 'Status'}
-                  </label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => handleInputChange('status', e.target.value as any)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  >
-                    {statusOptions.map((status) => (
-                      <option key={status.value} value={status.value}>
-                        {language === 'ar' ? status.label : status.labelEn}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Organizer Fields */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {language === 'ar' ? 'المنظم (عربي) *' : 'Organizer (Arabic) *'}
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.organizer}
-                    onChange={(e) => handleInputChange('organizer', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    required
-                    dir="rtl"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {language === 'ar' ? 'المنظم (إنجليزي) *' : 'Organizer (English) *'}
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.organizerEn}
-                    onChange={(e) => handleInputChange('organizerEn', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Max Attendees */}
+              {/* Location Field (Arabic only) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {language === 'ar' ? 'الحد الأقصى للحضور' : 'Maximum Attendees'}
+                  {language === 'ar' ? 'المكان (عربي) *' : 'Location (Arabic) *'}
                 </label>
                 <input
-                  type="number"
-                  min="1"
-                  value={formData.maxAttendees}
-                  onChange={(e) => handleInputChange('maxAttendees', parseInt(e.target.value) || 1)}
+                  type="text"
+                  value={formData.location}
+                  onChange={(e) => handleInputChange('location', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  required
+                  dir="rtl"
                 />
               </div>
 
-              {/* Recurring Options */}
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <input
-                    id="isRecurring"
-                    type="checkbox"
-                    checked={formData.isRecurring}
-                    onChange={(e) => handleInputChange('isRecurring', e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="isRecurring" className="mr-2 text-sm text-gray-700 dark:text-gray-300">
-                    {language === 'ar' ? 'اجتماع متكرر' : 'Recurring Meeting'}
-                  </label>
-                </div>
-
-                {formData.isRecurring && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {language === 'ar' ? 'نوع التكرار' : 'Recurrence Type'}
-                    </label>
-                    <select
-                      value={formData.recurrenceType}
-                      onChange={(e) => handleInputChange('recurrenceType', e.target.value as any)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    >
-                      <option value="weekly">{language === 'ar' ? 'أسبوعي' : 'Weekly'}</option>
-                      <option value="monthly">{language === 'ar' ? 'شهري' : 'Monthly'}</option>
-                      <option value="yearly">{language === 'ar' ? 'سنوي' : 'Yearly'}</option>
-                    </select>
-                  </div>
-                )}
+              {/* Meeting Type as input text */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {language === 'ar' ? 'نوع الاجتماع' : 'Meeting Type'}
+                </label>
+                <input
+                  type="text"
+                  value={formData.type}
+                  onChange={(e) => handleInputChange('type', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  required
+                />
               </div>
 
-              {/* Description Fields */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {language === 'ar' ? 'الوصف (عربي)' : 'Description (Arabic)'}
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => handleInputChange('description', e.target.value)}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    dir="rtl"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {language === 'ar' ? 'الوصف (إنجليزي)' : 'Description (English)'}
-                  </label>
-                  <textarea
-                    value={formData.descriptionEn}
-                    onChange={(e) => handleInputChange('descriptionEn', e.target.value)}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
+              {/* Organizer (Arabic only) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {language === 'ar' ? 'المنظم (عربي) *' : 'Organizer (Arabic) *'}
+                </label>
+                <input
+                  type="text"
+                  value={formData.organizer}
+                  onChange={(e) => handleInputChange('organizer', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  required
+                  dir="rtl"
+                />
+              </div>
+
+              {/* ...existing code... */}
+
+              {/* Description (Arabic only) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {language === 'ar' ? 'الوصف (عربي)' : 'Description (Arabic)'}
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  dir="rtl"
+                />
               </div>
 
               {/* Image Upload */}

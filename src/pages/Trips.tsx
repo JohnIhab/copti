@@ -5,6 +5,7 @@ import { MapPin, Calendar, Users, Clock } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { tripsService, Trip } from '../services/tripsService';
 import { tripPaymentsService } from '../services/tripPaymentsService';
+import OrderButton from '../components/BookTripBtn';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -344,17 +345,16 @@ const Trips: React.FC = () => {
                   </div>
                   <div className="flex items-center">
                     <Clock className="h-4 w-4 mr-2 text-green-500" />
-                    <span>{language === 'ar' ? trip.duration : trip.durationEn}</span>
+                    <span>{language === 'ar' ? trip.duration : trip.durationEn} يوم</span>
                   </div>
                   <div className="flex items-center">
                     <Users className="h-4 w-4 mr-2 text-purple-500" />
-                    <span>{trip.registered}/{trip.capacity}</span>
+                    <span>{trip.capacity}</span>
                   </div>
                 </div>
 
                 {/* Includes */}
                 <div className="mb-4">
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm">يشمل:</h4>
                   <div className="flex flex-wrap gap-1">
                     {(language === 'ar' ? trip.includes || [] : trip.includesEn || []).map((item, index) => (
                       <span key={index} className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
@@ -365,24 +365,16 @@ const Trips: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-4">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${(trip.registered / trip.capacity) * 100}%` }}
-                  ></div>
-                </div>
+                
                 
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold text-green-600 dark:text-green-400">
                     {trip.cost} جنيه
                   </span>
-                  <div className={`px-4 py-2 rounded-lg font-semibold transition-all duration-300 ${
-                    selectedTrips.includes(trip.id || '')
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                  }`}>
-                    {selectedTrips.includes(trip.id || '') ? 'مختار' : 'اختر'}
-                  </div>
+
+                </div>
+                <div className="flex items-center justify-center mt-4">
+                  <OrderButton />
                 </div>
               </div>
             </div>

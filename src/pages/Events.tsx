@@ -152,9 +152,7 @@ const Events: React.FC = () => {
                   alt={language === 'ar' ? event.title : event.titleEn}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 />
-                <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
-                  {language === 'ar' ? categories.find(c => c.key === event.category)?.label : categories.find(c => c.key === event.category)?.labelEn}
-                </div>
+                
               </div>
               
               <div className="p-6">
@@ -173,29 +171,15 @@ const Events: React.FC = () => {
                   </div>
                   <div className="flex items-center">
                     <Clock className="h-4 w-4 mr-2" />
-                    <span>{event.time}</span>
+                    <span>{new Date(`1970-01-01T${event.time}`).toLocaleTimeString(language === 'ar' ? 'ar-EG' : 'en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
                   </div>
                   <div className="flex items-center">
                     <MapPin className="h-4 w-4 mr-2" />
                     <span>{language === 'ar' ? event.location : event.locationEn}</span>
                   </div>
-                  <div className="flex items-center">
-                    <Users className="h-4 w-4 mr-2" />
-                    <span>{event.registered}/{event.capacity}</span>
-                  </div>
+                  
                 </div>
-                
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-4">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${(event.registered / event.capacity) * 100}%` }}
-                  ></div>
-                </div>
-                
-                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg
-                                 font-semibold transition-all duration-300 transform hover:scale-105">
-                  سجل الآن
-                </button>
+              
               </div>
             </div>
           ))}
