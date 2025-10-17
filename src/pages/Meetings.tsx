@@ -61,7 +61,7 @@ const Meetings: React.FC = () => {
       const meetingsRef = collection(db, 'meetings');
       const q = query(meetingsRef, orderBy('date', 'asc'));
       const querySnapshot = await getDocs(q);
-      
+
       const meetingsData: Meeting[] = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
@@ -72,7 +72,7 @@ const Meetings: React.FC = () => {
           image: data.image || undefined
         } as Meeting);
       });
-      
+
       setMeetings(meetingsData);
     } catch (err) {
       console.error('Error loading meetings:', err);
@@ -99,7 +99,7 @@ const Meetings: React.FC = () => {
 
   const filteredMeetings = meetings.filter(meeting => {
     const matchesCategory = selectedCategory === 'all' || meeting.category === selectedCategory;
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       meeting.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       meeting.titleEn.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
@@ -127,14 +127,14 @@ const Meetings: React.FC = () => {
       stagger: 0.1,
       ease: 'power3.out',
     })
-    .to('.meeting-card', {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      duration: 0.6,
-      stagger: 0.15,
-      ease: 'power3.out',
-    }, '-=0.3');
+      .to('.meeting-card', {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.6,
+        stagger: 0.15,
+        ease: 'power3.out',
+      }, '-=0.3');
 
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
@@ -163,11 +163,10 @@ const Meetings: React.FC = () => {
                 <button
                   key={category.key}
                   onClick={() => setSelectedCategory(category.key)}
-                  className={`filter-item px-4 py-2 rounded-full font-medium transition-all duration-300 ${
-                    selectedCategory === category.key
+                  className={`filter-item px-4 py-2 rounded-full font-medium transition-all duration-300 ${selectedCategory === category.key
                       ? 'bg-blue-600 text-white shadow-lg'
                       : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700'
-                  }`}
+                    }`}
                 >
                   {language === 'ar' ? category.label : category.labelEn}
                 </button>
@@ -217,9 +216,7 @@ const Meetings: React.FC = () => {
                   day={formatDateToDay(meeting.date)}
                   location={language === 'ar' ? meeting.location : meeting.locationEn}
                   description={language === 'ar' ? meeting.description : meeting.descriptionEn}
-                  category={language === 'ar' ? categories.find(c => c.key === meeting.category)?.label || meeting.type : categories.find(c => c.key === meeting.category)?.labelEn || meeting.typeEn}
-                  capacity={meeting.maxAttendees}
-                  registered={meeting.currentAttendees}
+                  organizer={language === 'ar' ? meeting.organizer : meeting.organizer}
                   image={meeting.image}
                   onJoin={() => {
                     console.log(`Joining meeting: ${meeting.title}`);
@@ -243,7 +240,7 @@ const Meetings: React.FC = () => {
           </div>
         )}
       </div>
-      
+
     </div>
   );
 };

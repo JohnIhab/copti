@@ -14,20 +14,17 @@ const TripsManagement: React.FC = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
   const [formData, setFormData] = useState({
-    title: '',
-    titleEn: '',
-    destination: '',
-    destinationEn: '',
-    date: '',
-    duration: '',
-    durationEn: '',
-    category: 'adults',
-    categoryEn: 'Adults',
-    description: '',
-    descriptionEn: '',
-    image: '',
-    capacity: 0,
-    cost: 0
+  title: '',
+  titleEn: '',
+  destination: '',
+  date: '',
+  duration: '',
+  category: 'adults',
+  categoryEn: 'Adults',
+  description: '',
+  image: '',
+  capacity: 0,
+  cost: 0
   });
   const [imageUploading, setImageUploading] = useState(false);
   const [imageUploadProgress, setImageUploadProgress] = useState(0);
@@ -145,14 +142,11 @@ const TripsManagement: React.FC = () => {
       title: '',
       titleEn: '',
       destination: '',
-      destinationEn: '',
       date: '',
       duration: '',
-      durationEn: '',
       category: 'adults',
       categoryEn: 'Adults',
       description: '',
-      descriptionEn: '',
       image: '',
       capacity: 0,
       cost: 0
@@ -165,14 +159,11 @@ const TripsManagement: React.FC = () => {
       title: trip.title,
       titleEn: trip.titleEn,
       destination: trip.destination,
-      destinationEn: trip.destinationEn,
       date: trip.date,
       duration: trip.duration,
-      durationEn: trip.durationEn,
       category: trip.category,
       categoryEn: trip.categoryEn,
       description: trip.description,
-      descriptionEn: trip.descriptionEn,
       image: trip.image,
       capacity: trip.capacity,
       cost: trip.cost
@@ -221,7 +212,49 @@ const TripsManagement: React.FC = () => {
         {/* Desktop Table */}
         <div className="hidden sm:block overflow-x-auto">
           <table className="w-full">
-            {/* ...existing code... */}
+            <thead className="bg-gray-50 dark:bg-gray-700">
+              <tr>
+                <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">الرحلة</th>
+                <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">مدة الرحلة</th>
+                <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">الوجهة</th>
+                <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">التاريخ</th>
+                <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">السعة</th>
+                <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">التكلفة</th>
+                <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              {trips.map((trip) => (
+                <tr key={trip.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <td className="px-6 py-4">
+                    <div className="text-sm font-medium text-gray-900 dark:text-white">{trip.title}</div>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{trip.duration} يوم</td>
+                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{trip.destination}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{new Date(trip.date).toLocaleDateString('ar-EG')}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{trip.capacity}</td>
+                  <td className="px-6 py-4 text-sm text-green-600 dark:text-green-400 font-medium">{trip.cost} ج.م</td>
+                  <td className="px-6 py-4 text-sm font-medium">
+                    <div className="flex space-x-2 space-x-reverse">
+                      <button 
+                        onClick={() => handleEdit(trip)} 
+                        className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                        title="تعديل"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button 
+                        onClick={() => trip.id && handleDelete(trip.id)} 
+                        className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        title="حذف"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </div>
         {/* Mobile Cards */}
@@ -257,7 +290,7 @@ const TripsManagement: React.FC = () => {
 
       {showAddForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" dir="rtl">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" dir="rtl"  style={{ transform: 'translateX(-5rem)' }}>
             <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{editingTrip ? 'تعديل الرحلة' : 'إضافة رحلة جديدة'}</h3>
@@ -318,20 +351,7 @@ const TripsManagement: React.FC = () => {
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    الوجهة بالإنجليزية
-                  </label>
-                  <input
-                    type="text"
-                    name="destinationEn"
-                    value={formData.destinationEn}
-                    onChange={handleInputChange}
-                    placeholder="Enter destination in English"
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
+                {/* الوجهة بالإنجليزية removed */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     تاريخ الرحلة
@@ -376,20 +396,7 @@ const TripsManagement: React.FC = () => {
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    مدة الرحلة بالإنجليزية
-                  </label>
-                  <input
-                    type="text"
-                    name="durationEn"
-                    value={formData.durationEn}
-                    onChange={handleInputChange}
-                    placeholder="Example: One Day, Two Days"
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
+                {/* مدة الرحلة بالإنجليزية removed */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     السعة القصوى
@@ -476,20 +483,7 @@ const TripsManagement: React.FC = () => {
                 />
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  وصف الرحلة بالإنجليزية
-                </label>
-                <textarea
-                  name="descriptionEn"
-                  value={formData.descriptionEn}
-                  onChange={handleInputChange}
-                  placeholder="Write a detailed description in English"
-                  rows={4}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
+              {/* وصف الرحلة بالإنجليزية removed */}
               
               <div className="flex items-center justify-end space-x-4 space-x-reverse pt-6 border-t border-gray-200 dark:border-gray-700">
                 <button
