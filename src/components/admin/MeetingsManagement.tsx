@@ -502,14 +502,14 @@ const MeetingsManagement: React.FC = () => {
                           {meeting.type}
                         </span>
                       </td>
-                      <td className="px-6 text-center">
+                      <td className="px-6 text-center dark:text-white" >
                         <span>{new Date(meeting.date).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span><br />
                         <span>{formatTime(meeting.time)} - {formatTime(meeting.endTime)}</span>
                       </td>
-                      <td className="px-6 text-center">
+                      <td className="px-6 text-center dark:text-white">
                         <span>{language === 'ar' ? meeting.location : meeting.locationEn}</span>
                       </td>
-                      <td className="px-6 text-center">
+                      <td className="px-6 text-center dark:text-white">
                         <span>{language === 'ar' ? meeting.organizer : meeting.organizerEn}</span>
                       </td>
                       {/* Removed Attendees and Status cells */}

@@ -150,25 +150,25 @@ export default function SecondaryService() {
     async function handleDeleteAll() { if (!confirm('هل أنت متأكد من حذف جميع الأسماء؟')) return; setRowsByCategory(prev => ({ ...prev, [currentKey]: [] })); setSelected({}); await handleSave() }
 
     return (
-        <div className="p-4">
-            <div className="bg-white shadow rounded p-4">
+        <div className="p-4 dark:bg-gray-900 min-h-screen">
+            <div className="bg-white dark:bg-gray-800 shadow rounded p-4">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold">غياب خدمة ثانوي - جدول أيام الجمعة</h2>
+                    <h2 className="text-xl font-semibold dark:text-white">غياب خدمة ثانوي - جدول أيام الجمعة</h2>
                     <div className="flex items-center gap-3">
-                        {docId ? <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded">مخزن</span> : <span className="text-sm bg-yellow-100 text-yellow-800 px-2 py-1 rounded">لم يتم الحفظ</span>}
+                        {docId ? <span className="text-sm bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1 rounded">مخزن</span> : <span className="text-sm bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 px-2 py-1 rounded">لم يتم الحفظ</span>}
                         <button onClick={handleSave} className="bg-blue-600 text-white px-3 py-1 rounded shadow">حفظ</button>
                     </div>
                 </div>
 
                 <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
-                        <label className="block mb-1">اختر الفئة</label>
-                        <select value={selectedCategory} onChange={e => setSelectedCategory(Number(e.target.value))} className="border rounded px-2 py-1">
+                        <label className="block mb-1 dark:text-gray-200">اختر الفئة</label>
+                        <select value={selectedCategory} onChange={e => setSelectedCategory(Number(e.target.value))} className="border rounded px-2 py-1 dark:bg-gray-700 dark:text-white dark:border-gray-600">
                             {CATEGORIES.map((c, i) => <option key={i} value={i}>{c}</option>)}
                         </select>
                         <div className="mt-2">
-                            <label className="block mb-1">اختر الصف</label>
-                            <select value={selectedGradeIdx} onChange={e => setSelectedGradeIdx(Number(e.target.value))} className="border rounded px-2 py-1">
+                            <label className="block mb-1 dark:text-gray-200">اختر الصف</label>
+                            <select value={selectedGradeIdx} onChange={e => setSelectedGradeIdx(Number(e.target.value))} className="border rounded px-2 py-1 dark:bg-gray-700 dark:text-white dark:border-gray-600">
                                 {GRADES.map((g, i) => <option key={i} value={i}>{g}</option>)}
                             </select>
                         </div>
@@ -176,30 +176,30 @@ export default function SecondaryService() {
 
                     <div>
                         <div className="flex gap-2 mb-2">
-                            <input dir="auto" value={input} onChange={e => setInput(e.target.value)} placeholder="أدخل اسم ثم اضغط إضافة" className="border rounded px-3 py-2 flex-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200" />
+                            <input dir="auto" value={input} onChange={e => setInput(e.target.value)} placeholder="أدخل اسم ثم اضغط إضافة" className="border rounded px-3 py-2 flex-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200 dark:bg-gray-700 dark:text-white dark:border-gray-600" />
                             <button onClick={handleAdd} className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700">إضافة</button>
                         </div>
-                        <textarea value={bulk} onChange={e => setBulk(e.target.value)} placeholder="لصق أسماء (سطر لكل اسم) ثم اضغط استيراد" className="w-full h-24 border rounded p-2" />
+                        <textarea value={bulk} onChange={e => setBulk(e.target.value)} placeholder="لصق أسماء (سطر لكل اسم) ثم اضغط استيراد" className="w-full h-24 border rounded p-2 dark:bg-gray-700 dark:text-white dark:border-gray-600" />
                         <div className="mt-2 flex gap-2">
                             <button onClick={handleBulkImport} className="bg-indigo-600 text-white px-3 py-1 rounded shadow hover:bg-indigo-700">استيراد</button>
-                            <button onClick={() => { setBulk(''); setError('') }} className="px-3 py-1 border rounded">مسح</button>
+                            <button onClick={() => { setBulk(''); setError('') }} className="px-3 py-1 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600">مسح</button>
                         </div>
 
-                        <div className="mt-4 p-3 border rounded bg-gray-50">
-                            <h4 className="font-medium mb-2">خدام - تحكم مستقل</h4>
+                        <div className="mt-4 p-3 border rounded bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                            <h4 className="font-medium mb-2 dark:text-white">خدام - تحكم مستقل</h4>
                             <div className="flex gap-2 mb-2">
-                                <input dir="auto" value={whoInput} onChange={e => setWhoInput(e.target.value)} placeholder="أدخل اسم خادم ثم اضغط إضافة" className="border rounded px-3 py-2 flex-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200" />
+                                <input dir="auto" value={whoInput} onChange={e => setWhoInput(e.target.value)} placeholder="أدخل اسم خادم ثم اضغط إضافة" className="border rounded px-3 py-2 flex-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200 dark:bg-gray-800 dark:text-white dark:border-gray-600" />
                                 <button onClick={handleWhoAdd} className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700">إضافة خادم</button>
                             </div>
-                            <textarea value={whoBulk} onChange={e => setWhoBulk(e.target.value)} placeholder="لصق أسماء خدام (سطر لكل اسم) ثم اضغط استيراد" className="w-full h-20 border rounded p-2 mb-2" />
+                            <textarea value={whoBulk} onChange={e => setWhoBulk(e.target.value)} placeholder="لصق أسماء خدام (سطر لكل اسم) ثم اضغط استيراد" className="w-full h-20 border rounded p-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600" />
                             <div className="flex gap-2">
                                 <button onClick={handleWhoBulkImport} className="bg-indigo-600 text-white px-3 py-1 rounded shadow hover:bg-indigo-700">استيراد خدام</button>
-                                <button onClick={() => { setWhoBulk(''); setError('') }} className="px-3 py-1 border rounded">مسح</button>
+                                <button onClick={() => { setWhoBulk(''); setError('') }} className="px-3 py-1 border rounded dark:bg-gray-800 dark:text-white dark:border-gray-600">مسح</button>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center text-sm text-gray-600">
+                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                         <div>الأيام في الشهر (أيام الجمعة):</div>
                     </div>
                 </div>
@@ -209,7 +209,7 @@ export default function SecondaryService() {
                     <button onClick={handleDeleteAll} className="bg-red-800 text-white px-3 py-1 rounded shadow hover:bg-red-900">حذف الكل</button>
                 </div>
 
-                {error && <div className="text-red-600 mb-2">{error}</div>}
+                {error && <div className="text-red-600 dark:text-red-400 mb-2">{error}</div>}
 
                 {/* Mobile: stacked cards for students */}
                 <div className="sm:hidden space-y-4">
@@ -217,24 +217,24 @@ export default function SecondaryService() {
                         <div className="text-center py-8 text-gray-500">لا يوجد أسماء بعد</div>
                     ) : (
                         currentRows.map((r, idx) => (
-                            <div key={r.id} className="bg-white rounded-lg p-4 shadow border border-gray-200">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <span className="font-bold text-lg">{idx + 1}</span>
-                                        <span className="ml-2 text-gray-800">{r.name}</span>
+                            <div key={r.id} className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow border border-gray-200 dark:border-gray-700">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <span className="font-bold text-lg dark:text-white">{idx + 1}</span>
+                                            <span className="ml-2 text-gray-800 dark:text-gray-200">{r.name}</span>
+                                        </div>
+                                        <input
+                                            type="checkbox"
+                                            checked={!!selected[`${currentKey}_${r.id}`]}
+                                            onChange={() => toggleSelect(`${currentKey}_${r.id}`)}
+                                        />
                                     </div>
-                                    <input
-                                        type="checkbox"
-                                        checked={!!selected[`${currentKey}_${r.id}`]}
-                                        onChange={() => toggleSelect(`${currentKey}_${r.id}`)}
-                                    />
-                                </div>
                                 <div className="mt-2 flex flex-wrap gap-2">
                                     {r.attendance.map((att, i) => (
                                         <button
                                             key={i}
                                             onClick={() => toggleAttend(selectedCategory, selectedGradeIdx, r.id, i)}
-                                            className={`w-8 h-8 rounded ${att ? 'bg-green-600' : 'bg-white'} border shadow-sm hover:scale-105 transition-transform`}
+                                            className={`w-8 h-8 rounded ${att ? 'bg-green-600' : 'bg-white dark:bg-gray-700'} border shadow-sm hover:scale-105 transition-transform`}
                                             aria-pressed={att}
                                             title={fridays[i].toLocaleDateString('ar-EG')}
                                         >
@@ -248,30 +248,30 @@ export default function SecondaryService() {
                 </div>
                 {/* Desktop/table for sm and up */}
                 <div className="hidden sm:block overflow-x-auto">
-                    <table className="min-w-full border table-fixed" dir="rtl">
+                    <table className="min-w-full border table-fixed dark:border-gray-700" dir="rtl">
                         <thead>
-                            <tr className="bg-gray-100">
-                                <th className="border px-2 py-2">م</th>
-                                <th className="border px-2 py-2 sticky left-0 bg-gray-100 z-20">م</th>
-                                <th className="border px-2 py-2 sticky left-12 bg-gray-100 z-20">الاسم</th>
+                            <tr className="bg-gray-100 dark:bg-gray-800 dark:text-white">
+                                <th className="border px-2 py-2 dark:border-gray-700">م</th>
+                                <th className="border px-2 py-2 sticky left-0 bg-gray-100 dark:bg-gray-800 z-20 dark:border-gray-700">م</th>
+                                <th className="border px-2 py-2 sticky left-12 bg-gray-100 dark:bg-gray-800 z-20 dark:border-gray-700">الاسم</th>
                                 {fridays.map((d, i) => (
-                                    <th key={i} className="border px-2 py-2 align-bottom" style={{ height: 120 }}>
-                                        <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', whiteSpace: 'nowrap' }} className="text-sm">{d.toLocaleDateString('ar-EG')}</div>
+                                    <th key={i} className="border px-2 py-2 align-bottom dark:border-gray-700" style={{ height: 120 }}>
+                                        <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', whiteSpace: 'nowrap' }} className="text-sm dark:text-gray-200">{d.toLocaleDateString('ar-EG')}</div>
                                     </th>
                                 ))}
                             </tr>
                         </thead>
                         <tbody>
                             {currentRows.length === 0 ? (
-                                <tr><td className="border px-3 py-2 text-center" colSpan={3 + fridays.length}>لا يوجد أسماء بعد</td></tr>
+                                <tr><td className="border px-3 py-2 text-center dark:border-gray-700 dark:text-gray-200" colSpan={3 + fridays.length}>لا يوجد أسماء بعد</td></tr>
                             ) : (
                                 currentRows.map((r, idx) => (
-                                    <tr key={r.id} className={`transition-colors hover:bg-gray-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                        <td className="border px-2 py-2 text-center"><input type="checkbox" checked={!!selected[`${currentKey}_${r.id}`]} onChange={() => toggleSelect(`${currentKey}_${r.id}`)} /></td>
-                                        <td className="border px-2 py-2 text-center sticky left-0 bg-white z-10">{idx + 1}</td>
-                                        <td className="border px-2 py-2 sticky left-12 bg-white z-10">{r.name}</td>
+                                    <tr key={r.id} className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 ${idx % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                                        <td className="border px-2 py-2 text-center dark:border-gray-700"><input type="checkbox" checked={!!selected[`${currentKey}_${r.id}`]} onChange={() => toggleSelect(`${currentKey}_${r.id}`)} /></td>
+                                        <td className="border px-2 py-2 text-center sticky left-0 bg-white dark:bg-gray-900 z-10 dark:border-gray-700 dark:text-white">{idx + 1}</td>
+                                        <td className="border px-2 py-2 sticky left-12 bg-white dark:bg-gray-900 z-10 dark:border-gray-700 dark:text-white">{r.name}</td>
                                         {r.attendance.map((att, i) => (
-                                            <td key={i} className="border px-2 py-2 text-center"><button onClick={() => toggleAttend(selectedCategory, selectedGradeIdx, r.id, i)} className={`w-6 h-6 inline-block rounded ${att ? 'bg-green-600' : 'bg-white'} border shadow-sm hover:scale-105 transition-transform`} aria-pressed={att} /></td>
+                                            <td key={i} className="border px-2 py-2 text-center dark:border-gray-700"><button onClick={() => toggleAttend(selectedCategory, selectedGradeIdx, r.id, i)} className={`w-6 h-6 inline-block rounded ${att ? 'bg-green-600' : 'bg-white dark:bg-gray-700'} border shadow-sm hover:scale-105 transition-transform`} aria-pressed={att} /></td>
                                         ))}
                                     </tr>
                                 ))
@@ -281,7 +281,7 @@ export default function SecondaryService() {
                 </div>
 
                 <div className="mt-8">
-                    <h3 className="text-lg font-semibold mb-2">{CATEGORIES[selectedCategory]} - خدام</h3>
+                    <h3 className="text-lg font-semibold mb-2 dark:text-white">{CATEGORIES[selectedCategory]} - خدام</h3>
                     <div className="mb-3">
                         <button onClick={() => { const keys = Object.keys(selectedWho).filter(k => selectedWho[k]); if (keys.length === 0) { setError('لا يوجد خدام محددين للحذف'); return } setWhoRowsByCategory(prev => { const out = { ...prev }; keys.forEach(full => { const [cat, idStr] = full.split('_'); const id = Number(idStr); out[Number(cat)] = (out[Number(cat)] || []).filter(r => r.id !== id) }); return out }); setSelectedWho({}) }} className="bg-red-600 text-white px-3 py-1 rounded">حذف المحدد - خدام</button>
                         <button onClick={() => { setWhoRowsByCategory(prev => ({ ...prev, [selectedCategory]: [] })); setSelectedWho({}) }} className="bg-red-800 text-white px-3 py-1 rounded mr-2">حذف الكل - خدام</button>
@@ -290,14 +290,14 @@ export default function SecondaryService() {
                     {/* Mobile: stacked cards for servants */}
                     <div className="sm:hidden space-y-4">
                         {(whoCurrentRows || []).length === 0 ? (
-                            <div className="text-center py-8 text-gray-500">لا يوجد أسماء بعد</div>
+                            <div className="text-center py-8 text-gray-500 dark:text-gray-400">لا يوجد أسماء بعد</div>
                         ) : (
                             whoCurrentRows.map((r, idx) => (
-                                <div key={r.id} className="bg-white rounded-lg p-4 shadow border border-gray-200">
+                                <div key={r.id} className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow border border-gray-200 dark:border-gray-700">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <span className="font-bold text-lg">{idx + 1}</span>
-                                            <span className="ml-2 text-gray-800">{r.name}</span>
+                                            <span className="font-bold text-lg dark:text-white">{idx + 1}</span>
+                                            <span className="ml-2 text-gray-800 dark:text-gray-200">{r.name}</span>
                                         </div>
                                         <input
                                             type="checkbox"
@@ -310,7 +310,7 @@ export default function SecondaryService() {
                                             <button
                                                 key={i}
                                                 onClick={() => toggleAttendWho(selectedCategory, r.id, i)}
-                                                className={`w-8 h-8 rounded ${att ? 'bg-green-600' : 'bg-white'} border shadow-sm hover:scale-105 transition-transform`}
+                                                className={`w-8 h-8 rounded ${att ? 'bg-green-600' : 'bg-white dark:bg-gray-700'} border shadow-sm hover:scale-105 transition-transform`}
                                                 aria-pressed={att}
                                                 title={fridays[i].toLocaleDateString('ar-EG')}
                                             >
@@ -324,30 +324,30 @@ export default function SecondaryService() {
                     </div>
                     {/* Desktop/table for sm and up */}
                     <div className="hidden sm:block overflow-x-auto">
-                        <table className="min-w-full border table-fixed" dir="rtl">
+                        <table className="min-w-full border table-fixed dark:border-gray-700" dir="rtl">
                             <thead>
-                                <tr className="bg-gray-100">
-                                    <th className="border px-2 py-2">م</th>
-                                    <th className="border px-2 py-2 sticky left-0 bg-gray-100 z-20">م</th>
-                                    <th className="border px-2 py-2 sticky left-12 bg-gray-100 z-20">الاسم</th>
+                                <tr className="bg-gray-100 dark:bg-gray-800 dark:text-white">
+                                    <th className="border px-2 py-2 dark:border-gray-700">م</th>
+                                    <th className="border px-2 py-2 sticky left-0 bg-gray-100 dark:bg-gray-800 z-20 dark:border-gray-700">م</th>
+                                    <th className="border px-2 py-2 sticky left-12 bg-gray-100 dark:bg-gray-800 z-20 dark:border-gray-700">الاسم</th>
                                     {fridays.map((d, i) => (
-                                        <th key={i} className="border px-2 py-2 align-bottom" style={{ height: 120 }}>
-                                            <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', whiteSpace: 'nowrap' }} className="text-sm">{d.toLocaleDateString('ar-EG')}</div>
+                                        <th key={i} className="border px-2 py-2 align-bottom dark:border-gray-700" style={{ height: 120 }}>
+                                            <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', whiteSpace: 'nowrap' }} className="text-sm dark:text-gray-200">{d.toLocaleDateString('ar-EG')}</div>
                                         </th>
                                     ))}
                                 </tr>
                             </thead>
                             <tbody>
                                 {(whoCurrentRows || []).length === 0 ? (
-                                    <tr><td className="border px-3 py-2 text-center" colSpan={3 + fridays.length}>لا يوجد أسماء بعد</td></tr>
+                                    <tr><td className="border px-3 py-2 text-center dark:border-gray-700 dark:text-gray-200" colSpan={3 + fridays.length}>لا يوجد أسماء بعد</td></tr>
                                 ) : (
                                     whoCurrentRows.map((r, idx) => (
-                                        <tr key={r.id} className={`transition-colors hover:bg-gray-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                            <td className="border px-2 py-2 text-center"><input type="checkbox" checked={!!selectedWho[`${selectedCategory}_${r.id}`]} onChange={() => toggleSelectWho(`${selectedCategory}_${r.id}`)} /></td>
-                                            <td className="border px-2 py-2 text-center sticky left-0 bg-white z-10">{idx + 1}</td>
-                                            <td className="border px-2 py-2 sticky left-12 bg-white z-10">{r.name}</td>
+                                        <tr key={r.id} className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 ${idx % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                                            <td className="border px-2 py-2 text-center dark:border-gray-700"><input type="checkbox" checked={!!selectedWho[`${selectedCategory}_${r.id}`]} onChange={() => toggleSelectWho(`${selectedCategory}_${r.id}`)} /></td>
+                                            <td className="border px-2 py-2 text-center sticky left-0 bg-white dark:bg-gray-900 z-10 dark:border-gray-700 dark:text-white">{idx + 1}</td>
+                                            <td className="border px-2 py-2 sticky left-12 bg-white dark:bg-gray-900 z-10 dark:border-gray-700 dark:text-white">{r.name}</td>
                                             {r.attendance.map((att, i) => (
-                                                <td key={i} className="border px-2 py-2 text-center"><button onClick={() => toggleAttendWho(selectedCategory, r.id, i)} className={`w-6 h-6 inline-block rounded ${att ? 'bg-green-600' : 'bg-white'} border shadow-sm hover:scale-105 transition-transform`} aria-pressed={att} /></td>
+                                                <td key={i} className="border px-2 py-2 text-center dark:border-gray-700"><button onClick={() => toggleAttendWho(selectedCategory, r.id, i)} className={`w-6 h-6 inline-block rounded ${att ? 'bg-green-600' : 'bg-white dark:bg-gray-700'} border shadow-sm hover:scale-105 transition-transform`} aria-pressed={att} /></td>
                                             ))}
                                         </tr>
                                     ))

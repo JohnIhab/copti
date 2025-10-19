@@ -12,10 +12,11 @@ const Footer: React.FC = () => {
     { key: 'meetings', href: '/meetings' },
     { key: 'events', href: '/events' },
     { key: 'contact', href: '/contact' },
+    { key: 'terms', href: '/terms-and-conditions', label: 'الشروط و الأحكام' },
   ];
 
   const socialLinks = [
-    { icon: Facebook, href: '#', color: 'hover:text-blue-600' },
+    { icon: Facebook, href: 'https://www.facebook.com/profile.php?id=100064731461327', color: 'hover:text-blue-600' },
     { icon: Instagram, href: '#', color: 'hover:text-pink-600' },
     { icon: Youtube, href: '#', color: 'hover:text-red-600' },
   ];
@@ -60,7 +61,7 @@ const Footer: React.FC = () => {
                     to={link.href}
                     className="text-gray-300 hover:text-red-500 transition-colors duration-200 focus:outline-none"
                   >
-                    {t(link.key)}
+                    {link.label ? link.label : t(link.key)}
                   </Link>
                 </li>
               ))}

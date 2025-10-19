@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 
 export default function Features() {
   return (
-    <div className="min-h-screen bg-amber-50 py-8 px-2 sm:px-4 md:px-6 lg:px-8 flex flex-col items-center">
+  <div className="min-h-screen bg-amber-50 dark:bg-gray-800 py-8 px-2 sm:px-4 md:px-6 lg:px-8 flex flex-col items-center">
       <div className="max-w-7xl mx-auto w-full flex flex-col items-center">
         {/* Responsive grid for features */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 mb-8 justify-items-center">

@@ -30,26 +30,26 @@ const PaymentDetailsModal: React.FC<{
                         <h2 className="text-2xl font-bold text-gray-900 dark:text-white text-center w-full">تفاصيل الحجز</h2>
                     </div>
                     <div className="space-y-6 w-full flex flex-col items-center justify-center text-center">
-                        <div className="flex flex-col items-center space-y-2">
+                        <div className="flex flex-col items-center space-y-2 dark:text-white">
                             <Users className="h-5 w-5 text-blue-500 mx-auto" />
                             <span className="font-semibold">{payment.name}</span>
                             <span className="text-gray-500">{payment.phone}</span>
                         </div>
-                        <div className="flex flex-col items-center space-y-2">
+                        <div className="flex flex-col items-center space-y-2 dark:text-white">
                             <DollarSign className="h-5 w-5 text-green-600 mx-auto" />
                             <span className="font-bold text-green-700">{payment.total} جنيه</span>
                         </div>
-                        <div>
-                            <h3 className="font-semibold mb-2">الرحلات المحجوزة:</h3>
+                        <div className="flex flex-col items-center space-y-2 dark:text-white">
+                            <h3 className="font-semibold mb-2 ">الرحلات المحجوزة:</h3>
                             <ul className="list-disc pl-6 rtl:pl-0 rtl:pr-6 inline-block text-center">
                                 {payment.tripIds.map(id => (
                                     <li key={id}>{getTripName(id)}</li>
                                 ))}
                             </ul>
                         </div>
-                        <div className="flex flex-col items-center space-y-2">
+                        <div className="flex flex-col items-center space-y-2 ">
                             <Calendar className="h-5 w-5 text-gray-500 mx-auto" />
-                            <span className="text-gray-700">{payment.createdAt instanceof Date ? payment.createdAt.toLocaleString('ar-EG') : ''}</span>
+                            <span className="text-gray-700 dark:text-white">{payment.createdAt instanceof Date ? payment.createdAt.toLocaleString('ar-EG') : ''}</span>
                         </div>
                     </div>
                 </div>
@@ -100,7 +100,7 @@ const AdminTripsPayments: React.FC = () => {
         return (
             <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-8 pb-0">
-                    <h1 className="text-3xl font-bold">مدفوعات الرحلات</h1>
+                    <h1 className="text-3xl font-bold dark:text-white">مدفوعات الرحلات</h1>
                     <div className="flex items-center space-x-3 rtl:space-x-reverse">
                         <Filter className="h-5 w-5 text-gray-500" />
                         <select
@@ -195,13 +195,13 @@ const AdminTripsPayments: React.FC = () => {
                                     <tr key={payment.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                         <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white text-center">{payment.name}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300 text-center" dir="ltr">{payment.phone}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                                        <td className="px-6 py-4 whitespace-nowrap text-center dark:text-white">
                                             <ul className="list-none pl-4 rtl:pl-0 rtl:pr-4 inline-block text-center">
                                                 {payment.tripIds.map(id => <li key={id}>{getTripName(id)}</li>)}
                                             </ul>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap font-bold text-green-600 text-center">{payment.total} جنيه</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">{payment.createdAt instanceof Date ? payment.createdAt.toLocaleString('ar-EG') : ''}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-white text-center">{payment.createdAt instanceof Date ? payment.createdAt.toLocaleString('ar-EG') : ''}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
                                             <button
                                                 onClick={() => { setSelectedPayment(payment); setShowModal(true); }}

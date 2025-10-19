@@ -97,7 +97,7 @@ const Contact: React.FC = () => {
   ];
 
   const socialLinks = [
-    { icon: Facebook, href: '#', color: 'hover:text-blue-600', name: 'Facebook' },
+    { icon: Facebook, href: 'https://www.facebook.com/profile.php?id=100064731461327', color: 'hover:text-blue-600', name: 'Facebook' },
     { icon: Instagram, href: '#', color: 'hover:text-pink-600', name: 'Instagram' },
     { icon: Youtube, href: '#', color: 'hover:text-red-600', name: 'YouTube' }
   ];
