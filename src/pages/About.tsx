@@ -3,8 +3,8 @@ import { useEffect, useRef } from 'react';
 import { choirs, awards, sundaySchools, oldChurch, newChurch } from './aboutData';
 import gsap from 'gsap';
 import Fathers from '../components/Fathers';
-import CherchRole from '../components/CherchRole';
 import ThreeDWaveGallery from '../components/ThreeDWaveGallery';
+import InfiniteScoll from '../components/InfiniteScoll';
 
 const sectionClass =
   'mb-12 p-6 bg-white/80 rounded-xl shadow-lg border border-gray-200';
@@ -29,8 +29,8 @@ export default function AboutPage() {
   }, []);
 
   return (
-    
-    <div className="max-w-4xl mx-auto px-4 py-10 mt-24" ref={containerRef}>
+
+    <div className="max-w-7xl mx-auto px-4 py-10 mt-24" ref={containerRef}>
       {/* Section 1: Fathers */}
       <Fathers />
 
@@ -62,8 +62,8 @@ export default function AboutPage() {
           </ul>
         </div>
       </section>
-      
-      <ThreeDWaveGallery />
+
+      <ThreeDWaveGallery className="hidden sm:block" />
 
       {/* Section 3: Old Church */}
       <section className={sectionClass}>
@@ -80,6 +80,9 @@ export default function AboutPage() {
           {newChurch.content}
         </p>
       </section>
+      <div className="flex justify-center mt-8">
+        <InfiniteScoll />
+      </div>
     </div>
   );
 }

@@ -16,28 +16,32 @@ const images = [
   "/Images/services/1.jpg",
 ];
 
-const ThreeDWaveGallery: React.FC = () => {
-  return (
-    <div className="wrapper">
-      <div
-        className="items"
-        style={{
-          ["--index" as any]: "calc(1vw + 1vh)",
-        }}
-      >
-        {images.map((src, i) => (
-          <div
-            key={i}
-            tabIndex={0}
-            style={{
-              backgroundImage: `url(${src})`,
-            }}
-            className="item relative"
-          />
-        ))}
-      </div>
+interface ThreeDWaveGalleryProps {
+  className?: string;
+}
 
-  <style>{`
+const ThreeDWaveGallery: React.FC<ThreeDWaveGalleryProps> = ({ className }) => {
+  return (
+    <div className={className}>
+      <div className="wrapper">
+        <div
+          className="items"
+          style={{
+            ["--index" as any]: "calc(1vw + 1vh)",
+          }}
+        >
+          {images.map((src, i) => (
+            <div
+              key={i}
+              tabIndex={0}
+              style={{
+                backgroundImage: `url(${src})`,
+              }}
+              className="item relative"
+            />
+          ))}
+        </div>
+        <style>{`
 * {
     margin: 0;
     padding: 0;
@@ -190,6 +194,7 @@ body{
     margin: 0 .45vw;
 }
       `}</style>
+      </div>
     </div>
   );
 };
