@@ -1,10 +1,12 @@
+import Darkmood from './DarkmoodBtm';
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Church, LogOut } from 'lucide-react';
+import { Menu, X, LogOut } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { signOut, auth } from '../services/firebase';
 import LoginButton from './LoginButton';
+import logo from '../../public/Images/logo.jpg'
 
 const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -51,14 +53,11 @@ const Navigation: React.FC = () => {
         <div className="flex justify-between items-center h-14 sm:h-16 min-h-[3.5rem]">
           {/* Logo */}
           <div className="flex items-center space-x-2 rtl:space-x-reverse flex-shrink-0">
-            <Link to="/" className="flex items-center space-x-2 rtl:space-x-reverse focus:outline-none">
-              <Church className="h-6 w-6 sm:h-8 sm:w-8 text-blue-700 dark:text-blue-400" />
-            </Link>
+
             <div className="hidden sm:block">
               <Link to="/" className="focus:outline-none">
-                <h1 className="text-sm sm:text-lg font-bold text-white dark:text-white transition-colors whitespace-nowrap px-2 py-1 rounded-md bg-black/20 dark:bg-white/10 backdrop-blur-sm border border-white/10 dark:border-gray-700/20">
-                  {language === 'ar' ? 'كنيسة الأنبا رويس' : 'St. Rouis Church'}
-                </h1>
+                <img src={logo} alt="Church Logo Text" className="h-14 rounded-lg" />
+
               </Link>
             </div>
           </div>
@@ -80,6 +79,7 @@ const Navigation: React.FC = () => {
 
             {/* Auth Button */}
             {currentUser ? (
+              <>
               <div className="flex items-center space-x-2 rtl:space-x-reverse">
                 {/* Show admin link only for admin role. For service role ('خادم') route to services dashboard. */}
                 {appUser?.role === 'admin' ? (
@@ -111,6 +111,12 @@ const Navigation: React.FC = () => {
                   <LogOut className="h-4 w-4" />
                 </button>
               </div>
+                <div className="m-5">
+
+                <Darkmood />
+                </div>
+                </>
+              
             ) : (
               <Link to="/login" className="focus:outline-none">
                 <LoginButton />
@@ -142,18 +148,7 @@ const Navigation: React.FC = () => {
             </button> */}
 
             {/* Theme Toggle */}
-            {/* <button
-              onClick={toggleTheme}
-              className="p-1.5 sm:p-2 rounded-lg bg-gray-100 dark:bg-gray-800 
-                      hover:bg-gray-200 dark:hover:bg-gray-700
-                      transition-colors duration-200 focus:outline-none focus:ring-0"
-            >
-              {isDark ? (
-                <Sun className="h-4 w-4 text-yellow-500" />
-              ) : (
-                <Moon className="h-4 w-4 text-gray-600" />
-              )}
-            </button> */}
+            
 
             {/* Mobile Menu Button */}
             <button
@@ -181,14 +176,13 @@ const Navigation: React.FC = () => {
 
             {/* Sidebar Menu */}
             <div className={`md:hidden fixed text-center top-0 left-0 w-80 max-w-[85vw] bg-white dark:bg-gray-900 shadow-xl border-r border-white/20 dark:border-gray-700/20 z-50 transition-all duration-800 ease-in-out  !overflow-x-hidden ${isOpen ? 'h-full translate-x-0' : 'h-0 -translate-x-full'}
-              `} style={{height: isOpen ? '100vh' : '0', overflowX: 'hidden'}}>
+              `} style={{ height: isOpen ? '100vh' : '0', overflowX: 'hidden' }}>
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-white/20 dark:border-gray-700/20 bg-white">
-                <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                  <Church className="h-8 w-8 text-blue-700 dark:text-blue-400" />
-                  <h2 className="text-lg font-bold text-gray-800 dark:text-white">
-                    {language === 'ar' ? 'كنيسة السيدة العذراء' : 'St. Mary Church'}
-                  </h2>
+                <div className="flex items-center justify-center flex-grow">
+                  <Link to="/" className="focus:outline-none">
+                    <img src={logo} alt="Church Logo Text" className="h-20 rounded-lg" />
+                  </Link>
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}
@@ -218,7 +212,7 @@ const Navigation: React.FC = () => {
 
                 {/* Mobile Auth Buttons */}
                 {currentUser ? (
-                  <div className="space-y-2">
+                  <div className="space-y-5">
                     {appUser?.role === 'admin' ? (
                       <Link
                         to="/admin"
@@ -240,6 +234,7 @@ const Navigation: React.FC = () => {
                         {language === 'ar' ? 'لوحة التحكم' : 'Dashboard'}
                       </Link>
                     ) : null}
+                    <>
                     <button
                       onClick={async () => {
                         // Close menu first
@@ -257,6 +252,10 @@ const Navigation: React.FC = () => {
                     >
                       {language === 'ar' ? 'تسجيل الخروج' : 'Logout'}
                     </button>
+                    <div className="flex justify-center items-center">
+                      <Darkmood />
+                    </div>
+                  </>
                   </div>
                 ) : (
                   <div className="flex justify-center">

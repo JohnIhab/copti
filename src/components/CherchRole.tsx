@@ -10,14 +10,14 @@ const images = [
     { src: '/Images/card/22.jpg', label: 'Architecture Example 7' },
     { src: '/Images/card/33.jpg', label: 'Architecture Example 8' },
     { src: '/Images/card/44.jpg', label: 'Architecture Example 9' },
-    { src: '/Images/card/55.jpg', label: 'Architecture Example 10' },
+    { src: '/Images/card/55.jpg', label: 'Architecture Example 10' }, 
     { src: '/Images/card/66.jpg', label: 'Architecture Example 11' },
 ];
 
 export default function CherchRole() {
   return (
   <div
-    className="w-full flex items-center justify-center bg-white overflow-hidden relative responsive-chrchrole-height"
+    className="w-full flex items-center justify-center bg-white dark:bg-gray-900 overflow-hidden relative responsive-chrchrole-height"
   >
             <div className="carousel relative" style={{width: '30rem'}}>
                 

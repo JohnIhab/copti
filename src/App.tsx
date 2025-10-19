@@ -31,6 +31,7 @@ import ThreeDWaveGallery from './components/ThreeDWaveGallery';
 import AboutPage from './pages/About';
 import CherchRole from './components/CherchRole';
 import ScrollToTop from './components/ScrollToTop';
+import TermsAndConditions from './pages/TermsAndConditions';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -169,6 +170,13 @@ function App() {
                     <Navigation />
                     <ServicesDashboard />
                   </ServiceProtectedRoute>
+                } />
+                <Route path='terms-and-conditions' element={
+                  <>
+                    <Navigation />
+                    <TermsAndConditions />
+                    <Footer />
+                  </>
                 } />
                 <Route path="*" element={
                   <>

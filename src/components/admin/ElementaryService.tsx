@@ -310,22 +310,22 @@ export default function ElementaryService() {
 
     return (
         <div className="p-4">
-            <div className="bg-white shadow rounded p-4">
+            <div className="bg-white dark:bg-gray-900 shadow rounded p-4">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold">غياب خدمة ابتدائي - جدول أيام الجمعة</h2>
+                    <h2 className="text-xl font-semibold dark:text-white">غياب خدمة ابتدائي - جدول أيام الجمعة</h2>
                     <div className="flex items-center gap-3">
-                        {docId ? <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded">مخزن</span> : <span className="text-sm bg-yellow-100 text-yellow-800 px-2 py-1 rounded">لم يتم الحفظ</span>}
+                        {docId ? <span className="text-sm bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1 rounded">مخزن</span> : <span className="text-sm bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 px-2 py-1 rounded">لم يتم الحفظ</span>}
                         <button onClick={handleSave} className="bg-blue-600 text-white px-3 py-1 rounded shadow">حفظ</button>
                     </div>
                 </div>
 
                 <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
-                        <label className="block mb-1">اختر الصف</label>
+                        <label className="block mb-1 dark:text-white">اختر الصف</label>
                         <select
                             value={selectedGrade}
                             onChange={e => setSelectedGrade(Number(e.target.value))}
-                            className="border rounded px-2 py-1"
+                                className="border rounded px-2 py-1 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                         >
                             {GRADES.map((g, i) => (
                                 <option key={i} value={i}>{g}</option>
@@ -342,7 +342,7 @@ export default function ElementaryService() {
                                 value={input}
                                 onChange={e => setInput(e.target.value)}
                                 placeholder="أدخل اسم ثم اضغط إضافة"
-                                className="border rounded px-3 py-2 flex-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                className="border rounded px-3 py-2 flex-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                             />
                             <button onClick={handleAdd} className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700">إضافة</button>
                         </div>
@@ -350,22 +350,22 @@ export default function ElementaryService() {
                             value={bulk}
                             onChange={e => setBulk(e.target.value)}
                             placeholder="لصق أسماء (سطر لكل اسم) ثم اضغط استيراد"
-                            className="w-full h-24 border rounded p-2"
+                            className="w-full h-24 border rounded p-2 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                         />
-                        <div className="mt-2 flex gap-2">
+                        <div className="mt-2 flex gap-2 dark:text-white">
                             <button onClick={handleBulkImport} className="bg-indigo-600 text-white px-3 py-1 rounded shadow hover:bg-indigo-700">استيراد</button>
                             <button onClick={() => { setBulk(''); setError('') }} className="px-3 py-1 border rounded">مسح</button>
                         </div>
 
-                        <div className="mt-4 p-3 border rounded bg-gray-50">
-                            <h4 className="font-medium mb-2">خدام - تحكم مستقل</h4>
+                        <div className="mt-4 p-3 border rounded bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+                            <h4 className="font-medium mb-2 dark:text-white">خدام - تحكم مستقل</h4>
                             <div className="flex gap-2 mb-2">
                                 <input
                                     dir="auto"
                                     value={whoInput}
                                     onChange={e => setWhoInput(e.target.value)}
                                     placeholder="أدخل اسم خادم ثم اضغط إضافة"
-                                    className="border rounded px-3 py-2 flex-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                    className="border rounded px-3 py-2 flex-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                                 />
                                 <button onClick={handleWhoAdd} className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700">إضافة خادم</button>
                             </div>
@@ -373,16 +373,16 @@ export default function ElementaryService() {
                                 value={whoBulk}
                                 onChange={e => setWhoBulk(e.target.value)}
                                 placeholder="لصق أسماء خدام (سطر لكل اسم) ثم اضغط استيراد"
-                                className="w-full h-20 border rounded p-2 mb-2"
+                                className="w-full h-20 border rounded p-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                             />
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 dark:text-white">
                                 <button onClick={handleWhoBulkImport} className="bg-indigo-600 text-white px-3 py-1 rounded shadow hover:bg-indigo-700">استيراد خدام</button>
                                 <button onClick={() => { setWhoBulk(''); setError('') }} className="px-3 py-1 border rounded">مسح</button>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center text-sm text-gray-600">
+                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                         <div>الأيام في الشهر (أيام الجمعة):</div>
                     </div>
                 </div>
@@ -390,10 +390,10 @@ export default function ElementaryService() {
                 <div className="mb-3 flex gap-2">
                     <button onClick={handleDeleteSelected} className="bg-red-600 text-white px-3 py-1 rounded shadow hover:bg-red-700">حذف المحدد</button>
                     <button onClick={handleDeleteAll} className="bg-red-800 text-white px-3 py-1 rounded shadow hover:bg-red-900">حذف الكل</button>
-                    <input value={search} onChange={e => setSearch(e.target.value)} placeholder="بحث..." className="ml-auto border px-2 py-1 rounded" />
+                    <input value={search} onChange={e => setSearch(e.target.value)} placeholder="بحث..." className="ml-auto border px-2 py-1 rounded dark:bg-gray-800 dark:text-white dark:border-gray-700" />
                 </div>
 
-                {error && <div className="text-red-600 mb-2">{error}</div>}
+                {error && <div className="text-red-600 dark:text-red-400 mb-2">{error}</div>}
 
                 {/* Mobile: stacked cards for students */}
                 <div className="sm:hidden space-y-4">
@@ -401,11 +401,11 @@ export default function ElementaryService() {
                         <div className="text-center py-8 text-gray-500">لا يوجد أسماء بعد</div>
                     ) : (
                         filteredRows.map((r, idx) => (
-                            <div key={r.id} className="bg-white rounded-lg p-4 shadow border border-gray-200">
+                            <div key={r.id} className="bg-white dark:bg-gray-900 rounded-lg p-4 shadow border border-gray-200 dark:border-gray-700">
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <span className="font-bold text-lg">{idx + 1}</span>
-                                        <span className="ml-2 text-gray-800">{r.name}</span>
+                                        <span className="ml-2 text-gray-800 dark:text-gray-200">{r.name}</span>
                                     </div>
                                     <input
                                         type="checkbox"
@@ -418,7 +418,7 @@ export default function ElementaryService() {
                                         <button
                                             key={i}
                                             onClick={() => toggleAttend(r.id, i)}
-                                            className={`w-8 h-8 rounded ${att ? 'bg-green-600' : 'bg-white'} border shadow-sm hover:scale-105 transition-transform`}
+                                            className={`w-8 h-8 rounded ${att ? 'bg-green-600' : 'bg-white dark:bg-gray-800'} border shadow-sm hover:scale-105 transition-transform`}
                                             aria-pressed={att}
                                             title={fridays[i].toLocaleDateString('ar-EG')}
                                         >
@@ -432,17 +432,17 @@ export default function ElementaryService() {
                 </div>
                 {/* Desktop/table for sm and up */}
                 <div className="hidden sm:block overflow-x-auto">
-                    <table className="min-w-full border table-fixed" dir="rtl">
+                    <table className="min-w-full border table-fixed dark:border-gray-700" dir="rtl">
                         <thead>
-                            <tr className="bg-gray-100">
-                                <th className="border px-2 py-2">
+                            <tr className="bg-gray-100 dark:bg-gray-800">
+                                <th className="border px-2 py-2 dark:border-gray-700">
                                     <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} />
                                 </th>
-                                <th className="border px-2 py-2 sticky left-0 bg-gray-100 z-20">م</th>
-                                <th className="border px-2 py-2 sticky left-12 bg-gray-100 z-20">الاسم</th>
+                                <th className="border px-2 py-2 sticky left-0 bg-gray-100 dark:bg-gray-800 z-20 dark:text-white">م</th>
+                                <th className="border px-2 py-2 sticky left-12 bg-gray-100 dark:bg-gray-800 z-20 dark:text-white">الاسم</th>
                                 {fridays.map((d, i) => (
-                                    <th key={i} className="border px-2 py-2 align-bottom" style={{ height: 120 }}>
-                                        <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', whiteSpace: 'nowrap' }} className="text-sm">
+                                    <th key={i} className="border px-2 py-2 align-bottom dark:border-gray-700" style={{ height: 120 }}>
+                                        <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', whiteSpace: 'nowrap' }} className="text-sm dark:text-gray-200">
                                             {d.toLocaleDateString('ar-EG')}
                                         </div>
                                     </th>
@@ -452,15 +452,15 @@ export default function ElementaryService() {
                         <tbody>
                             {filteredRows.length === 0 ? (
                                 <tr>
-                                    <td className="border px-3 py-2 text-center" colSpan={3 + fridays.length}>لا يوجد أسماء بعد</td>
+                                    <td className="border px-3 py-2 text-center dark:border-gray-700" colSpan={3 + fridays.length}>لا يوجد أسماء بعد</td>
                                 </tr>
                             ) : (
                                 filteredRows.map((r, idx) => {
                                     // Use visible index (idx) for numbering
                                     const visibleIndex = idx
                                     return (
-                                        <tr key={r.id} className={`transition-colors hover:bg-gray-50 ${visibleIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                            <td className="border px-2 py-2 text-center">
+                                        <tr key={r.id} className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 ${visibleIndex % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                                            <td className="border px-2 py-2 text-center dark:border-gray-700">
                                                 <input
                                                     type="checkbox"
                                                     checked={!!selected[`${selectedGrade}_${r.id}`]}
@@ -471,13 +471,13 @@ export default function ElementaryService() {
                                                 />
 
                                             </td>
-                                            <td className="border px-2 py-2 text-center sticky left-0 bg-white z-10">{visibleIndex + 1}</td>
-                                            <td className="border px-2 py-2 sticky left-12 bg-white z-10">{r.name}</td>
+                                            <td className="border px-2 py-2 text-center sticky left-0 bg-white dark:bg-gray-900 z-10 dark:text-white">{visibleIndex + 1}</td>
+                                            <td className="border px-2 py-2 sticky left-12 bg-white dark:bg-gray-900 z-10 dark:text-white">{r.name}</td>
                                             {r.attendance.map((att, i) => (
-                                                <td key={i} className="border px-2 py-2 text-center">
+                                                <td key={i} className="border px-2 py-2 text-center dark:border-gray-700">
                                                     <button
                                                         onClick={() => toggleAttend(r.id, i)}
-                                                        className={`w-6 h-6 inline-block rounded ${att ? 'bg-green-600' : 'bg-white'} border shadow-sm hover:scale-105 transition-transform`}
+                                                        className={`w-6 h-6 inline-block rounded ${att ? 'bg-green-600' : 'bg-white dark:bg-gray-800'} border shadow-sm hover:scale-105 transition-transform`}
                                                         aria-pressed={att}
                                                     />
                                                 </td>
@@ -491,10 +491,10 @@ export default function ElementaryService() {
                 </div>
                 {/* WHO_SERVE table */}
                 <div className="mt-8">
-                    <h3 className="text-lg font-semibold mb-2">{GRADES[selectedGrade]} و {WHO_SERVE[selectedGrade]}</h3>
+                    <h3 className="text-lg font-semibold mb-2 dark:text-white">{GRADES[selectedGrade]} و {WHO_SERVE[selectedGrade]}</h3>
                     <div className="mb-3 flex gap-2">
                         <div className="text-sm self-center">قائمة الخدام للمجموعة المختارة</div>
-                        <input value={whoSearch} onChange={e => setWhoSearch(e.target.value)} placeholder="بحث في الخدام..." className="ml-auto border px-2 py-1 rounded" />
+                        <input value={whoSearch} onChange={e => setWhoSearch(e.target.value)} placeholder="بحث في الخدام..." className="ml-auto border px-2 py-1 rounded dark:bg-gray-800 dark:text-white dark:border-gray-700" />
                     </div>
                     <div className="mb-3">
                         <button onClick={() => { /* delete selected who */
@@ -516,14 +516,14 @@ export default function ElementaryService() {
                     {/* Mobile: stacked cards for servants */}
                     <div className="sm:hidden space-y-4">
                         {whoFilteredRows.length === 0 ? (
-                            <div className="text-center py-8 text-gray-500">لا يوجد أسماء بعد</div>
+                            <div className="text-center py-8 text-gray-500 dark:text-gray-400">لا يوجد أسماء بعد</div>
                         ) : (
                             whoFilteredRows.map((r, idx) => (
-                                <div key={r.id} className="bg-white rounded-lg p-4 shadow border border-gray-200">
+                                <div key={r.id} className="bg-white dark:bg-gray-900 rounded-lg p-4 shadow border border-gray-200 dark:border-gray-700">
                                     <div className="flex items-center justify-between">
                                         <div>
                                             <span className="font-bold text-lg">{idx + 1}</span>
-                                            <span className="ml-2 text-gray-800">{r.name}</span>
+                                            <span className="ml-2 text-gray-800 dark:text-gray-200">{r.name}</span>
                                         </div>
                                         <input
                                             type="checkbox"
@@ -542,7 +542,7 @@ export default function ElementaryService() {
                                                         return { ...prev, [selectedGrade]: updated }
                                                     })
                                                 }}
-                                                className={`w-8 h-8 rounded ${att ? 'bg-green-600' : 'bg-white'} border shadow-sm hover:scale-105 transition-transform`}
+                                                className={`w-8 h-8 rounded ${att ? 'bg-green-600' : 'bg-white dark:bg-gray-800'} border shadow-sm hover:scale-105 transition-transform`}
                                                 aria-pressed={att}
                                                 title={fridays[i].toLocaleDateString('ar-EG')}
                                             >
@@ -556,15 +556,15 @@ export default function ElementaryService() {
                     </div>
                     {/* Desktop/table for sm and up */}
                     <div className="hidden sm:block overflow-x-auto">
-                        <table className="min-w-full border table-fixed" dir="rtl">
+                        <table className="min-w-full border table-fixed dark:border-gray-700" dir="rtl">
                             <thead>
-                                <tr className="bg-gray-100">
-                                    <th className="border px-2 py-2"><input type="checkbox" checked={whoAllSelected} onChange={toggleSelectAllWho} /></th>
-                                    <th className="border px-2 py-2 sticky left-0 bg-gray-100 z-20">م</th>
-                                    <th className="border px-2 py-2 sticky left-12 bg-gray-100 z-20">الاسم</th>
+                                <tr className="bg-gray-100 dark:bg-gray-800">
+                                    <th className="border px-2 py-2 dark:border-gray-700"><input type="checkbox" checked={whoAllSelected} onChange={toggleSelectAllWho} /></th>
+                                    <th className="border px-2 py-2 sticky left-0 bg-gray-100 dark:bg-gray-800 z-20 dark:text-white">م</th>
+                                    <th className="border px-2 py-2 sticky left-12 bg-gray-100 dark:bg-gray-800 z-20 dark:text-white">الاسم</th>
                                     {fridays.map((d, i) => (
-                                        <th key={i} className="border px-2 py-2 align-bottom" style={{ height: 120 }}>
-                                            <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', whiteSpace: 'nowrap' }} className="text-sm">
+                                        <th key={i} className="border px-2 py-2 align-bottom dark:border-gray-700" style={{ height: 120 }}>
+                                            <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', whiteSpace: 'nowrap' }} className="text-sm dark:text-gray-200">
                                                 {d.toLocaleDateString('ar-EG')}
                                             </div>
                                         </th>
@@ -573,17 +573,17 @@ export default function ElementaryService() {
                             </thead>
                             <tbody>
                                 {whoFilteredRows.length === 0 ? (
-                                    <tr><td className="border px-3 py-2 text-center" colSpan={3 + fridays.length}>لا يوجد أسماء بعد</td></tr>
+                                    <tr><td className="border px-3 py-2 text-center dark:border-gray-700" colSpan={3 + fridays.length}>لا يوجد أسماء بعد</td></tr>
                                 ) : (
                                     whoFilteredRows.map((r, idx) => (
-                                        <tr key={r.id} className={`transition-colors hover:bg-gray-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                            <td className="border px-2 py-2 text-center">
+                                        <tr key={r.id} className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 ${idx % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                                            <td className="border px-2 py-2 text-center dark:border-gray-700">
                                                 <input type="checkbox" checked={!!selectedWho[`${selectedGrade}_${r.id}`]} onChange={() => toggleSelectWho(r.id)} />
                                             </td>
-                                            <td className="border px-2 py-2 text-center sticky left-0 bg-white z-10">{idx + 1}</td>
-                                            <td className="border px-2 py-2 sticky left-12 bg-white z-10">{r.name}</td>
+                                            <td className="border px-2 py-2 text-center sticky left-0 bg-white dark:bg-gray-900 z-10 dark:text-white">{idx + 1}</td>
+                                            <td className="border px-2 py-2 sticky left-12 bg-white dark:bg-gray-900 z-10 dark:text-white">{r.name}</td>
                                             {r.attendance.map((att, i) => (
-                                                <td key={i} className="border px-2 py-2 text-center">
+                                                <td key={i} className="border px-2 py-2 text-center dark:border-gray-700">
                                                     <button onClick={() => {
                                                         // toggle attendance for who row
                                                         setWhoRowsByGroup(prev => {
@@ -591,7 +591,7 @@ export default function ElementaryService() {
                                                             const updated = list.map(rr => rr.id === r.id ? { ...rr, attendance: rr.attendance.map((a, ii) => ii === i ? !a : a) } : rr)
                                                             return { ...prev, [selectedGrade]: updated }
                                                         })
-                                                    }} className={`w-6 h-6 inline-block rounded ${att ? 'bg-green-600' : 'bg-white'} border shadow-sm hover:scale-105 transition-transform`} aria-pressed={att} />
+                                                    }} className={`w-6 h-6 inline-block rounded ${att ? 'bg-green-600' : 'bg-white dark:bg-gray-800'} border shadow-sm hover:scale-105 transition-transform`} aria-pressed={att} />
                                                 </td>
                                             ))}
                                         </tr>
