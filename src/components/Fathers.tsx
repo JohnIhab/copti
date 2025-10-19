@@ -1,24 +1,29 @@
 
 import React, { useRef } from 'react';
 
+import bolesImg from '../../public/Images/fathers/بولس.jpeg';
+import abdelmalekImg from '../../public/Images/fathers/سمعان عبدالملك.png';
+import shahhatImg from '../../public/Images/fathers/سمعان الشحات.jpeg';
+import barnabaImg from '../../public/Images/card/5.jpg';
+
 const slides = [
     {
-        img: '/public/Images/fathers/بولس.jpeg',
+        img: bolesImg,
         name: 'أبونا المتنيح القمص / بولس كامل بشاي',
         desc: 'Renowned for its breathtaking Alpine scenery and precision in craftsmanship',
     },
     {
-        img: '/public/Images/fathers/سمعان عبدالملك.png',
+        img: abdelmalekImg,
         name: 'أبونا المتنيح القمص / سمعان عبد الملاك',
         desc: 'Known for its saunas, lakes, and a deep connection to nature',
     },
     {
-        img: '/public/Images/fathers/سمعان الشحات.jpeg',
+        img: shahhatImg,
         name: 'أبونا المتنيح القمص /سمعان الشحات عبد المسيح',
         desc: 'Famous for its rich culture, historical landmarks, natural beauty, and diverse cuisine',
     },
     {
-        img: '/public/Images/card/5.jpg',
+        img: barnabaImg,
         name: 'أبونا القس / برنابا سليمان',
         desc: 'الأب الراعي للكنيسة الأن',
     }
@@ -40,7 +45,7 @@ export default function Fathers() {
     };
 
     return (
-        <div className="slider-main" style={{ position: 'relative',left: '10rem', top: '-3rem', zIndex: 1, width: '100%', margin: 0, padding: 0 }}>
+        <div className="slider-main" style={{ position: 'relative',left: '-1rem', top: '-3rem', zIndex: 1, width: '100%', margin: 0, padding: 0 }}>
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
             <style>{`
         .slider-slider-container { position: relative; width: 75vw; height: 85vh; border-radius: 0; background: #f5f5f5; box-shadow: 0 30px 50px #dbdbdb; }
@@ -57,7 +62,7 @@ export default function Fathers() {
         .slider-slide .slider-item:nth-child(5) { left: calc(50% + 440px); top: 70%; transform: translate(40%, -70%); }
         .slider-slide .slider-item:nth-child(n + 6) { left: calc(50% + 440px); top: 70%; transform: translate(40%, -70%); overflow: hidden; }
         @media (max-width: 768px) { .slider-item img { transform: scale(1.4); } .slider-slide .slider-item:nth-child(3) { left: 50%; top: 75%; transform: translate(20%, -75%); } .slider-slide .slider-item:nth-child(4) { left: calc(50% + 170px); top: 75%; transform: translate(20%, -75%); } .slider-slide .slider-item:nth-child(5) { left: calc(50% + 340px); top: 75%; transform: translate(20%, -75%); } .slider-slide .slider-item:nth-child(n + 6) { left: calc(50% + 340px); top: 75%; transform: translate(20%, -75%); } }
-        .slider-item .slider-content { position: absolute; top: 50%; left: 100px; max-width: 450px; text-align: left; color: #fff; transform: translate(0, -50%); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: none; font-size: 20px; background: #fffcfc54; padding: 30px; border-radius: 15px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .slider-item .slider-content { position: absolute; top: 70%; left: 100px; max-width: 450px; text-align: left; color: #fff; transform: translate(0, -50%); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: none; font-size: 20px; background: #fffcfc54; padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
         @media (max-width: 768px) { .slider-item .slider-content { left: 20px; width: 158px; font-size: 14px; padding: 20px 15px; backdrop-filter: blur(8px); transform: translate(28px, 39px); background: #fffcfc54; } }
         @media (max-width: 480px) { .slider-item .slider-content { left: 15px; width: 158px; font-size: 16px; padding: 15px 12px; backdrop-filter: blur(6px); transform: translate(28px, 39px); background: #fffcfc54; } }
         .slider-content .slider-name { font-size: 42px; text-transform: uppercase; font-weight: 700; opacity: 0; animation: animate 1s ease-in-out 1 forwards; background: linear-gradient(135deg, #05A490, #004f45); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); letter-spacing: 2px; line-height: 1.2; margin-bottom: 15px; }
@@ -83,7 +88,7 @@ export default function Fathers() {
         @media (max-width: 768px) { .slider-main { padding: 0; } .button button { min-height: 44px; min-width: 44px; touch-action: manipulation; } .slider-slide .slider-item:nth-child(n + 5) { display: none; } }
         @media (max-width: 480px) { .slider-slide .slider-item:nth-child(n + 4) { display: none; } .slider-slide .slider-item:nth-child(3) { left: 60%; transform: translate(10%, -75%); } }
         @media (max-width: 768px) { body { overflow-x: hidden; } }
-        .slider-content .slider-name::after { content: ''; display: block; width: 60px; height: 3px; background: linear-gradient(90deg, #05A490, #004f45); margin: 10px 0; border-radius: 2px; animation: slideInFromLeft 1s ease-out 1s forwards; opacity: 0; }
+        
         @media (max-width: 768px) { .slider-content .slider-name::after { width: 40px; height: 2px; margin: 8px 0; } }
         @media (max-width: 480px) { .slider-content .slider-name::after { width: 35px; height: 2px; margin: 6px 0; } }
         .slider-content::selection { background: rgba(0,123,255,0.3); color: white; }
@@ -97,7 +102,6 @@ export default function Fathers() {
                             <img src={slide.img} alt={slide.name} style={{objectFit: 'cover'}}/>
                             <div className="slider-content">
                                 <div className="slider-name text-center">{slide.name}</div>
-                                <div className="slider-description text-center">{slide.desc}</div>
                             </div>
                         </div>
                     ))}

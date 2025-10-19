@@ -7,11 +7,11 @@ const Footer: React.FC = () => {
   const { t } = useLanguage();
 
   const quickLinks = [
-    { key: 'home', href: '#home' },
-    { key: 'about', href: '#about' },
-    { key: 'meetings', href: '#meetings' },
-    { key: 'events', href: '#events' },
-    { key: 'contact', href: '#contact' },
+    { key: 'home', href: '/' },
+    { key: 'about', href: '/aboutpage' },
+    { key: 'meetings', href: '/meetings' },
+    { key: 'events', href: '/events' },
+    { key: 'contact', href: '/contact' },
   ];
 
   const socialLinks = [
@@ -56,12 +56,12 @@ const Footer: React.FC = () => {
             <ul className="space-y-3">
               {quickLinks.map((link) => (
                 <li key={link.key}>
-                  <a
-                    href={link.href}
+                  <Link
+                    to={link.href}
                     className="text-gray-300 hover:text-red-500 transition-colors duration-200 focus:outline-none"
                   >
                     {t(link.key)}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

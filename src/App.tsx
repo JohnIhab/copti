@@ -30,6 +30,7 @@ import NotFound from './pages/NotFound';
 import ThreeDWaveGallery from './components/ThreeDWaveGallery';
 import AboutPage from './pages/About';
 import CherchRole from './components/CherchRole';
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -81,6 +82,7 @@ function App() {
       <LanguageProvider>
         <AuthProvider>
           <Router>
+              <ScrollToTop />
               <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
                 <BibleVerseModal 
                   isOpen={showBibleVerse} 
