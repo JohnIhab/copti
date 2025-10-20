@@ -75,8 +75,11 @@ const Navigation: React.FC = () => {
               >
                 {t(item.key)}
               </Link>
+              
             ))}
-
+            <div className="m-5">
+                <Darkmood />
+                </div>
             {/* Auth Button */}
             {currentUser ? (
               <>
@@ -111,10 +114,7 @@ const Navigation: React.FC = () => {
                   <LogOut className="h-4 w-4" />
                 </button>
               </div>
-                <div className="m-5">
-
-                <Darkmood />
-                </div>
+                
                 </>
               
             ) : (
@@ -209,10 +209,12 @@ const Navigation: React.FC = () => {
                     {t(item.key)}
                   </Link>
                 ))}
-
+                <div className="flex justify-center items-center">
+                      <Darkmood />
+                    </div>
                 {/* Mobile Auth Buttons */}
                 {currentUser ? (
-                  <div className="space-y-5">
+                  <div className="space-y-2">
                     {appUser?.role === 'admin' ? (
                       <Link
                         to="/admin"
@@ -252,9 +254,7 @@ const Navigation: React.FC = () => {
                     >
                       {language === 'ar' ? 'تسجيل الخروج' : 'Logout'}
                     </button>
-                    <div className="flex justify-center items-center">
-                      <Darkmood />
-                    </div>
+                    
                   </>
                   </div>
                 ) : (

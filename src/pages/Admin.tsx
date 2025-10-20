@@ -28,6 +28,7 @@ import SecondaryService from '../components/admin/SecondaryService';
 import UniversityService from '../components/admin/UniversityService';
 import MissingServe from '../components/admin/MissingService';
 import SettingsPage from '../components/admin/SettingsPage';
+import { Helmet } from 'react-helmet';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -35,32 +36,32 @@ const Admin: React.FC = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { currentUser } = useAuth();
-  
+
   // Core admin state
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
-  
+
   const adminRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = async () => {
     if (loggingOut) return;
-    
+
     const confirmed = window.confirm(
-      language === 'ar' 
+      language === 'ar'
         ? 'هل أنت متأكد من تسجيل الخروج من لوحة التحكم؟'
         : 'Are you sure you want to logout from the admin panel?'
     );
-    
+
     if (!confirmed) return;
-    
+
     setLoggingOut(true);
     try {
       await signOut(auth);
       toast.success(
-        language === 'ar' 
+        language === 'ar'
           ? 'تم تسجيل الخروج بنجاح'
           : 'Successfully logged out'
       );
@@ -68,7 +69,7 @@ const Admin: React.FC = () => {
     } catch (error) {
       console.error('Logout error:', error);
       toast.error(
-        language === 'ar' 
+        language === 'ar'
           ? 'حدث خطأ أثناء تسجيل الخروج. يرجى المحاولة مرة أخرى.'
           : 'An error occurred during logout. Please try again.'
       );
@@ -117,46 +118,46 @@ const Admin: React.FC = () => {
       duration: 0.8,
       ease: 'power3.out'
     })
-    .to('.admin-topbar', {
-      y: 0,
-      opacity: 1,
-      duration: 0.6,
-      ease: 'power3.out'
-    }, '-=0.4')
-    .to('.menu-item', {
-      opacity: 1,
-      x: 0,
-      duration: 0.4,
-      stagger: 0.08,
-      ease: 'back.out(1.7)'
-    }, '-=0.3')
-    .to('.content-header', {
-      opacity: 1,
-      y: 0,
-      duration: 0.5,
-      ease: 'power3.out'
-    }, '-=0.2')
-    .to('.stat-card', {
-      opacity: 1,
-      x: 0,
-      scale: 1,
-      duration: 0.6,
-      stagger: 0.1,
-      ease: 'back.out(1.7)'
-    }, '-=0.3')
-    .to('.admin-card', {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      rotationX: 0,
-      duration: 0.7,
-      stagger: 0.12,
-      ease: 'power3.out'
-    }, '-=0.4');
+      .to('.admin-topbar', {
+        y: 0,
+        opacity: 1,
+        duration: 0.6,
+        ease: 'power3.out'
+      }, '-=0.4')
+      .to('.menu-item', {
+        opacity: 1,
+        x: 0,
+        duration: 0.4,
+        stagger: 0.08,
+        ease: 'back.out(1.7)'
+      }, '-=0.3')
+      .to('.content-header', {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        ease: 'power3.out'
+      }, '-=0.2')
+      .to('.stat-card', {
+        opacity: 1,
+        x: 0,
+        scale: 1,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: 'back.out(1.7)'
+      }, '-=0.3')
+      .to('.admin-card', {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        rotationX: 0,
+        duration: 0.7,
+        stagger: 0.12,
+        ease: 'power3.out'
+      }, '-=0.4');
 
     // Enhanced hover animations for cards only
     const cards = document.querySelectorAll('.admin-card, .stat-card');
-    
+
     cards.forEach(card => {
       card.addEventListener('mouseenter', () => {
         gsap.to(card, {
@@ -167,7 +168,7 @@ const Admin: React.FC = () => {
           ease: 'power2.out'
         });
       });
-      
+
       card.addEventListener('mouseleave', () => {
         gsap.to(card, {
           scale: 1,
@@ -182,8 +183,8 @@ const Admin: React.FC = () => {
     // Cleanup
     return () => {
       cards.forEach(card => {
-        card.removeEventListener('mouseenter', () => {});
-        card.removeEventListener('mouseleave', () => {});
+        card.removeEventListener('mouseenter', () => { });
+        card.removeEventListener('mouseleave', () => { });
       });
     };
   }, [language]);
@@ -191,12 +192,12 @@ const Admin: React.FC = () => {
   // Tab transition animations
   useEffect(() => {
     const contentElements = document.querySelectorAll('.tab-content > *');
-    
-    gsap.fromTo(contentElements, 
+
+    gsap.fromTo(contentElements,
       { opacity: 0, y: 30, rotationX: 15 },
-      { 
-        opacity: 1, 
-        y: 0, 
+      {
+        opacity: 1,
+        y: 0,
         rotationX: 0,
         duration: 0.6,
         stagger: 0.1,
@@ -256,49 +257,57 @@ const Admin: React.FC = () => {
   };
 
   return (
-    <div 
-      ref={adminRef}
-      className={`min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30
+    <>
+      <Helmet>
+        <title> كنيسة الأنبا رويس | لوحة الإدارة</title>
+        <meta name="description" content="تعرف على دور وتميز كنيسة الأنبا رويس في المجتمع، بما في ذلك الكورالات، الجوائز، مدارس الأحد، وتاريخ الكنيسة القديم والجديد." />
+        <meta name="keywords" content="كنيسة الأنبا رويس, دور الكنيسة, تميز الكنيسة, كورالات, جوائز الكنيسة, مدارس الأحد, تاريخ الكنيسة" />
+        <meta name="author" content="كنيسة الأنيا رويس بكفر فرج" />
+      </Helmet>
+      <div
+        ref={adminRef}
+        className={`min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30
                   dark:from-gray-900 dark:via-blue-900/10 dark:to-purple-900/10 
                   flex ${language === 'ar' ? 'rtl' : 'ltr'} relative overflow-x-hidden`}
-    >
-      {/* Mobile Menu Icon */}
-      <button
-        className={`lg:hidden fixed top-4 ${language === 'ar' ? 'right-4' : 'left-4'} z-50 p-2 rounded-full bg-white/80 dark:bg-gray-900/80 shadow-md border border-gray-200 dark:border-gray-700 flex items-center justify-center`}
-        onClick={() => setSidebarOpen(true)}
-        aria-label={language === 'ar' ? 'فتح القائمة' : 'Open menu'}
       >
-        <Menu className="h-7 w-7 text-gray-700 dark:text-white" />
-      </button>
-      {/* Enhanced background pattern */}
-      <div className="absolute inset-0 opacity-5 dark:opacity-10">
-        <div className="absolute top-20 left-20 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-20 left-40 w-80 h-80 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-2000"></div>
-      </div>
-      {/* Sidebar */}
-      <AdminSidebar
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        expandedGroups={expandedGroups}
-        toggleGroup={toggleGroup}
-        onLogout={handleLogout}
-        loggingOut={loggingOut}
-        currentUserEmail={currentUser?.email || undefined}
-      />
+        {/* Mobile Menu Icon */}
+        <button
+          className={`lg:hidden fixed top-4 ${language === 'ar' ? 'right-4' : 'left-4'} z-50 p-2 rounded-full bg-white/80 dark:bg-gray-900/80 shadow-md border border-gray-200 dark:border-gray-700 flex items-center justify-center`}
+          onClick={() => setSidebarOpen(true)}
+          aria-label={language === 'ar' ? 'فتح القائمة' : 'Open menu'}
+        >
+          <Menu className="h-7 w-7 text-gray-700 dark:text-white" />
+        </button>
+        {/* Enhanced background pattern */}
+        <div className="absolute inset-0 opacity-5 dark:opacity-10">
+          <div className="absolute top-20 left-20 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+          <div className="absolute top-40 right-20 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-1000"></div>
+          <div className="absolute bottom-20 left-40 w-80 h-80 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-2000"></div>
+        </div>
+        {/* Sidebar */}
+        <AdminSidebar
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          expandedGroups={expandedGroups}
+          toggleGroup={toggleGroup}
+          onLogout={handleLogout}
+          loggingOut={loggingOut}
+          currentUserEmail={currentUser?.email || undefined}
+        />
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen relative z-10">
-        {/* Page Content */}
-        <div className="flex-1 px-4 sm:px-6 lg:px-8 pb-8 overflow-y-auto">
-          <div ref={contentRef} className="w-full max-w-full relative">
-            {renderContent()}
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col min-h-screen relative z-10">
+          {/* Page Content */}
+          <div className="flex-1 px-4 sm:px-6 lg:px-8 pb-8 overflow-y-auto">
+            <div ref={contentRef} className="w-full max-w-full relative">
+              {renderContent()}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

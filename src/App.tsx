@@ -27,11 +27,11 @@ import Login from './pages/Login';
 import ImageGallery from './components/ImageGallery';
 import ReadBible from './pages/ReadBible';
 import NotFound from './pages/NotFound';
-import ThreeDWaveGallery from './components/ThreeDWaveGallery';
 import AboutPage from './pages/About';
 import CherchRole from './components/CherchRole';
 import ScrollToTop from './components/ScrollToTop';
 import TermsAndConditions from './pages/TermsAndConditions';
+import News from './pages/News';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -159,6 +159,7 @@ function App() {
                 } />
                 
                 <Route path="/login" element={<Login />} />
+                <Route path="/news" element={<News />} />
                 <Route path="/admin" element={
                   
                   <ProtectedRoute>

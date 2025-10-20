@@ -38,7 +38,7 @@ export default function Features() {
         </div>
 
         {/* Responsive grid for confession and events */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 mb-8 justify-items-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 mb-8 justify-items-center mt-28">
           <div className="flex justify-center w-full">
             <Link to="/confession" className="w-full max-w-xs md:max-w-sm lg:max-w-md mx-auto">
               <Card3D
@@ -54,6 +54,15 @@ export default function Features() {
                 coverImage="https://i1.wp.com/www.light-dark.net/wp-content/uploads/2025/01/2018_4_8_10_47_37_884-561-1024x717.jpg"
                 title="فعاليات الكنيسة"
                 characterImage="https://i1.wp.com/www.light-dark.net/wp-content/uploads/2025/06/261_687_073740-461-1140x815.jpg"
+              />
+            </Link>
+          </div>
+          <div className="flex justify-center w-full">
+            <Link to="/news" className="w-full max-w-xs md:max-w-sm lg:max-w-md mx-auto">
+              <Card3D
+                coverImage="https://copticorthodox.church/wp-content/uploads/2025/10/WhatsApp-Image-2025-10-13-at-21.13.43.jpeg"
+                title="الأخبار المسيحية"
+                characterImage="https://copticorthodox.church/wp-content/uploads/2025/10/WhatsApp-Image-2025-10-07-at-14.09.13.jpeg"
               />
             </Link>
           </div>
