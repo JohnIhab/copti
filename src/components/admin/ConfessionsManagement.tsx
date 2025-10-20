@@ -1,3 +1,4 @@
+import ConfirmDialog from '../ConfirmDialog';
 import React, { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { 
@@ -23,6 +24,9 @@ import { toast } from 'react-toastify';
 import confessionService, { ConfessionAppointment, TimeSlot } from '../../services/confessionService';
 
 const ConfessionsManagement: React.FC = () => {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteType, setDeleteType] = useState<'appointment' | 'slot' | 'bulk' | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState<'appointments' | 'schedule' | 'statistics'>('appointments');
   const [searchQuery, setSearchQuery] = useState('');
@@ -142,47 +146,9 @@ const ConfessionsManagement: React.FC = () => {
       );
       return;
     }
-
-    const confirmed = window.confirm(
-      language === 'ar'
-        ? 'هل أنت متأكد من حذف هذا الموعد؟'
-        : 'Are you sure you want to delete this appointment?'
-    );
-    
-    if (confirmed) {
-      try {
-        console.log('Deleting appointment with ID:', id);
-        
-        // Optimistic update - remove from UI immediately
-        setAppointments(prev => prev.filter(apt => apt.id !== id));
-        
-        // Close modal if the deleted appointment was selected
-        if (selectedAppointment?.id === id) {
-          setSelectedAppointment(null);
-          setShowAppointmentModal(false);
-        }
-        
-        // Delete from Firebase
-        await confessionService.deleteAppointment(id);
-        console.log('Appointment deleted successfully');
-        
-        toast.success(
-          language === 'ar' ? 'تم حذف الموعد بنجاح' : 'Appointment deleted successfully'
-        );
-      } catch (error: any) {
-        console.error('Error deleting appointment:', error);
-        
-        // Revert optimistic update on error
-        loadData();
-        
-        toast.error(
-          error?.message ||
-          (language === 'ar'
-            ? 'حدث خطأ أثناء حذف الموعد'
-            : 'Error deleting appointment')
-        );
-      }
-    }
+    setDeleteType('appointment');
+    setDeleteTargetId(id);
+    setShowDeleteConfirm(true);
   };
 
   const addTimeSlot = async (newSlot: Omit<TimeSlot, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -232,41 +198,9 @@ const ConfessionsManagement: React.FC = () => {
       );
       return;
     }
-
-    const confirmed = window.confirm(
-      language === 'ar'
-        ? 'هل أنت متأكد من حذف هذا الوقت؟'
-        : 'Are you sure you want to delete this time slot?'
-    );
-    
-    if (confirmed) {
-      try {
-        console.log('Deleting time slot with ID:', id);
-        
-        // Optimistic update - remove from UI immediately
-        setTimeSlots(prev => prev.filter(slot => slot.id !== id));
-        
-        // Delete from Firebase
-        await confessionService.deleteTimeSlot(id);
-        console.log('Time slot deleted successfully');
-        
-        toast.success(
-          language === 'ar' ? 'تم حذف الوقت بنجاح' : 'Time slot deleted successfully'
-        );
-      } catch (error: any) {
-        console.error('Error deleting time slot:', error);
-        
-        // Revert optimistic update on error
-        loadData();
-        
-        toast.error(
-          error?.message ||
-          (language === 'ar'
-            ? 'حدث خطأ أثناء حذف الوقت'
-            : 'Error deleting time slot')
-        );
-      }
-    }
+    setDeleteType('slot');
+    setDeleteTargetId(id);
+    setShowDeleteConfirm(true);
   };
 
   // Bulk selection handlers
@@ -301,48 +235,8 @@ const ConfessionsManagement: React.FC = () => {
       );
       return;
     }
-
-    const confirmed = window.confirm(
-      language === 'ar'
-        ? `هل أنت متأكد من حذف ${selectedTimeSlots.size} وقت محدد؟`
-        : `Are you sure you want to delete ${selectedTimeSlots.size} selected time slots?`
-    );
-
-    if (confirmed) {
-      try {
-        // Optimistic update - remove from UI immediately
-        setTimeSlots(prev => prev.filter(slot => !selectedTimeSlots.has(slot.id!)));
-        
-        // Delete from Firebase
-        const deletePromises = Array.from(selectedTimeSlots).map(id => 
-          confessionService.deleteTimeSlot(id)
-        );
-        
-        await Promise.all(deletePromises);
-        
-        // Clear selection
-        setSelectedTimeSlots(new Set());
-        setSelectAll(false);
-        
-        toast.success(
-          language === 'ar' 
-            ? `تم حذف ${selectedTimeSlots.size} وقت بنجاح` 
-            : `Successfully deleted ${selectedTimeSlots.size} time slots`
-        );
-      } catch (error: any) {
-        console.error('Error bulk deleting time slots:', error);
-        
-        // Revert optimistic update on error
-        loadData();
-        
-        toast.error(
-          error?.message ||
-          (language === 'ar'
-            ? 'حدث خطأ أثناء حذف الأوقات المحددة'
-            : 'Error deleting selected time slots')
-        );
-      }
-    }
+    setDeleteType('bulk');
+    setShowDeleteConfirm(true);
   };
 
   // GSAP animations
@@ -723,6 +617,68 @@ const ConfessionsManagement: React.FC = () => {
 
   return (
     <div ref={contentRef} className={`space-y-6 mt-10 ${language === 'ar' ? 'rtl' : 'ltr'}`}>
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setDeleteType(null);
+          setDeleteTargetId(null);
+        }}
+        onConfirm={async () => {
+          if (deleteType === 'appointment' && deleteTargetId) {
+            try {
+              // Optimistic update - remove from UI immediately
+              setAppointments(prev => prev.filter(apt => apt.id !== deleteTargetId));
+              if (selectedAppointment?.id === deleteTargetId) {
+                setSelectedAppointment(null);
+                setShowAppointmentModal(false);
+              }
+              await confessionService.deleteAppointment(deleteTargetId);
+              toast.success(language === 'ar' ? 'تم حذف الموعد بنجاح' : 'Appointment deleted successfully');
+            } catch (error: any) {
+              console.error('Error deleting appointment:', error);
+              loadData();
+              toast.error(error?.message || (language === 'ar' ? 'حدث خطأ أثناء حذف الموعد' : 'Error deleting appointment'));
+            }
+          } else if (deleteType === 'slot' && deleteTargetId) {
+            try {
+              setTimeSlots(prev => prev.filter(slot => slot.id !== deleteTargetId));
+              await confessionService.deleteTimeSlot(deleteTargetId);
+              toast.success(language === 'ar' ? 'تم حذف الوقت بنجاح' : 'Time slot deleted successfully');
+            } catch (error: any) {
+              console.error('Error deleting time slot:', error);
+              loadData();
+              toast.error(error?.message || (language === 'ar' ? 'حدث خطأ أثناء حذف الوقت' : 'Error deleting time slot'));
+            }
+          } else if (deleteType === 'bulk') {
+            try {
+              setTimeSlots(prev => prev.filter(slot => !selectedTimeSlots.has(slot.id!)));
+              const deletePromises = Array.from(selectedTimeSlots).map(id => confessionService.deleteTimeSlot(id));
+              await Promise.all(deletePromises);
+              setSelectedTimeSlots(new Set());
+              setSelectAll(false);
+              toast.success(language === 'ar' ? `تم حذف ${selectedTimeSlots.size} وقت بنجاح` : `Successfully deleted ${selectedTimeSlots.size} time slots`);
+            } catch (error: any) {
+              console.error('Error bulk deleting time slots:', error);
+              loadData();
+              toast.error(error?.message || (language === 'ar' ? 'حدث خطأ أثناء حذف الأوقات المحددة' : 'Error deleting selected time slots'));
+            }
+          }
+          setShowDeleteConfirm(false);
+          setDeleteType(null);
+          setDeleteTargetId(null);
+        }}
+        title={language === 'ar' ? 'تأكيد الحذف' : 'Confirm Deletion'}
+        message={deleteType === 'appointment'
+          ? (language === 'ar' ? 'هل أنت متأكد من حذف هذا الموعد؟' : 'Are you sure you want to delete this appointment?')
+          : deleteType === 'slot'
+            ? (language === 'ar' ? 'هل أنت متأكد من حذف هذا الوقت؟' : 'Are you sure you want to delete this time slot?')
+            : (language === 'ar' ? `هل أنت متأكد من حذف ${selectedTimeSlots.size} وقت محدد؟` : `Are you sure you want to delete ${selectedTimeSlots.size} selected time slots?`)
+        }
+        confirmText={language === 'ar' ? 'حذف' : 'Delete'}
+        cancelText={language === 'ar' ? 'إلغاء' : 'Cancel'}
+        type="danger"
+      />
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <Loader className="w-8 h-8 animate-spin text-blue-600 mr-3" />

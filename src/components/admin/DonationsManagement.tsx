@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ConfirmDialog from '../ConfirmDialog';
 import { Plus, Heart, Eye, X, Trash2 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -20,6 +21,7 @@ interface NewDonationForm {
 }
 
 const DonationsManagement: React.FC = () => {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { language } = useLanguage();
   const { currentUser } = useAuth();
   
@@ -370,48 +372,7 @@ const DonationsManagement: React.FC = () => {
 
   const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return;
-
-    const confirmMsg = language === 'ar'
-      ? `هل أنت متأكد من حذف ${selectedIds.length} صندوق؟ هذا الإجراء لا يمكن التراجع عنه.`
-      : `Are you sure you want to delete ${selectedIds.length} box(es)? This action cannot be undone.`;
-
-    if (!window.confirm(confirmMsg)) return;
-
-    setIsDeleting(true);
-    try {
-      const results = await Promise.allSettled(selectedIds.map(id => donationBoxesService.deleteDonationBox(id)));
-
-      const successes: string[] = [];
-      const failures: { id: string; reason: any }[] = [];
-
-      results.forEach((r, idx) => {
-        if (r.status === 'fulfilled') successes.push(selectedIds[idx]);
-        else failures.push({ id: selectedIds[idx], reason: r.reason });
-      });
-
-      if (successes.length > 0) {
-        toast.success(
-          language === 'ar' ? `تم حذف ${successes.length} صندوق بنجاح` : `${successes.length} box(es) deleted successfully`
-        );
-      }
-
-      if (failures.length > 0) {
-        console.error('Bulk delete failures:', failures);
-        toast.error(
-          language === 'ar' ? `فشل في حذف ${failures.length} صندوق` : `Failed to delete ${failures.length} box(es)`
-        );
-      }
-
-      // Remove deleted from state
-      setDonations(prev => prev.filter(d => !selectedIds.includes(d.id)));
-      setSelectedIds([]);
-      setSelectAll(false);
-    } catch (error) {
-      console.error('Error during bulk delete:', error);
-      toast.error(language === 'ar' ? 'حدث خطأ أثناء الحذف' : 'An error occurred while deleting');
-    } finally {
-      setIsDeleting(false);
-    }
+    setShowDeleteConfirm(true);
   };
 
   if (loading) {
@@ -464,6 +425,49 @@ const DonationsManagement: React.FC = () => {
 
   return (
     <div className="space-y-8 tab-content mt-10">
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={async () => {
+          setIsDeleting(true);
+          try {
+            const results = await Promise.allSettled(selectedIds.map(id => donationBoxesService.deleteDonationBox(id)));
+            const successes: string[] = [];
+            const failures: { id: string; reason: any }[] = [];
+            results.forEach((r, idx) => {
+              if (r.status === 'fulfilled') successes.push(selectedIds[idx]);
+              else failures.push({ id: selectedIds[idx], reason: r.reason });
+            });
+            if (successes.length > 0) {
+              toast.success(
+                language === 'ar' ? `تم حذف ${successes.length} صندوق بنجاح` : `${successes.length} box(es) deleted successfully`
+              );
+            }
+            if (failures.length > 0) {
+              console.error('Bulk delete failures:', failures);
+              toast.error(
+                language === 'ar' ? `فشل في حذف ${failures.length} صندوق` : `Failed to delete ${failures.length} box(es)`
+              );
+            }
+            setDonations(prev => prev.filter(d => !selectedIds.includes(d.id)));
+            setSelectedIds([]);
+            setSelectAll(false);
+          } catch (error) {
+            console.error('Error during bulk delete:', error);
+            toast.error(language === 'ar' ? 'حدث خطأ أثناء الحذف' : 'An error occurred while deleting');
+          } finally {
+            setIsDeleting(false);
+            setShowDeleteConfirm(false);
+          }
+        }}
+        title={language === 'ar' ? 'تأكيد الحذف' : 'Confirm Deletion'}
+        message={language === 'ar'
+          ? `هل أنت متأكد من حذف ${selectedIds.length} صندوق؟ هذا الإجراء لا يمكن التراجع عنه.`
+          : `Are you sure you want to delete ${selectedIds.length} box(es)? This action cannot be undone.`}
+        confirmText={language === 'ar' ? 'حذف' : 'Delete'}
+        cancelText={language === 'ar' ? 'إلغاء' : 'Cancel'}
+        type="danger"
+      />
       <div className="content-header">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
           <div>

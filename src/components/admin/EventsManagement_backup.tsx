@@ -224,30 +224,26 @@ const EventsManagement: React.FC = () => {
   };
 
   const handleDelete = async (event: Event) => {
-    const confirmed = window.confirm(
+    if (window.confirm(
       language === 'ar' 
         ? `هل أنت متأكد من حذف الفعالية "${event.title}"؟`
         : `Are you sure you want to delete the event "${event.titleEn}"?`
-    );
-
-    if (!confirmed) return;
-
-    try {
-      await deleteEvent(event.id!);
-      
-      toast.success(
-        language === 'ar' 
-          ? 'تم حذف الفعالية بنجاح'
-          : 'Event deleted successfully'
-      );
-
-    } catch (error) {
-      console.error('Error deleting event:', error);
-      toast.error(
-        language === 'ar' 
-          ? 'حدث خطأ أثناء حذف الفعالية'
-          : 'Error occurred while deleting event'
-      );
+    )) {
+      try {
+        await deleteEvent(event.id!);
+        toast.success(
+          language === 'ar' 
+            ? 'تم حذف الفعالية بنجاح'
+            : 'Event deleted successfully'
+        );
+      } catch (error) {
+        console.error('Error deleting event:', error);
+        toast.error(
+          language === 'ar' 
+            ? 'حدث خطأ أثناء حذف الفعالية'
+            : 'Error occurred while deleting event'
+        );
+      }
     }
   };
 
@@ -530,20 +526,14 @@ const EventsManagement: React.FC = () => {
                   >
                     <Edit className="h-4 w-4" />
                   </button>
-                  <button 
-                    onClick={() => handleDelete(event)}
-                    className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                    title={language === 'ar' ? 'حذف' : 'Delete'}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  
                 </div>
               </div>
             </div>
           </div>
         ))
       )}
-    </>
+        </>
   )}
 
       {/* Add Event Modal */}
@@ -1044,6 +1034,7 @@ const EventsManagement: React.FC = () => {
         </div>
       )}
     </div>
+    
   );
 };
 

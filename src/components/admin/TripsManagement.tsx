@@ -171,15 +171,30 @@ const TripsManagement: React.FC = () => {
     setShowAddForm(true);
   };
 
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [tripToDelete, setTripToDelete] = useState<string | null>(null);
+
   const handleDelete = async (tripId: string) => {
-    if (window.confirm('هل أنت متأكد من حذف هذه الرحلة؟')) {
-      try {
-        await tripsService.deleteTrip(tripId);
-        await loadTrips();
-      } catch (error) {
-        console.error('Error deleting trip:', error);
-      }
+    setTripToDelete(tripId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!tripToDelete) return;
+    try {
+      await tripsService.deleteTrip(tripToDelete);
+      await loadTrips();
+    } catch (error) {
+      console.error('Error deleting trip:', error);
+    } finally {
+      setDeleteDialogOpen(false);
+      setTripToDelete(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setTripToDelete(null);
   };
 
   if (loading) {
@@ -287,6 +302,26 @@ const TripsManagement: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {deleteDialogOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6" dir="rtl">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">تأكيد حذف الرحلة</h3>
+            <p className="mb-6 text-gray-700 dark:text-gray-300">هل أنت متأكد من حذف هذه الرحلة؟ لا يمكن التراجع عن هذا الإجراء.</p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={cancelDelete}
+                className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >إلغاء</button>
+              <button
+                onClick={confirmDelete}
+                className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-lg transition-colors"
+              >تأكيد الحذف</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showAddForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
