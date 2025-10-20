@@ -6,6 +6,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { tripsService, Trip } from '../services/tripsService';
 import { tripPaymentsService } from '../services/tripPaymentsService';
 import OrderButton from '../components/BookTripBtn';
+import { Helmet } from 'react-helmet';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -128,7 +129,14 @@ const Trips: React.FC = () => {
   }, [filteredTrips]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20">
+    <>
+      <Helmet>
+        <title>دور وتميز كنيسة الأنبا رويس - الرحلات الروحية</title>
+        <meta name="description" content="تعرف على دور وتميز كنيسة الأنبا رويس في المجتمع، بما في ذلك الكورالات، الجوائز، مدارس الأحد، وتاريخ الكنيسة القديم والجديد." />
+        <meta name="keywords" content="كنيسة الأنبا رويس, دور الكنيسة, تميز الكنيسة, كورالات, جوائز الكنيسة, مدارس الأحد, تاريخ الكنيسة" />
+        <meta name="author" content="كنيسة الأنيا رويس بكفر فرج" />
+      </Helmet>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20">
       <div ref={sectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="text-center mb-12">
@@ -390,6 +398,7 @@ const Trips: React.FC = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 
