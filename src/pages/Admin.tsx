@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -33,6 +34,7 @@ import { Helmet } from 'react-helmet';
 gsap.registerPlugin(ScrollTrigger);
 
 const Admin: React.FC = () => {
+  const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { currentUser } = useAuth();
@@ -48,15 +50,10 @@ const Admin: React.FC = () => {
 
   const handleLogout = async () => {
     if (loggingOut) return;
+    setShowConfirm(true);
+  };
 
-    const confirmed = window.confirm(
-      language === 'ar'
-        ? 'هل أنت متأكد من تسجيل الخروج من لوحة التحكم؟'
-        : 'Are you sure you want to logout from the admin panel?'
-    );
-
-    if (!confirmed) return;
-
+  const handleLogoutConfirm = async () => {
     setLoggingOut(true);
     try {
       await signOut(auth);
@@ -75,6 +72,7 @@ const Admin: React.FC = () => {
       );
     } finally {
       setLoggingOut(false);
+      setShowConfirm(false);
     }
   };
 
@@ -303,6 +301,16 @@ const Admin: React.FC = () => {
           <div className="flex-1 px-4 sm:px-6 lg:px-8 pb-8 overflow-y-auto">
             <div ref={contentRef} className="w-full max-w-full relative">
               {renderContent()}
+              <ConfirmDialog
+                isOpen={showConfirm}
+                onClose={() => setShowConfirm(false)}
+                onConfirm={handleLogoutConfirm}
+                title={language === 'ar' ? 'تأكيد تسجيل الخروج' : 'Confirm Logout'}
+                message={language === 'ar' ? 'هل أنت متأكد من تسجيل الخروج من لوحة التحكم؟' : 'Are you sure you want to logout from the admin panel?'}
+                confirmText={language === 'ar' ? 'تسجيل الخروج' : 'Logout'}
+                cancelText={language === 'ar' ? 'إلغاء' : 'Cancel'}
+                type="danger"
+              />
             </div>
           </div>
         </div>

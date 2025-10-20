@@ -38,6 +38,9 @@ export default function SecondaryService() {
 
     const [input, setInput] = useState('')
     const [bulk, setBulk] = useState('')
+        const [dialogOpen, setDialogOpen] = useState(false)
+        const [dialogMessage, setDialogMessage] = useState('')
+        const [dialogAction, setDialogAction] = useState<(() => Promise<void>) | null>(null)
     const [whoInput, setWhoInput] = useState('')
     const [whoBulk, setWhoBulk] = useState('')
     const [error, setError] = useState('')
@@ -141,16 +144,52 @@ export default function SecondaryService() {
     async function handleDeleteSelected() {
         const keysToDelete = Object.keys(selected).filter(k => selected[k])
         if (keysToDelete.length === 0) { setError('لا يوجد عناصر محددة للحذف'); return }
-        if (!confirm('هل أنت متأكد من حذف العناصر المحددة؟')) return
+            setDialogMessage('هل أنت متأكد من حذف العناصر المحددة؟')
+            setDialogOpen(true)
+            setDialogAction(() => async () => {
+                setRowsByCategory(prev => { const out = { ...prev }; keysToDelete.forEach(fullKey => { const [c, g, idStr] = fullKey.split('_'); if (!idStr) return; const id = Number(idStr); const k = `${c}_${g}`; out[k] = (out[k] || []).filter(r => r.id !== id); }); return out })
+                setSelected({})
+                await handleSave()
+            })
         setRowsByCategory(prev => { const out = { ...prev }; keysToDelete.forEach(fullKey => { const [c, g, idStr] = fullKey.split('_'); if (!idStr) return; const id = Number(idStr); const k = `${c}_${g}`; out[k] = (out[k] || []).filter(r => r.id !== id); }); return out })
         setSelected({})
         await handleSave()
     }
 
-    async function handleDeleteAll() { if (!confirm('هل أنت متأكد من حذف جميع الأسماء؟')) return; setRowsByCategory(prev => ({ ...prev, [currentKey]: [] })); setSelected({}); await handleSave() }
+    async function handleDeleteAll() {
+        setDialogMessage('هل أنت متأكد من حذف جميع الأسماء؟')
+        setDialogOpen(true)
+        setDialogAction(() => async () => {
+            setRowsByCategory(prev => ({ ...prev, [currentKey]: [] }))
+            setSelected({})
+            await handleSave()
+        })
+    }
 
     return (
         <div className="p-4 dark:bg-gray-900 min-h-screen">
+                {/* Confirmation Dialog */}
+                {dialogOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                        <div className="bg-white dark:bg-gray-800 rounded shadow-lg p-6 min-w-[300px]">
+                            <div className="mb-4 text-lg dark:text-gray-100">{dialogMessage}</div>
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    className="px-4 py-2 rounded bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-100"
+                                    onClick={() => { setDialogOpen(false); setDialogAction(null); }}
+                                >إلغاء</button>
+                                <button
+                                    className="px-4 py-2 rounded bg-red-600 text-white"
+                                    onClick={async () => {
+                                        setDialogOpen(false);
+                                        if (dialogAction) await dialogAction();
+                                        setDialogAction(null);
+                                    }}
+                                >تأكيد</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             <div className="bg-white dark:bg-gray-800 shadow rounded p-4">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-semibold dark:text-white">غياب خدمة ثانوي - جدول أيام الجمعة</h2>

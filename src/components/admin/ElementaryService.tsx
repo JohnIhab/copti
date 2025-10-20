@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
+import ConfirmDialog from '../ConfirmDialog';
 import { saveElementaryServiceData, getElementaryServiceData, updateElementaryServiceData } from '../../services/elementaryService'
 
 function getFridaysOfMonth(year: number, month: number) {
@@ -18,6 +19,8 @@ type Row = {
 }
 
 export default function ElementaryService() {
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [deleteType, setDeleteType] = useState<'selected' | 'all' | null>(null);
     const today = new Date()
     const year = today.getFullYear()
     const month = today.getMonth()
@@ -280,36 +283,56 @@ export default function ElementaryService() {
             setError('لا يوجد عناصر محددة للحذف')
             return
         }
-        if (!confirm('هل أنت متأكد من حذف العناصر المحددة؟')) return
-        setRowsByGrade(prev => {
-            const list = prev[selectedGrade] || []
-            const remaining = list.filter(r => !idsToDelete.includes(r.id))
-            return { ...prev, [selectedGrade]: remaining }
-        })
-        // clear selected keys for this grade
-        setSelected(s => {
-            const out: Record<string, boolean> = {}
-            Object.keys(s).forEach(k => { if (!k.startsWith(selectedGrade + '_')) out[k] = s[k] })
-            return out
-        })
-        // persist change
-        await handleSave()
+        setDeleteType('selected');
+        setShowDeleteConfirm(true);
     }
 
     async function handleDeleteAll() {
-        if (!confirm('هل أنت متأكد من حذف جميع الأسماء؟')) return
-        setRowsByGrade(prev => ({ ...prev, [selectedGrade]: [] }))
-        // clear selected keys for this grade
-        setSelected(s => {
-            const out: Record<string, boolean> = {}
-            Object.keys(s).forEach(k => { if (!k.startsWith(selectedGrade + '_')) out[k] = s[k] })
-            return out
-        })
-        await handleSave()
+        setDeleteType('all');
+        setShowDeleteConfirm(true);
     }
 
     return (
         <div className="p-4">
+            <ConfirmDialog
+                isOpen={showDeleteConfirm}
+                onClose={() => {
+                    setShowDeleteConfirm(false);
+                    setDeleteType(null);
+                }}
+                onConfirm={async () => {
+                    if (deleteType === 'selected') {
+                        const keysToDelete = Object.keys(selected).filter(k => k.startsWith(selectedGrade + '_') && selected[k])
+                        const idsToDelete = keysToDelete.map(k => Number(k.split('_')[1]))
+                        setRowsByGrade(prev => {
+                            const list = prev[selectedGrade] || []
+                            const remaining = list.filter(r => !idsToDelete.includes(r.id))
+                            return { ...prev, [selectedGrade]: remaining }
+                        })
+                        setSelected(s => {
+                            const out: Record<string, boolean> = {}
+                            Object.keys(s).forEach(k => { if (!k.startsWith(selectedGrade + '_')) out[k] = s[k] })
+                            return out
+                        })
+                        await handleSave()
+                    } else if (deleteType === 'all') {
+                        setRowsByGrade(prev => ({ ...prev, [selectedGrade]: [] }))
+                        setSelected(s => {
+                            const out: Record<string, boolean> = {}
+                            Object.keys(s).forEach(k => { if (!k.startsWith(selectedGrade + '_')) out[k] = s[k] })
+                            return out
+                        })
+                        await handleSave()
+                    }
+                    setShowDeleteConfirm(false);
+                    setDeleteType(null);
+                }}
+                title={'تأكيد الحذف'}
+                message={deleteType === 'selected' ? 'هل أنت متأكد من حذف العناصر المحددة؟' : 'هل أنت متأكد من حذف جميع الأسماء؟'}
+                confirmText={'حذف'}
+                cancelText={'إلغاء'}
+                type="danger"
+            />
             <div className="bg-white dark:bg-gray-900 shadow rounded p-4">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-semibold dark:text-white">غياب خدمة ابتدائي - جدول أيام الجمعة</h2>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ConfirmDialog from '../ConfirmDialog';
 import { Plus, BarChart3, Calendar, Star, MapPin, Heart, MessageSquare, Users, Edit, Trash2, RefreshCw } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { db } from '../../services/firebase';
@@ -35,6 +36,8 @@ interface AdminDashboardProps {
 }
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ setActiveTab }) => {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [meetingToDelete, setMeetingToDelete] = useState<string | null>(null);
   const { language } = useLanguage();
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [editingMeeting, setEditingMeeting] = useState<string | null>(null);
@@ -274,13 +277,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ setActiveTab }) => {
   };
 
   const handleDeleteMeeting = async (meetingId: string) => {
-    if (window.confirm(language === 'ar' ? 'هل أنت متأكد من حذف هذا الاجتماع؟' : 'Are you sure you want to delete this meeting?')) {
-      try {
-        await deleteMeeting(meetingId);
-      } catch (error) {
-        console.error('Error deleting meeting:', error);
-      }
-    }
+    setMeetingToDelete(meetingId);
+    setShowDeleteConfirm(true);
   };
 
   const formatDate = (dateString: string) => {
@@ -294,6 +292,29 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ setActiveTab }) => {
 
   return (
     <div className="space-y-8 tab-content mt-10">
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setMeetingToDelete(null);
+        }}
+        onConfirm={async () => {
+          if (meetingToDelete) {
+            try {
+              await deleteMeeting(meetingToDelete);
+            } catch (error) {
+              console.error('Error deleting meeting:', error);
+            }
+          }
+          setShowDeleteConfirm(false);
+          setMeetingToDelete(null);
+        }}
+        title={language === 'ar' ? 'حذف الاجتماع' : 'Delete Meeting'}
+        message={language === 'ar' ? 'هل أنت متأكد من حذف هذا الاجتماع؟' : 'Are you sure you want to delete this meeting?'}
+        confirmText={language === 'ar' ? 'حذف' : 'Delete'}
+        cancelText={language === 'ar' ? 'إلغاء' : 'Cancel'}
+        type="danger"
+      />
       {/* Enhanced Header */}
       <div className="content-header">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">

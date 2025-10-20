@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ConfirmDialog from '../ConfirmDialog';
 import { Mail, Eye, Trash2, Check } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -14,6 +15,9 @@ import {
 } from '../../services/contactService';
 
 const ContactMessagesManagement: React.FC = () => {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteType, setDeleteType] = useState<'single' | 'bulk' | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const { language } = useLanguage();
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -105,16 +109,8 @@ const ContactMessagesManagement: React.FC = () => {
 
   const handleBulkDelete = async () => {
     if (selectedMessages.length === 0) return;
-    
-    if (window.confirm(language === 'ar' ? 'هل أنت متأكد من حذف الرسائل المحددة؟' : 'Are you sure you want to delete selected messages?')) {
-      try {
-        await bulkDeleteMessages(selectedMessages);
-        setSelectedMessages([]);
-      } catch (error) {
-        console.error('Error deleting messages:', error);
-        alert(language === 'ar' ? 'حدث خطأ في حذف الرسائل' : 'Error deleting messages');
-      }
-    }
+    setDeleteType('bulk');
+    setShowDeleteConfirm(true);
   };
 
   const handleBulkMarkAsRead = async () => {
@@ -142,14 +138,9 @@ const ContactMessagesManagement: React.FC = () => {
   };
 
   const handleDeleteSingle = async (messageId: string) => {
-    if (window.confirm(language === 'ar' ? 'هل أنت متأكد من حذف هذه الرسالة؟' : 'Are you sure you want to delete this message?')) {
-      try {
-        await deleteMessage(messageId);
-      } catch (error) {
-        console.error('Error deleting message:', error);
-        alert(language === 'ar' ? 'حدث خطأ في حذف الرسالة' : 'Error deleting message');
-      }
-    }
+    setDeleteType('single');
+    setDeleteTargetId(messageId);
+    setShowDeleteConfirm(true);
   };
 
   const formatRelativeTime = (timestamp: Date) => {
@@ -229,6 +220,42 @@ const ContactMessagesManagement: React.FC = () => {
 
   return (
     <div className="space-y-8 tab-content mt-10">
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setDeleteType(null);
+          setDeleteTargetId(null);
+        }}
+        onConfirm={async () => {
+          if (deleteType === 'single' && deleteTargetId) {
+            try {
+              await deleteMessage(deleteTargetId);
+            } catch (error) {
+              console.error('Error deleting message:', error);
+              alert(language === 'ar' ? 'حدث خطأ في حذف الرسالة' : 'Error deleting message');
+            }
+          } else if (deleteType === 'bulk') {
+            try {
+              await bulkDeleteMessages(selectedMessages);
+              setSelectedMessages([]);
+            } catch (error) {
+              console.error('Error deleting messages:', error);
+              alert(language === 'ar' ? 'حدث خطأ في حذف الرسائل' : 'Error deleting messages');
+            }
+          }
+          setShowDeleteConfirm(false);
+          setDeleteType(null);
+          setDeleteTargetId(null);
+        }}
+        title={language === 'ar' ? 'تأكيد الحذف' : 'Confirm Deletion'}
+        message={deleteType === 'single'
+          ? (language === 'ar' ? 'هل أنت متأكد من حذف هذه الرسالة؟' : 'Are you sure you want to delete this message?')
+          : (language === 'ar' ? 'هل أنت متأكد من حذف الرسائل المحددة؟' : 'Are you sure you want to delete selected messages?')}
+        confirmText={language === 'ar' ? 'حذف' : 'Delete'}
+        cancelText={language === 'ar' ? 'إلغاء' : 'Cancel'}
+        type="danger"
+      />
       <div className="content-header">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
           <div>

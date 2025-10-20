@@ -537,12 +537,12 @@ const EventsManagement: React.FC = () => {
                             <Edit className="h-4 w-4" />
                           </button>
                           <button 
-                            onClick={() => handleDelete(event)}
-                            className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                            title={language === 'ar' ? 'حذف' : 'Delete'}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                                onClick={() => openDeleteConfirm(event)}
+                                className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                title={language === 'ar' ? 'حذف' : 'Delete'}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
                         </div>
                       </div>
                     </div>
