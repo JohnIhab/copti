@@ -34,7 +34,7 @@ export default function InfiniteScoll() {
         <Swiper
             slidesPerView={3}
             spaceBetween={30}
-            modules={[Navigation]}
+            modules={[Navigation, Pagination]}
             navigation={true}
             loop={true}
             breakpoints={{
@@ -44,12 +44,11 @@ export default function InfiniteScoll() {
             pagination={{
                 clickable: true,
             }}
-            modules={[Pagination]}
             className="mySwiper"
         >
             {images.map((src, idx) => (
                 <SwiperSlide key={idx}>
-                    <img src={src} alt={`Card ${idx + 1}`} style={{ width: '100vw', height: '80vh', borderRadius: '12px' }} />
+                    <img src={src} alt={`Card ${idx + 1}`} loading="lazy" decoding="async" fetchPriority="low" style={{ width: '100vw', height: '80vh', borderRadius: '12px' }} />
                 </SwiperSlide>
             ))}
         </Swiper>

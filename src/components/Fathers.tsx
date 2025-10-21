@@ -99,7 +99,7 @@ export default function Fathers() {
                 <div className="slider-slide" ref={slideRef} >
                     {slides.map((slide, idx) => (
                         <div className="slider-item" key={idx}>
-                            <img src={slide.img} alt={slide.name} style={{objectFit: 'cover'}}/>
+                            <img src={slide.img} alt={slide.name} style={{objectFit: 'cover'}} loading="lazy" decoding="async" fetchPriority="low" />
                             <div className="slider-content">
                                 <div className="slider-name text-center">{slide.name}</div>
                             </div>

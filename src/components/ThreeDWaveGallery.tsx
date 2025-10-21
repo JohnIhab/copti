@@ -35,11 +35,16 @@ const ThreeDWaveGallery: React.FC<ThreeDWaveGalleryProps> = ({ className }) => {
             <div
               key={i}
               tabIndex={0}
-              style={{
-                backgroundImage: `url(${src})`,
-              }}
               className="item relative"
-            />
+            >
+              <img
+                src={src}
+                alt={`صور ${i + 1}`}
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+              />
+            </div>
           ))}
         </div>
         <style>{`
@@ -79,17 +84,28 @@ body{
     font-weight: 600;
   }
 
-    .item{
-        width: calc(var(--index) * 3);
-        height: calc(var(--index) * 12);
-        background-color: #222;
-        background-size: cover;
-        background-position: center;
-        cursor: pointer;
-        filter: grayscale(.1) brightness(.6);
-        transition: transform 1.25s var(--transition), filter 3s var(--transition), width 1.25s var(--transition);
-        will-change: transform, filter, rotateY, width;
-    }
+  .item{
+    width: calc(var(--index) * 3);
+    height: calc(var(--index) * 12);
+    background-color: #222;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    filter: grayscale(.1) brightness(.6);
+    transition: transform 1.25s var(--transition), filter 3s var(--transition), width 1.25s var(--transition);
+    will-change: transform, filter, rotateY, width;
+  }
+
+  .item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transform-origin: center;
+    transition: inherit;
+  }
 
     /* Responsive styles */
     @media (max-width: 900px) {
