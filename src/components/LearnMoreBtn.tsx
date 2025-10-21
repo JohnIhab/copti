@@ -14,7 +14,7 @@ const LearnMoreBtn = () => {
 
 const StyledWrapper = styled.div`
   .button {
-    width: 130px;
+    width: 150px;
     height: 40px;
     display: flex;
     align-items: center;
@@ -37,6 +37,7 @@ const StyledWrapper = styled.div`
   .svgIcon {
     height: 25px;
     transition-duration: 1.5s;
+    margin-right: 6px;
   }
 
   .bell path {

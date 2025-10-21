@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { tripPaymentsService, TripPayment } from '../../services/tripPaymentsService';
 import { tripsService, Trip } from '../../services/tripsService';
 import { Eye, Filter, Users, Calendar, DollarSign } from 'lucide-react';
+import { toast } from 'react-toastify';
+import ConfirmDialog from '../ConfirmDialog';
 
 const PaymentDetailsModal: React.FC<{
     payment: TripPayment | null;
@@ -20,7 +22,7 @@ const PaymentDetailsModal: React.FC<{
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col items-center justify-center mx-2 sm:mx-0 relative">
                 <button
                     onClick={onClose}
-                    className="absolute top-3 right-3 p-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full z-10"
+                    className="absolute top-3 right-3 p-2 bg-gray-100 dark:bg-white hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full z-10"
                     aria-label="إغلاق"
                 >
                     <svg className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -33,7 +35,7 @@ const PaymentDetailsModal: React.FC<{
                         <div className="flex flex-col items-center space-y-2 dark:text-white">
                             <Users className="h-5 w-5 text-blue-500 mx-auto" />
                             <span className="font-semibold">{payment.name}</span>
-                            <span className="text-gray-500">{payment.phone}</span>
+                            <span className="text-gray-500 dark:text-white">{payment.phone}</span>
                         </div>
                         <div className="flex flex-col items-center space-y-2 dark:text-white">
                             <DollarSign className="h-5 w-5 text-green-600 mx-auto" />
@@ -65,6 +67,13 @@ const AdminTripsPayments: React.FC = () => {
     const [showModal, setShowModal] = useState(false);
     const [selectedPayment, setSelectedPayment] = useState<TripPayment | null>(null);
     const [filterTrip, setFilterTrip] = useState('all');
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [selectAll, setSelectAll] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [confirmTitle, setConfirmTitle] = useState('');
+    const [confirmMessage, setConfirmMessage] = useState('');
+    const [confirmAction, setConfirmAction] = useState<(() => Promise<void>) | null>(null);
 
     useEffect(() => {
         const fetchAll = async () => {
@@ -92,6 +101,17 @@ const AdminTripsPayments: React.FC = () => {
         const filteredPayments = filterTrip === 'all'
             ? payments
             : payments.filter(p => p.tripIds.includes(filterTrip));
+
+        // Keep selectedIds in sync when filtering: remove any selected ids that are no longer visible
+        useEffect(() => {
+            setSelectedIds(prev => {
+                const newSel = prev.filter(id => filteredPayments.some(p => p.id === id));
+                // mark selectAll if all visible rows are selected
+                setSelectAll(filteredPayments.length > 0 && filteredPayments.every(p => newSel.includes(p.id!)));
+                return newSel;
+            });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [filterTrip, payments]);
 
         // Calculate total donors and total amount
         const totalDonors = filteredPayments.length;
@@ -133,6 +153,54 @@ const AdminTripsPayments: React.FC = () => {
                                 <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 8c-2.21 0-4-1.79-4-4h2a2 2 0 004 0h2c0 2.21-1.79 4-4 4zm0-16C6.48 0 2 4.48 2 10c0 5.52 4.48 10 10 10s10-4.48 10-10C22 4.48 17.52 0 12 0z" /></svg>
                             </div>
                         </div>
+                        <div className="flex items-center justify-between p-4">
+                            <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                                <input
+                                    type="checkbox"
+                                    className="h-4 w-4"
+                                    checked={selectAll}
+                                    onChange={e => {
+                                        const checked = e.target.checked;
+                                        setSelectAll(checked);
+                                        if (checked) {
+                                            setSelectedIds(filteredPayments.map(p => p.id!).filter(Boolean));
+                                        } else {
+                                            setSelectedIds([]);
+                                        }
+                                    }}
+                                />
+                                <span className="text-sm dark:text-white">اختيار الكل</span>
+                            </div>
+                            <div>
+                                <button
+                                    disabled={selectedIds.length === 0 || deleting}
+                                    onClick={() => {
+                                        if (selectedIds.length === 0) return;
+                                        setConfirmTitle('حذف المدفوعات');
+                                        setConfirmMessage(`هل أنت متأكد من حذف ${selectedIds.length} مدفوعات؟ هذا الإجراء لا يمكن الرجوع عنه.`);
+                                        setConfirmAction(() => async () => {
+                                            try {
+                                                setDeleting(true);
+                                                await tripPaymentsService.deletePayments(selectedIds);
+                                                setPayments(prev => prev.filter(p => !selectedIds.includes(p.id!)));
+                                                setSelectedIds([]);
+                                                setSelectAll(false);
+                                                toast.success('تم حذف المدفوعات بنجاح.');
+                                            } catch (err) {
+                                                console.error(err);
+                                                toast.error('خطأ أثناء حذف المدفوعات. حاول مرة أخرى.');
+                                            } finally {
+                                                setDeleting(false);
+                                            }
+                                        });
+                                        setConfirmOpen(true);
+                                    }}
+                                    className="px-4 py-2 bg-red-600 text-white rounded-lg disabled:opacity-50"
+                                >
+                                    {deleting ? 'جاري الحذف...' : `حذف المحدد (${selectedIds.length})`}
+                                </button>
+                            </div>
+                        </div>
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
                 {loading ? (
                     <div className="flex items-center justify-center h-64">
@@ -150,28 +218,45 @@ const AdminTripsPayments: React.FC = () => {
                             {filteredPayments.map(payment => (
                                 <div key={payment.id} className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow border border-gray-200 dark:border-gray-700">
                                     <div className="flex items-start justify-between">
-                                        <div>
-                                            <p className="font-medium text-gray-900 dark:text-white">{payment.name}</p>
-                                            <p className="text-sm text-gray-500" dir="ltr">{payment.phone}</p>
+                                        <div className="flex items-start space-x-3 rtl:space-x-reverse">
+                                            <input
+                                                type="checkbox"
+                                                className="h-4 w-4 mt-1"
+                                                checked={selectedIds.includes(payment.id!)}
+                                                onChange={e => {
+                                                    const checked = e.target.checked;
+                                                    setSelectedIds(prev => {
+                                                        if (checked) return [...prev, payment.id!];
+                                                        return prev.filter(id => id !== payment.id);
+                                                    });
+                                                }}
+                                            />
+                                            <div>
+                                                <p className="font-medium text-gray-900 dark:text-white">{payment.name}</p>
+                                                <p className="text-sm text-gray-500" dir="ltr">{payment.phone}</p>
+                                            </div>
                                         </div>
                                         <div className="text-right">
                                             <p className="font-bold text-green-600">{payment.total} جنيه</p>
                                             <p className="text-xs text-gray-500">{payment.createdAt instanceof Date ? payment.createdAt.toLocaleString('ar-EG') : ''}</p>
                                         </div>
                                     </div>
-                                    <div className="mt-3">
-                                        <h4 className="text-sm font-semibold mb-1">الرحلات</h4>
-                                        <ul className="list-disc pl-5 rtl:pl-0 rtl:pr-5">
-                                            {payment.tripIds.map(id => <li key={id} className="text-sm">{getTripName(id)}</li>)}
-                                        </ul>
-                                    </div>
+                                    
                                     <div className="mt-3 flex items-center justify-between">
-                                        <button
-                                            onClick={() => { setSelectedPayment(payment); setShowModal(true); }}
-                                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
-                                        >
-                                            عرض
-                                        </button>
+                                        <div>
+                                            <h4 className="text-sm font-semibold mb-1">الرحلات</h4>
+                                            <ul className="list-disc pl-5 rtl:pl-0 rtl:pr-5">
+                                                {payment.tripIds.map(id => <li key={id} className="text-sm">{getTripName(id)}</li>)}
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <button
+                                                onClick={() => { setSelectedPayment(payment); setShowModal(true); }}
+                                                className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
+                                            >
+                                                عرض
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -182,6 +267,9 @@ const AdminTripsPayments: React.FC = () => {
                             <table className="w-full">
                             <thead className="bg-gray-50 dark:bg-gray-700">
                                 <tr>
+                                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                        <span className="sr-only">اختيار</span>
+                                    </th>
                                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">الاسم</th>
                                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">رقم الهاتف</th>
                                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">الرحلات</th>
@@ -193,6 +281,20 @@ const AdminTripsPayments: React.FC = () => {
                             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700 text-center">
                                 {filteredPayments.map(payment => (
                                     <tr key={payment.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                                            <input
+                                                type="checkbox"
+                                                className="h-4 w-4"
+                                                checked={selectedIds.includes(payment.id!)}
+                                                onChange={e => {
+                                                    const checked = e.target.checked;
+                                                    setSelectedIds(prev => {
+                                                        if (checked) return [...prev, payment.id!];
+                                                        return prev.filter(id => id !== payment.id);
+                                                    });
+                                                }}
+                                            />
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white text-center">{payment.name}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300 text-center" dir="ltr">{payment.phone}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-center dark:text-white">
@@ -224,6 +326,20 @@ const AdminTripsPayments: React.FC = () => {
                 trips={trips}
                 isOpen={showModal}
                 onClose={() => { setShowModal(false); setSelectedPayment(null); }}
+            />
+            <ConfirmDialog
+                isOpen={confirmOpen}
+                onClose={() => { setConfirmOpen(false); setConfirmAction(null); }}
+                onConfirm={async () => {
+                    setConfirmOpen(false);
+                    if (confirmAction) await confirmAction();
+                    setConfirmAction(null);
+                }}
+                title={confirmTitle}
+                message={confirmMessage}
+                confirmText={deleting ? 'جاري الحذف...' : 'حذف'}
+                cancelText="إلغاء"
+                type="danger"
             />
         </div>
     );

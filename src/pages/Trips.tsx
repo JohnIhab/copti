@@ -7,6 +7,7 @@ import { tripsService, Trip } from '../services/tripsService';
 import { tripPaymentsService } from '../services/tripPaymentsService';
 import OrderButton from '../components/BookTripBtn';
 import { Helmet } from 'react-helmet';
+import { toast } from 'react-toastify';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -21,10 +22,18 @@ const Trips: React.FC = () => {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [bookingName, setBookingName] = useState('');
   const [bookingPhone, setBookingPhone] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const [isPaying, setIsPaying] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [paymentError, setPaymentError] = useState('');
   const [showPaymentStep, setShowPaymentStep] = useState(false);
+  // Simple numeric captcha (sum of two numbers)
+  const [captchaA, setCaptchaA] = useState<number | null>(null);
+  const [captchaB, setCaptchaB] = useState<number | null>(null);
+  const [captchaInput, setCaptchaInput] = useState('');
+  const [captchaError, setCaptchaError] = useState('');
+  // Honeypot anti-bot field for booking forms
+  const [extra, setExtra] = useState<string | null>(null);
 
   // Load trips from Firestore
   useEffect(() => {
@@ -70,12 +79,27 @@ const Trips: React.FC = () => {
     }, 0);
   };
 
-  // Simulate sending booking data to admin dashboard (replace with real logic)
   const handleSubmitBooking = async () => {
+    if (extra && extra.trim() !== '') {
+      console.warn('Blocked booking submission due to honeypot field:', extra);
+      toast.error(language === 'ar' ? 'تم حظر الطلب المشبوه' : 'Suspicious submission blocked');
+      return;
+    }
+    // captcha must be valid before submitting
+    if (!isCaptchaValid()) {
+      setCaptchaError(language === 'ar' ? 'الرجاء حل اختبار التحقق' : 'Please solve the verification question');
+      setPaymentError(language === 'ar' ? 'الرجاء حل اختبار التحقق' : 'Please solve the verification question');
+      return;
+    }
+    if (!isValidEgyptianPhone(bookingPhone)) {
+      const err = language === 'ar' ? 'الرجاء إدخال رقم هاتف صالح' : 'Please enter a valid phone number';
+      setPhoneError(language === 'ar' ? 'رقم الهاتف غير صالح' : 'Invalid phone number');
+      setPaymentError(err);
+      return;
+    }
     setIsPaying(true);
     setPaymentError('');
     try {
-      // Save payment info in Firestore
       await tripPaymentsService.addPayment({
         name: bookingName,
         phone: bookingPhone,
@@ -98,7 +122,20 @@ const Trips: React.FC = () => {
     }
   };
 
+  const isValidEgyptianPhone = (phone: string) => {
+    if (!phone) return false;
+    const digits = phone.replace(/\D/g, '');
+    if (/^01[0125]\d{8}$/.test(digits)) return true;
+    if (/^20?1[0125]\d{8}$/.test(digits)) return true;
+    return false;
+  };
 
+  const isCaptchaValid = () => {
+    if (captchaA === null || captchaB === null) return false;
+    const expected = captchaA + captchaB;
+    const val = parseInt(captchaInput || '', 10);
+    return !Number.isNaN(val) && val === expected;
+  };
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -187,7 +224,14 @@ const Trips: React.FC = () => {
             </p>
             <button
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105"
-              onClick={() => setShowBookingModal(true)}
+              onClick={() => {
+                // generate simple captcha when opening modal
+                setCaptchaA(Math.floor(Math.random() * 8) + 1);
+                setCaptchaB(Math.floor(Math.random() * 8) + 1);
+                setCaptchaInput('');
+                setCaptchaError('');
+                setShowBookingModal(true);
+              }}
             >
               {language === 'ar' ? 'احجز الرحلات المختارة' : 'Book Selected Trips'}
             </button>
@@ -209,6 +253,13 @@ const Trips: React.FC = () => {
               <h2 className="text-2xl font-bold mb-4 text-center text-blue-700 dark:text-blue-300">
                 {language === 'ar' ? 'حجز الرحلات المختارة' : 'Book Selected Trips'}
               </h2>
+              {/* Honeypot hidden input for booking form */}
+              <input
+                type="hidden"
+                name="extra"
+                value={extra ?? ''}
+                onChange={(e) => setExtra(e.target.value)}
+              />
               {paymentSuccess ? (
                 <div className="text-green-600 dark:text-green-400 text-center text-lg font-semibold my-8">
                   {language === 'ar' ? 'تم إرسال بيانات الحجز بنجاح!' : 'Booking data sent successfully!'}
@@ -235,7 +286,7 @@ const Trips: React.FC = () => {
                   <button
                     className={`w-full py-3 rounded-lg font-semibold text-white transition-all duration-300 ${isPaying ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'}`}
                     onClick={handleSubmitBooking}
-                    disabled={isPaying}
+                    disabled={isPaying || !!phoneError || !isCaptchaValid()}
                   >
                     {isPaying
                       ? (language === 'ar' ? 'جاري الإرسال...' : 'Sending...')
@@ -248,12 +299,12 @@ const Trips: React.FC = () => {
               ) : (
                 <>
                   <div className="mb-4">
-                    <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">
+                    <label className="block mb-1 font-medium text-gray-700 dark:text-white">
                       {language === 'ar' ? 'الاسم' : 'Name'}
                     </label>
                     <input
                       type="text"
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 dark:text-white bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={bookingName}
                       onChange={e => setBookingName(e.target.value)}
                       disabled={isPaying}
@@ -265,11 +316,21 @@ const Trips: React.FC = () => {
                     </label>
                     <input
                       type="tel"
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:text-white dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={bookingPhone}
-                      onChange={e => setBookingPhone(e.target.value)}
+                      onChange={e => {
+                        const v = e.target.value;
+                        setBookingPhone(v);
+                        if (v && !isValidEgyptianPhone(v)) {
+                          setPhoneError(language === 'ar' ? 'رقم الهاتف غير صالح' : 'Invalid phone number');
+                        } else {
+                          setPhoneError('');
+                        }
+                        setPaymentError('');
+                      }}
                       disabled={isPaying}
                     />
+                    {phoneError && <div className="mt-2 text-sm text-red-600 dark:text-red-400">{phoneError}</div>}
                   </div>
                   <div className="mb-4">
                     <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">
@@ -282,10 +343,38 @@ const Trips: React.FC = () => {
                   {paymentError && (
                     <div className="mb-2 text-red-600 dark:text-red-400 text-center">{paymentError}</div>
                   )}
+                  {/* Simple numeric captcha */}
+                  <div className="mb-4">
+                    <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">
+                      {language === 'ar' ? 'اختبار التحقق: كم نتيجة' : 'Verification test: What is'}
+                    </label>
+                    <div className="flex gap-2 items-center">
+                      <div className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-bold">{captchaA ?? '?'} + {captchaB ?? '?'}</div>
+                      <input
+                        type="number"
+                        className="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:text-white dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none"
+                        value={captchaInput}
+                        onChange={e => {
+                          setCaptchaInput(e.target.value);
+                          setCaptchaError('');
+                          setPaymentError('');
+                        }}
+                        disabled={isPaying}
+                      />
+                    </div>
+                    {captchaError && <div className="mt-2 text-sm text-red-600 dark:text-red-400">{captchaError}</div>}
+                  </div>
                   <button
                     className={`w-full py-3 rounded-lg font-semibold text-white transition-all duration-300 ${isPaying ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'}`}
-                    onClick={() => setShowPaymentStep(true)}
-                    disabled={isPaying || !bookingName || !bookingPhone}
+                    onClick={() => {
+                      // check captcha before showing payment step
+                      if (!isCaptchaValid()) {
+                        setCaptchaError(language === 'ar' ? 'الرجاء حل اختبار التحقق بشكل صحيح' : 'Please solve the verification correctly');
+                        return;
+                      }
+                      setShowPaymentStep(true);
+                    }}
+                    disabled={isPaying || !bookingName || !bookingPhone || !!phoneError}
                   >
                     {language === 'ar' ? 'ادفع واحجز' : 'Pay & Book'}
                   </button>
@@ -366,7 +455,7 @@ const Trips: React.FC = () => {
                   <div className="flex flex-wrap gap-1">
                     {(language === 'ar' ? trip.includes || [] : trip.includesEn || []).map((item, index) => (
                       <span key={index} className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
-                                                   px-2 py-1 rounded text-xs">
+                                                  px-2 py-1 rounded text-xs">
                         {item}
                       </span>
                     ))}

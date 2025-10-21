@@ -1,9 +1,9 @@
 
 import React, { useRef } from 'react';
 
-import bolesImg from '../../public/Images/fathers/بولس.jpeg';
+import bolesImg from '../../public/Images/fathers/بولس.jpg';
 import abdelmalekImg from '../../public/Images/fathers/سمعان عبدالملك.png';
-import shahhatImg from '../../public/Images/fathers/سمعان الشحات.jpeg';
+import shahhatImg from '../../public/Images/fathers/سمعان الشحات.jpg';
 import barnabaImg from '../../public/Images/card/5.jpg';
 
 const slides = [

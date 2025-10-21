@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import gsap from 'gsap';
 import { getAllBibleBooks, getBookChapters, getChapterVersesWithText, BibleBook } from '../services/bibleBooksService';
 import { Helmet } from 'react-helmet';
+import { useTheme } from '../contexts/ThemeContext';
 
 const ReadBible: React.FC = () => {
     const [books, setBooks] = useState<BibleBook[]>([]);
@@ -26,6 +27,9 @@ const ReadBible: React.FC = () => {
     // Music player state and refs
     const [isPlaying, setIsPlaying] = useState(false);
     const audioRef = useRef<HTMLAudioElement>(null);
+
+    // theme
+    const { isDark } = useTheme();
 
     const handlePlayPause = () => {
         if (!audioRef.current) return;
@@ -198,13 +202,13 @@ const ReadBible: React.FC = () => {
                 <meta name="keywords" content="كنيسة الأنبا رويس, دور الكنيسة, تميز الكنيسة, كورالات, جوائز الكنيسة, مدارس الأحد, تاريخ الكنيسة" />
                 <meta name="author" content="كنيسة الأنيا رويس بكفر فرج" />
             </Helmet>
-            <div className="flex justify-center items-center min-h-[80vh] bg-gradient-to-br from-blue-50 to-indigo-100 py-8 mt-20">
-                <div ref={containerRef} className="w-full max-w-2xl bg-white shadow-xl rounded-2xl p-8 border border-indigo-100">
+            <div className={`flex justify-center items-center min-h-[80vh] py-8 pt-36 ${isDark ? 'bg-gradient-to-br from-slate-900 to-slate-800' : 'bg-gradient-to-br from-blue-50 to-indigo-100'}`}>
+                <div ref={containerRef} className={`w-full max-w-2xl rounded-2xl p-8 border ${isDark ? 'bg-slate-900 shadow-md border-slate-700' : 'bg-white shadow-xl border-indigo-100'}`}>
                     {/* Music play button and audio */}
                     <div className="flex justify-center mb-4">
                         <button
                             onClick={handlePlayPause}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-full border border-indigo-200 bg-indigo-50 text-indigo-700 font-semibold shadow hover:bg-indigo-100 transition focus:outline-none focus:ring-2 focus:ring-indigo-400`}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-full border font-semibold shadow transition focus:outline-none focus:ring-2 ${isDark ? 'border-slate-600 bg-slate-800 text-slate-100 hover:bg-slate-700 focus:ring-slate-500' : 'border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 focus:ring-indigo-400'}`}
                             title={isPlaying ? 'إيقاف الموسيقى' : 'تشغيل موسيقى هادئة للقراءة'}
                         >
                             {isPlaying ? (
@@ -226,12 +230,12 @@ const ReadBible: React.FC = () => {
                         />
                     </div>
 
-                    <h2 className="text-3xl font-bold text-center text-indigo-700 mb-8 tracking-tight drop-shadow-sm">
+                    <h2 className={`text-3xl font-bold text-center mb-8 tracking-tight drop-shadow-sm ${isDark ? 'text-slate-100' : 'text-indigo-700'}`}>
                         اقرأ الكتاب المقدس
                     </h2>
 
                     {error && (
-                        <div className="mb-4 p-3 rounded bg-red-100 text-red-700 text-center font-semibold border border-red-200 animate-pulse">
+                        <div className={`mb-4 p-3 rounded text-center font-semibold animate-pulse border ${isDark ? 'bg-red-900 text-red-300 border-red-800' : 'bg-red-100 text-red-700 border-red-200'}`}>
                             {error}
                         </div>
                     )}
@@ -242,7 +246,7 @@ const ReadBible: React.FC = () => {
                         <select
                             value={selectedTestament}
                             onChange={handleTestamentChange}
-                            className="w-full px-4 py-2 rounded-lg border border-indigo-200 focus:ring-2 focus:ring-indigo-400 focus:outline-none bg-indigo-50 text-indigo-900 shadow-sm transition"
+                            className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none shadow-sm transition ${isDark ? 'border-slate-600 bg-slate-800 text-slate-100 focus:ring-slate-500' : 'border-indigo-200 bg-indigo-50 text-indigo-900 focus:ring-indigo-400'}`}
                         >
                             <option value="">-- اختر العهد --</option>
                             <option value="old">العهد القديم</option>
@@ -257,7 +261,7 @@ const ReadBible: React.FC = () => {
                             <select
                                 value={selectedBook?.id || ''}
                                 onChange={handleBookChange}
-                                className="w-full px-4 py-2 rounded-lg border border-indigo-200 focus:ring-2 focus:ring-indigo-400 focus:outline-none bg-indigo-50 text-indigo-900 shadow-sm transition"
+                                className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none shadow-sm transition ${isDark ? 'border-slate-600 bg-slate-800 text-slate-100 focus:ring-slate-500' : 'border-indigo-200 bg-indigo-50 text-indigo-900 focus:ring-indigo-400'}`}
                             >
                                 <option value="">-- اختر السفر --</option>
                                 {filteredBooks.map(book => (
@@ -276,7 +280,7 @@ const ReadBible: React.FC = () => {
                             <select
                                 value={selectedChapter || ''}
                                 onChange={handleChapterChange}
-                                className="w-full px-4 py-2 rounded-lg border border-indigo-200 focus:ring-2 focus:ring-indigo-400 focus:outline-none bg-indigo-50 text-indigo-900 shadow-sm transition"
+                                className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none shadow-sm transition ${isDark ? 'border-slate-600 bg-slate-800 text-slate-100 focus:ring-slate-500' : 'border-indigo-200 bg-indigo-50 text-indigo-900 focus:ring-indigo-400'}`}
                             >
                                 <option value="">-- اختر الإصحاح --</option>
                                 {chapters
@@ -291,19 +295,19 @@ const ReadBible: React.FC = () => {
                     {/* التحميل */}
                     {loading && (
                         <div className="flex justify-center items-center my-8">
-                            <svg className="animate-spin h-6 w-6 text-indigo-500 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <svg className={`animate-spin h-6 w-6 mr-2 ${isDark ? 'text-slate-300' : 'text-indigo-500'}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                             </svg>
-                            <span className="text-indigo-700 font-semibold">جاري التحميل...</span>
+                            <span className={`${isDark ? 'text-slate-200' : 'text-indigo-700'} font-semibold`}>جاري التحميل...</span>
                         </div>
                     )}
 
                     {/* عرض الأعداد */}
                     {verses.length > 0 && (
-                        <div className="bg-gradient-to-br from-indigo-50 to-blue-100 rounded-xl p-6 mt-8 shadow-inner border border-indigo-100">
-                            <h3 className="text-xl font-bold text-indigo-800 mb-4 text-right">الأعداد:</h3>
-                            <ol ref={versesRef} className="rtl text-right space-y-4">
+                        <div className={`${isDark ? 'bg-slate-900 border-slate-700 shadow-inner' : 'bg-gradient-to-br from-indigo-50 to-blue-100 border-indigo-100 shadow-inner'} rounded-xl p-6 mt-8 border` }>
+                            <h3 className={`text-xl font-bold mb-4 text-right ${isDark ? 'text-slate-100' : 'text-indigo-800'}`}>الأعداد:</h3>
+                            <ol ref={versesRef} className={`rtl text-right space-y-4` }>
                                 {verses.map((verse) => {
                                     let reference = verse.reference;
                                     if (typeof reference !== 'string' || reference.includes('NaN')) reference = null;
@@ -311,19 +315,19 @@ const ReadBible: React.FC = () => {
                                     return (
                                         <li
                                             key={verse.id}
-                                            className={`bg-white rounded-lg shadow p-4 border border-indigo-50 hover:bg-indigo-50 transition flex flex-col gap-1 cursor-pointer ${isHighlighted ? 'bg-yellow-200' : ''}`}
+                                            className={`rounded-lg p-4 border transition flex flex-col gap-1 cursor-pointer ${isHighlighted ? 'bg-yellow-200' : ''} ${isDark ? 'bg-slate-800 border-slate-700 hover:bg-slate-700 text-slate-100' : 'bg-white border-indigo-50 hover:bg-indigo-50'}`}
                                             onClick={() => handleVerseClick(verse.id)}
                                             title={isHighlighted ? 'إزالة التمييز' : 'تمييز العدد'}
                                         >
                                             <span className="text-lg leading-relaxed" dangerouslySetInnerHTML={{ __html: verse.content }} />
                                             {reference && (
-                                                <span className="text-xs text-indigo-500 font-semibold">({reference})</span>
+                                                <span className={`text-xs font-semibold ${isDark ? 'text-slate-300' : 'text-indigo-500'}`}>({reference})</span>
                                             )}
                                         </li>
                                     );
                                 })}
                             </ol>
-                            <div className="mt-2 text-xs text-gray-500 text-right">انقر على العدد لتمييزه أو إزالة التمييز</div>
+                            <div className={`mt-2 text-xs text-right ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>انقر على العدد لتمييزه أو إزالة التمييز</div>
                         </div>
                     )}
                 </div>

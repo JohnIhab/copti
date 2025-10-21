@@ -97,7 +97,7 @@ const OrderButton: React.FC = () => {
         ref={successTextRef}
         className="absolute inset-x-0 top-[19px] text-center text-white text-[16px] font-medium opacity-0 flex items-center justify-center"
       >
-        تم الحجز بنجاح
+        انتقل الي اعلى لملء البيانات
         <svg
           ref={checkRef}
           viewBox="0 0 12 10"
