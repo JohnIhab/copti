@@ -20,22 +20,68 @@ const Contact: React.FC = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
+  // Honeypot anti-bot field for contact form
+  const [extra, setExtra] = useState<string | null>(null);
+  // Simple numeric captcha (sum of two numbers)
+  const [captchaA, setCaptchaA] = useState<number | null>(null);
+  const [captchaB, setCaptchaB] = useState<number | null>(null);
+  const [captchaInput, setCaptchaInput] = useState('');
+  const [captchaError, setCaptchaError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+
+  const isValidEgyptPhone = (phone: string) => {
+    if (!phone) return false;
+    const normalized = phone.replace(/[\s-]/g, '');
+    // Local formats: 01X######## (11 digits). X allowed: 0,1,2,5
+    const localRegex = /^01(0|1|2|5)\d{8}$/;
+    // International: +201X######## or 00201X########
+    const intlRegex = /^(?:\+20|0020)1(0|1|2|5)\d{8}$/;
+    return localRegex.test(normalized) || intlRegex.test(normalized);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target as HTMLInputElement;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+
+    if (name === 'phone') {
+      // live-validate phone and set friendly error message
+      if (value.trim() === '') {
+        setPhoneError('');
+      } else if (!isValidEgyptPhone(value)) {
+        setPhoneError(language === 'ar' ? 'رقم الهاتف غير صحيح. مثال: 01012345678' : 'Invalid phone number. Example: 01012345678');
+      } else {
+        setPhoneError('');
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Block if honeypot filled
+    if (extra && extra.trim() !== '') {
+      console.warn('Blocked contact submission due to honeypot field:', extra);
+      toast.error(language === 'ar' ? 'تم حظر الطلب المشبوه' : 'Suspicious submission blocked');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       // Validate required fields
       if (!formData.name || !formData.phone || !formData.subject || !formData.message) {
         toast.error(language === 'ar' ? 'يرجى ملء جميع الحقول المطلوبة' : 'Please fill in all required fields');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // captcha must be valid before submitting
+      if (!isCaptchaValid()) {
+        setCaptchaError(language === 'ar' ? 'الرجاء حل اختبار التحقق' : 'Please solve the verification question');
+        toast.warning(language === 'ar' ? 'الرجاء حل اختبار التحقق' : 'Please solve the verification question');
         setIsSubmitting(false);
         return;
       }
@@ -53,12 +99,24 @@ const Contact: React.FC = () => {
         subject: '',
         message: ''
       });
+      // Reset captcha after successful submit
+      setCaptchaA(Math.floor(Math.random() * 8) + 1);
+      setCaptchaB(Math.floor(Math.random() * 8) + 1);
+      setCaptchaInput('');
+      setCaptchaError('');
     } catch (error) {
       console.error('Error submitting message:', error);
       toast.error(language === 'ar' ? 'حدث خطأ أثناء إرسال الرسالة. يرجى المحاولة مرة أخرى.' : 'An error occurred while sending the message. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const isCaptchaValid = () => {
+    if (captchaA === null || captchaB === null) return false;
+    const expected = captchaA + captchaB;
+    const val = parseInt(captchaInput || '', 10);
+    return !isNaN(val) && val === expected;
   };
 
   const contactInfo = [
@@ -145,6 +203,14 @@ const Contact: React.FC = () => {
     };
   }, []);
 
+  // generate captcha on mount
+  useEffect(() => {
+    setCaptchaA(Math.floor(Math.random() * 8) + 1);
+    setCaptchaB(Math.floor(Math.random() * 8) + 1);
+    setCaptchaInput('');
+    setCaptchaError('');
+  }, []);
+
   return (
     <>
       <Helmet>
@@ -171,8 +237,8 @@ const Contact: React.FC = () => {
               <div
                 key={index}
                 className="contact-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg
-                       hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2
-                       border border-gray-100 dark:border-gray-700 text-center group"
+                      hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2
+                      border border-gray-100 dark:border-gray-700 text-center group"
               >
                 <div className={`${info.color} bg-gray-50 dark:bg-gray-700 p-4 rounded-full w-16 h-16 mx-auto mb-4
                             group-hover:scale-110 transition-transform duration-300`}>
@@ -196,6 +262,13 @@ const Contact: React.FC = () => {
               </h2>
 
               <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+                {/* Honeypot hidden input for contact form */}
+                <input
+                  type="hidden"
+                  name="extra"
+                  value={extra ?? ''}
+                  onChange={(e) => setExtra(e.target.value)}
+                />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -208,8 +281,8 @@ const Contact: React.FC = () => {
                       onChange={handleInputChange}
                       required
                       className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
-                             focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                             bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                            bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       placeholder="أدخل اسمك الكريم"
                     />
                   </div>
@@ -223,11 +296,14 @@ const Contact: React.FC = () => {
                       value={formData.phone}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
-                             focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                             bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className={`w-full px-4 py-3 border rounded-lg
+                            focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                            bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${phoneError ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
                       placeholder="01xxxxxxxxx"
                     />
+                    {phoneError && (
+                      <p className="mt-2 text-sm text-red-600 dark:text-red-400">{phoneError}</p>
+                    )}
                   </div>
                 </div>
 
@@ -241,8 +317,8 @@ const Contact: React.FC = () => {
                     value={formData.email}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
-                           focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                           bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                          bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="example@email.com"
                   />
                 </div>
@@ -257,8 +333,8 @@ const Contact: React.FC = () => {
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
-                           focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                           bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                          bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     <option value="">اختر موضوع الرسالة</option>
                     {subjects.map((subject) => (
@@ -280,10 +356,28 @@ const Contact: React.FC = () => {
                     required
                     rows={5}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
-                           focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                           bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
+                          focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                          bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
                     placeholder="اكتب رسالتك هنا..."
                   />
+                </div>
+
+                {/* Captcha (sum of two numbers) */}
+                <div className="mt-2 mb-4">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {language === 'ar' ? 'تحقق' : 'Verification'}
+                  </label>
+                  <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                    <div className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-bold">{captchaA ?? '?'} + {captchaB ?? '?'}</div>
+                    <input
+                      type="number"
+                      value={captchaInput}
+                      onChange={(e) => { setCaptchaInput(e.target.value); setCaptchaError(''); }}
+                      className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      placeholder={language === 'ar' ? 'أدخل الناتج' : 'Enter sum'}
+                    />
+                  </div>
+                  {captchaError && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{captchaError}</p>}
                 </div>
 
                 <button
@@ -333,7 +427,7 @@ const Contact: React.FC = () => {
               {/* Service Hours */}
               <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-                  <Clock className="h-5 w-5 mr-2 text-blue-600" />
+                  <Clock className="h-5 w-5 ml-2 text-blue-600" />
                   أوقات الخدمة
                 </h3>
                 <div className="space-y-3 text-sm">
@@ -363,7 +457,7 @@ const Contact: React.FC = () => {
                     <a
                       key={index}
                       href={social.href}
-                      className={`p-3 bg-gray-100 dark:bg-gray-700 rounded-full ${social.color} 
+                      className={`p-3 bg-gray-100 dark:bg-white rounded-full ${social.color} 
                             transition-all duration-300 transform hover:scale-110 hover:shadow-lg`}
                       title={social.name}
                     >

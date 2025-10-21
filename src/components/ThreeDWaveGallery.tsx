@@ -1,19 +1,19 @@
 import React from "react";
 
 const images = [
-  "/Images/hero.jpg",
-  "/Images/card/1.jpg",
-  "/Images/card/2.jpg",
-  "/Images/card/3.jpg",
-  "/Images/card/4.jpg",
-  "/Images/card/5.jpg",
-  "/Images/card/11.jpg",
-  "/Images/card/22.jpg",
-  "/Images/card/33.jpg",
-  "/Images/card/44.jpg",
-  "/Images/card/55.jpg",
-  "/Images/card/66.jpg",
-  "/Images/services/1.jpg",
+  '/Images/old/1.jpg',
+  '/Images/old/2.jpg',
+  '/Images/old/3.jpg',
+  '/Images/old/4.jpg',
+  '/Images/old/5.jpg',
+  '/Images/old/6.jpg',
+  '/Images/old/7.jpg',
+  '/Images/old/8.jpg',
+  '/Images/old/9.jpg',
+  '/Images/old/10.jpg',
+  '/Images/old/11.jpg',
+  '/Images/old/12.jpg',
+  '/Images/old/13.jpg',
 ];
 
 interface ThreeDWaveGalleryProps {
@@ -23,6 +23,7 @@ interface ThreeDWaveGalleryProps {
 const ThreeDWaveGallery: React.FC<ThreeDWaveGalleryProps> = ({ className }) => {
   return (
     <div className={className}>
+      <h2 className="gallery-title" dir="rtl">صور الهدم لبناء الكنيسة الحالية</h2>
       <div className="wrapper">
         <div
           className="items"
@@ -69,6 +70,14 @@ body{
         gap: 0.4rem;
         perspective: calc(var(--index) * 35);
     }
+
+  .gallery-title{
+    font-size: calc(1.2rem + 1vw);
+    text-align: center;
+    margin-bottom: 1rem;
+    direction: rtl;
+    font-weight: 600;
+  }
 
     .item{
         width: calc(var(--index) * 3);

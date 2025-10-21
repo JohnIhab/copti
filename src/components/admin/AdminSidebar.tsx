@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ConfirmDialog from '../ConfirmDialog';
 import {
   X, ChevronRight, Search, Activity,
   Users, Calendar, MapPin, DollarSign, MessageSquare, Settings, BarChart3,
@@ -45,6 +46,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [quickAccessVisible, setQuickAccessVisible] = useState(true);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Smart menu organization with badges and priorities
   const menuGroups: {
@@ -567,7 +569,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
           {/* Enhanced Logout Button */}
           <button
-            onClick={onLogout}
+            onClick={() => setShowConfirm(true)}
             disabled={loggingOut}
             className="w-full flex items-center justify-center space-x-3 rtl:space-x-reverse px-4 py-3 rounded-xl
                      bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 
@@ -590,6 +592,21 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           </button>
         </div>
       </div>
+
+        {/* Logout confirmation dialog (sidebar-level) */}
+        <ConfirmDialog
+          isOpen={showConfirm}
+          onClose={() => setShowConfirm(false)}
+          onConfirm={() => {
+            setShowConfirm(false);
+            onLogout();
+          }}
+          title={language === 'ar' ? 'تأكيد تسجيل الخروج' : 'Confirm Logout'}
+          message={language === 'ar' ? 'هل أنت متأكد من تسجيل الخروج؟' : 'Are you sure you want to logout?'}
+          confirmText={language === 'ar' ? 'تسجيل الخروج' : 'Logout'}
+          cancelText={language === 'ar' ? 'إلغاء' : 'Cancel'}
+          type="danger"
+        />
 
 
     </>

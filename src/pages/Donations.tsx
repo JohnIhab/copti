@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Heart, CreditCard, Smartphone, Gift, Users, Home, BookOpen, Star, Shield } from 'lucide-react';
+import { Heart, CreditCard, Smartphone, Gift, Users, Home, BookOpen, Star, Shield, Loader } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { toast } from 'react-toastify';
 import { donationsService } from '../services/donationsService';
@@ -17,12 +17,23 @@ const Donations: React.FC = () => {
   const [customAmount, setCustomAmount] = useState('');
   const [donorName, setDonorName] = useState('');
   const [donorPhone, setDonorPhone] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
   const [isCompletingDonation, setIsCompletingDonation] = useState(false);
   const [currentDonationId, setCurrentDonationId] = useState<string | null>(null);
   const [donationBoxes, setDonationBoxes] = useState<DonationBox[]>([]);
   const [loadingBoxes, setLoadingBoxes] = useState(true);
+  const [recaptchaLoading, setRecaptchaLoading] = useState(false);
+  const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY as string | undefined;
   const sectionRef = useRef<HTMLDivElement>(null);
+  // Honeypot anti-bot field for donation form
+  const [extra, setExtra] = useState<string | null>(null);
+
+  // Simple numeric captcha (sum of two numbers) similar to Trips.tsx pattern
+  const [captchaA, setCaptchaA] = useState<number | null>(null);
+  const [captchaB, setCaptchaB] = useState<number | null>(null);
+  const [captchaInput, setCaptchaInput] = useState('');
+  const [captchaError, setCaptchaError] = useState('');
 
   // Icon mapping for donation boxes
   const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
@@ -180,12 +191,43 @@ const Donations: React.FC = () => {
   };
 
   const handleDonation = async () => {
+    // Block if honeypot filled
+    if (extra && extra.trim() !== '') {
+      console.warn('Blocked donation submission due to honeypot field:', extra);
+      toast.error(language === 'ar' ? 'تم حظر الطلب المشبوه' : 'Suspicious submission blocked');
+      return;
+    }
     if (!donorName || !donorPhone || (!amount && !customAmount)) {
       toast.warning('يرجى ملء جميع البيانات المطلوبة');
       return;
     }
+    // captcha must be valid before submitting
+    if (!isCaptchaValid()) {
+      setCaptchaError(language === 'ar' ? 'الرجاء حل اختبار التحقق' : 'Please solve the verification question');
+      toast.warning(language === 'ar' ? 'الرجاء حل اختبار التحقق' : 'Please solve the verification question');
+      return;
+    }
+    // Validate phone before proceeding
+    if (phoneError || !isValidEgyptPhone(donorPhone)) {
+      toast.warning(language === 'ar' ? 'يرجى إدخال رقم هاتف صحيح' : 'Please enter a valid phone number');
+      return;
+    }
 
     try {
+      // obtain reCAPTCHA token if site key present
+      let recaptchaToken: string | undefined = undefined;
+      if (RECAPTCHA_SITE_KEY) {
+        setRecaptchaLoading(true);
+        try {
+          recaptchaToken = await getRecaptchaToken('donation');
+        } catch (tokenErr) {
+          console.error('Failed to get reCAPTCHA token:', tokenErr);
+          toast.error(language === 'ar' ? 'فشل التحقق، يرجى المحاولة لاحقاً' : 'Verification failed, please try again later');
+          setRecaptchaLoading(false);
+          return;
+        }
+        setRecaptchaLoading(false);
+      }
       const selectedDonationBox = donationBoxes.find(box => box.key === donationType);
       if (!selectedDonationBox) {
         toast.error('نوع التبرع غير صحيح');
@@ -200,6 +242,8 @@ const Donations: React.FC = () => {
         donationTypeTitle: selectedDonationBox.title,
         donationTypeTitleEn: selectedDonationBox.titleEn,
         notes: `تبرع من خلال موقع الكنيسة - نوع التبرع: ${selectedDonationBox.title}`
+        // attach recaptcha token if available
+        , ...(recaptchaToken ? { recaptchaToken } : {})
       };
 
       console.log('إنشاء طلب تبرع:', donationData);
@@ -221,6 +265,55 @@ const Donations: React.FC = () => {
 
   const getFinalAmount = () => {
     return amount === 'custom' ? customAmount : amount;
+  };
+
+  // Validate Egyptian phone numbers (supports local 11-digit and +20 prefixed numbers)
+  const isValidEgyptPhone = (phone: string) => {
+    if (!phone) return false;
+    const normalized = phone.replace(/[\s-]/g, '');
+    // Local formats: 01X######## (11 digits). X allowed: 0,1,2,5
+    const localRegex = /^01(0|1|2|5)\d{8}$/;
+    // International: +201X######## or 00201X########
+    const intlRegex = /^(?:\+20|0020)1(0|1|2|5)\d{8}$/;
+    return localRegex.test(normalized) || intlRegex.test(normalized);
+  };
+
+  const isCaptchaValid = () => {
+    if (captchaA === null || captchaB === null) return false;
+    const expected = captchaA + captchaB;
+    const val = parseInt(captchaInput || '', 10);
+    return !isNaN(val) && val === expected;
+  };
+
+  // reCAPTCHA helpers
+  const loadRecaptchaScript = () => new Promise<void>((resolve, reject) => {
+    if (!RECAPTCHA_SITE_KEY) return reject(new Error('RECAPTCHA_SITE_KEY not provided'));
+    if ((window as any).grecaptcha) return resolve();
+    const script = document.createElement('script');
+    script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    script.onerror = (e) => reject(e);
+    document.head.appendChild(script);
+  });
+
+  const getRecaptchaToken = async (action = 'donation') => {
+    if (!(window as any).grecaptcha) {
+      await loadRecaptchaScript();
+    }
+    return new Promise<string>((resolve, reject) => {
+      try {
+        (window as any).grecaptcha.ready(() => {
+          (window as any).grecaptcha.execute(RECAPTCHA_SITE_KEY, { action }).then((token: string) => {
+            if (!token) return reject(new Error('Empty token'));
+            resolve(token);
+          }).catch(reject);
+        });
+      } catch (err) {
+        reject(err);
+      }
+    });
   };
 
   const handleDonationComplete = async () => {
@@ -284,6 +377,17 @@ const Donations: React.FC = () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
+
+  // generate captcha on mount (and when donation type changes to be safe)
+  useEffect(() => {
+    const gen = () => {
+      setCaptchaA(Math.floor(Math.random() * 8) + 1);
+      setCaptchaB(Math.floor(Math.random() * 8) + 1);
+      setCaptchaInput('');
+      setCaptchaError('');
+    };
+    gen();
+  }, [donationType]);
 
   return (
     <>
@@ -395,6 +499,13 @@ const Donations: React.FC = () => {
                 </h2>
 
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+                    {/* Honeypot hidden input for donation form */}
+                    <input
+                      type="hidden"
+                      name="extra"
+                      value={extra ?? ''}
+                      onChange={(e) => setExtra(e.target.value)}
+                    />
                   {/* Personal Info */}
                   <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -418,12 +529,27 @@ const Donations: React.FC = () => {
                     <input
                       type="tel"
                       value={donorPhone}
-                      onChange={(e) => setDonorPhone(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setDonorPhone(val);
+                        // live-validate and set friendly error message
+                        if (val.trim() === '') {
+                          setPhoneError('');
+                        } else if (!isValidEgyptPhone(val)) {
+                          setPhoneError(language === 'ar' ? 'رقم الهاتف غير صحيح. مثال: 01012345678' : 'Invalid phone number. Example: 01012345678');
+                        } else {
+                          setPhoneError('');
+                        }
+                      }}
+                      className={`w-full px-4 py-3 border rounded-lg
                             focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                            bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${phoneError ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        }`}
                       placeholder="01xxxxxxxxx"
                     />
+                    {phoneError && (
+                      <p className="mt-2 text-sm text-red-600 dark:text-red-400">{phoneError}</p>
+                    )}
                   </div>
 
                   {/* Amount Selection */}
@@ -471,14 +597,32 @@ const Donations: React.FC = () => {
                   </div>
 
                   {/* Submit Button */}
+                  {/* Captcha (sum of two numbers) */}
+                  <div className="mt-6 mb-4">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      {language === 'ar' ? 'تحقق' : 'Verification'}
+                    </label>
+                    <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                      <div className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-bold">{captchaA ?? '?'} + {captchaB ?? '?'}</div>
+                      <input
+                        type="number"
+                        value={captchaInput}
+                        onChange={(e) => { setCaptchaInput(e.target.value); setCaptchaError(''); }}
+                        className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        placeholder={language === 'ar' ? 'أدخل الناتج' : 'Enter sum'}
+                      />
+                    </div>
+                    {captchaError && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{captchaError}</p>}
+                  </div>
                   <button
                     onClick={handleDonation}
+                    disabled={recaptchaLoading}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-lg
                           font-semibold transition-all duration-300 transform hover:scale-105
                           shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 rtl:space-x-reverse"
                   >
-                    <Heart className="h-5 w-5" />
-                    <span>تبرع الآن</span>
+                    {recaptchaLoading ? (<Loader className="h-5 w-5 animate-spin" />) : (<Heart className="h-5 w-5" />)}
+                    <span>{recaptchaLoading ? (language === 'ar' ? 'جارٍ التحقق...' : 'Verifying...') : 'تبرع الآن'}</span>
                   </button>
                 </div>
               </div>

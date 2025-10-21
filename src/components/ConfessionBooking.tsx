@@ -28,6 +28,16 @@ const ConfessionBooking: React.FC = () => {
     userEmail: '',
     notes: ''
   });
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+
+  
+  // Honeypot anti-bot field for booking form
+  const [extra, setExtra] = useState<string | null>(null);
+  // Simple numeric captcha for bookings
+  const [captchaA, setCaptchaA] = useState<number | null>(null);
+  const [captchaB, setCaptchaB] = useState<number | null>(null);
+  const [captchaInput, setCaptchaInput] = useState('');
+  const [captchaError, setCaptchaError] = useState<string | null>(null);
 
   useEffect(() => {
     loadAvailableSlots();
@@ -136,17 +146,45 @@ const ConfessionBooking: React.FC = () => {
 
   const handleSlotSelect = (slot: TimeSlot) => {
     setSelectedSlot(slot);
+    // generate simple captcha when opening booking form
+    setCaptchaA(Math.floor(Math.random() * 8) + 1);
+    setCaptchaB(Math.floor(Math.random() * 8) + 1);
+    setCaptchaInput('');
+    setCaptchaError(null);
     setShowBookingForm(true);
   };
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Block if honeypot filled
+    if (extra && extra.trim() !== '') {
+      console.warn('Blocked confession booking due to honeypot field:', extra);
+      toast.error(language === 'ar' ? 'تم حظر الطلب المشبوه' : 'Suspicious submission blocked');
+      return;
+    }
+
     if (!selectedSlot || !formData.userName || !formData.userPhone) {
       toast.error(
         language === 'ar'
           ? 'يرجى ملء جميع الحقول المطلوبة'
           : 'Please fill in all required fields'
+      );
+      return;
+    }
+
+    // validate captcha
+    const expected = (captchaA ?? 0) + (captchaB ?? 0);
+    const val = parseInt(captchaInput || '', 10);
+    if (Number.isNaN(val) || val !== expected) {
+      setCaptchaError(language === 'ar' ? 'الرجاء حل اختبار التحقق بشكل صحيح' : 'Please solve the verification correctly');
+      return;
+    }
+
+    // Validate phone before proceeding
+    if (phoneError) {
+      toast.error(
+        language === 'ar' ? 'يرجى إدخال رقم هاتف صحيح' : 'Please enter a valid phone number'
       );
       return;
     }
@@ -192,6 +230,12 @@ const ConfessionBooking: React.FC = () => {
         notes: ''
       });
 
+      // clear captcha after successful booking
+      setCaptchaA(null);
+      setCaptchaB(null);
+      setCaptchaInput('');
+      setCaptchaError(null);
+
       // Reload available slots
       loadAvailableSlots();
     } catch (error: any) {
@@ -205,6 +249,13 @@ const ConfessionBooking: React.FC = () => {
     } finally {
       setBooking(false);
     }
+  };
+
+  const isValidPhone = (phone: string) => {
+    if (!phone) return false;
+    const cleaned = phone.replace(/[\s()-]/g, '');
+    const e164 = /^01(0|1|2|5)\d{8}$/;
+    return e164.test(cleaned);
   };
 
   const groupSlotsByDate = (slots: TimeSlot[]) => {
@@ -370,10 +421,19 @@ const ConfessionBooking: React.FC = () => {
                       <span>{language === 'ar' ? selectedSlot.priest : selectedSlot.priestEn}</span>
                     </div>
                   </div>
+
+                  
                 </div>
 
                 {/* Booking Form */}
                 <form onSubmit={handleBooking} className="space-y-4">
+                  {/* Honeypot hidden input for booking form */}
+                  <input
+                    type="hidden"
+                    name="extra"
+                    value={extra ?? ''}
+                    onChange={(e) => setExtra(e.target.value)}
+                  />
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       {language === 'ar' ? 'الاسم الكامل' : 'Full Name'} *
@@ -397,32 +457,32 @@ const ConfessionBooking: React.FC = () => {
                     </label>
                     <div className="relative">
                       <Phone className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <input
-                        type="tel"
-                        value={formData.userPhone}
-                        onChange={(e) => setFormData(prev => ({ ...prev, userPhone: e.target.value }))}
-                        placeholder={language === 'ar' ? '+20123456789' : '+20123456789'}
-                        className="w-full pl-10 rtl:pr-10 rtl:pl-3 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                        required
-                      />
+                        <input
+                          type="tel"
+                          value={formData.userPhone}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setFormData(prev => ({ ...prev, userPhone: val }));
+                            // validate as user types
+                            if (val.trim() === '') {
+                              setPhoneError(null);
+                            } else if (!isValidPhone(val)) {
+                              setPhoneError(language === 'ar' ? 'رقم هاتف غير صالح' : 'Invalid phone number');
+                            } else {
+                              setPhoneError(null);
+                            }
+                          }}
+                          placeholder={language === 'ar' ? '+20123456789' : '+20123456789'}
+                          className="w-full pl-10 rtl:pr-10 rtl:pl-3 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                          required
+                        />
+                        {phoneError && (
+                          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{phoneError}</p>
+                        )}
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      {language === 'ar' ? 'البريد الإلكتروني (اختياري)' : 'Email (Optional)'}
-                    </label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <input
-                        type="email"
-                        value={formData.userEmail}
-                        onChange={(e) => setFormData(prev => ({ ...prev, userEmail: e.target.value }))}
-                        placeholder={language === 'ar' ? 'your@email.com' : 'your@email.com'}
-                        className="w-full pl-10 rtl:pr-10 rtl:pl-3 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                      />
-                    </div>
-                  </div>
+                  
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -439,7 +499,26 @@ const ConfessionBooking: React.FC = () => {
                       />
                     </div>
                   </div>
-
+                    {/* Simple numeric captcha */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {language === 'ar' ? 'اختبار التحقق: كم نتيجة' : 'Verification test: What is'}
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <div className="px-3 py-2 rounded bg-gray-100 dark:bg-gray-700 font-bold">{captchaA ?? '?'} + {captchaB ?? '?'}</div>
+                      <input
+                        type="number"
+                        value={captchaInput}
+                        onChange={(e) => {
+                          setCaptchaInput(e.target.value);
+                          setCaptchaError(null);
+                        }}
+                        placeholder={language === 'ar' ? 'النتيجة' : 'result'}
+                        className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                      />
+                    </div>
+                    {captchaError && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{captchaError}</p>}
+                  </div>
                   <div className="flex justify-end space-x-3 rtl:space-x-reverse pt-4 border-t border-gray-200 dark:border-gray-700">
                     <button
                       type="button"
@@ -453,10 +532,10 @@ const ConfessionBooking: React.FC = () => {
                     </button>
                     <button
                       type="submit"
-                      disabled={booking}
+                      disabled={booking || !!phoneError || !captchaA || !captchaB || captchaInput.trim() === ''}
                       className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 rtl:space-x-reverse"
                     >
-                      {booking && <Loader className="w-4 h-4 animate-spin" />}
+                      {(booking) && <Loader className="w-4 h-4 animate-spin" />}
                       <span>
                         {booking 
                           ? (language === 'ar' ? 'جاري الحجز...' : 'Booking...')

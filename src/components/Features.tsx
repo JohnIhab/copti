@@ -22,7 +22,7 @@ export default function Features() {
               <Card3D
                 coverImage="https://png.pngtree.com/png-clipart/20250218/original/pngtree-3d-road-trip-traveler-icon-png-image_20463657.png"
                 title="رحلات روحية"
-                characterImage="https://png.pngtree.com/png-vector/20231230/ourmid/pngtree-school-van-png-image_11390014.png"
+                characterImage="https://png.pngtree.com/png-vector/20230902/ourmid/pngtree-tourist-couple-are-excited-to-go-to-travel-3d-character-illustration-png-image_9240564.png"
               />
             </Link>
           </div>
@@ -42,18 +42,18 @@ export default function Features() {
           <div className="flex justify-center w-full">
             <Link to="/confession" className="w-full max-w-xs md:max-w-sm lg:max-w-md mx-auto">
               <Card3D
-                coverImage="https://static.thenounproject.com/png/3462527-200.png"
+                coverImage="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXwn1yPbADUS1Pb_rzKN1Asmu6YS64wzUjhQ&s"
                 title="حجز موعد أعتراف"
-                characterImage="https://png.pngtree.com/png-clipart/20230917/original/pngtree-an-icon-of-people-at-the-cross-or-church-with-the-png-image_12277174.png"
+                characterImage="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1ohFsPXKkjHnbnBlXgqk3bVeU14Xm7HtDtg&s"
               />
             </Link>
           </div>
           <div className="flex justify-center w-full">
             <Link to="/events" className="w-full max-w-xs md:max-w-sm lg:max-w-md mx-auto">
               <Card3D
-                coverImage="https://i1.wp.com/www.light-dark.net/wp-content/uploads/2025/01/2018_4_8_10_47_37_884-561-1024x717.jpg"
+                coverImage="https://png.pngtree.com/png-clipart/20231006/original/pngtree-3d-concert-stage-png-image_13128551.png"
                 title="فعاليات الكنيسة"
-                characterImage="https://i1.wp.com/www.light-dark.net/wp-content/uploads/2025/06/261_687_073740-461-1140x815.jpg"
+                characterImage="https://cdn3d.iconscout.com/3d/premium/thumb/event-3d-icon-png-download-8341547.png"
               />
             </Link>
           </div>

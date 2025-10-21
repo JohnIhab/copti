@@ -14,6 +14,9 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [securityCode, setSecurityCode] = useState('');
+  // Honeypot anti-bot field: keep as null/empty string in normal usage.
+  // If this gains a value, we treat the submission as suspicious and abort.
+  const [extra, setExtra] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPopup, setShowPopup] = useState(true);
 
@@ -21,6 +24,16 @@ const Login: React.FC = () => {
     e.preventDefault();
 
     if (loading) return;
+
+    // If the hidden honeypot field has any value, block the submission.
+    // Legitimate users will not fill this field because it's hidden in the UI.
+    if (extra && extra.trim() !== '') {
+      console.warn('Blocked submission due to honeypot field:', extra);
+      toast.error(
+        language === 'ar' ? 'تم حظر الطلب المشبوه' : 'Suspicious submission blocked'
+      );
+      return;
+    }
 
     setLoading(true);
 
@@ -116,6 +129,13 @@ const Login: React.FC = () => {
                   {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
                 </h2>
                 <form onSubmit={handleSubmit}>
+                  {/* Honeypot hidden input: keep name 'extra'. Legit users won't fill this. */}
+                  <input
+                    type="hidden"
+                    name="extra"
+                    value={extra ?? ''}
+                    onChange={(e) => setExtra(e.target.value)}
+                  />
                   {/* Email Input */}
                   <div className="relative w-full h-12 border-b-2 border-slate-800 my-8">
                     <Mail className="absolute right-2 text-xl text-slate-800 top-3.5 w-5 h-5" />

@@ -1,4 +1,5 @@
 import { collection, addDoc, getDocs } from 'firebase/firestore';
+import { doc, deleteDoc } from 'firebase/firestore';
 import { db } from './firebase';
 
 export interface TripPayment {
@@ -30,5 +31,11 @@ export const tripPaymentsService = {
       ...doc.data(),
       createdAt: doc.data().createdAt?.toDate ? doc.data().createdAt.toDate() : new Date()
     }) as TripPayment);
+  }
+  ,
+
+  async deletePayments(ids: string[]): Promise<void> {
+    const deletes = ids.map(id => deleteDoc(doc(db, COLLECTION_NAME, id)));
+    await Promise.all(deletes);
   }
 };
