@@ -677,7 +677,7 @@ const Donations: React.FC = () => {
                       احول المبلغ على الرقم التالي:
                     </p>
                     <p className="font-bold text-lg text-gray-900 dark:text-white" dir="ltr">
-                      01234567890
+                      01110797455
                     </p>
                   </div>
 

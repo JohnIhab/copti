@@ -274,7 +274,7 @@ const Trips: React.FC = () => {
                       {language === 'ar' ? 'ارسل المبلغ إلى رقم فودافون كاش التالي:' : 'Send the amount to this Vodafone Cash number:'}
                     </div>
                     <div className="text-2xl font-bold text-green-700 dark:text-green-300 mb-2 select-all">
-                      01012345678
+                      01110797455
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
                       {language === 'ar' ? 'ثم أرسل صورة إيصال التحويل على واتساب نفس الرقم.' : 'Then send the payment screenshot via WhatsApp to the same number.'}
