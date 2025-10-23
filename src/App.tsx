@@ -32,6 +32,7 @@ import CherchRole from './components/CherchRole';
 import ScrollToTop from './components/ScrollToTop';
 import TermsAndConditions from './pages/TermsAndConditions';
 import News from './pages/News';
+import { Helmet } from 'react-helmet';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
