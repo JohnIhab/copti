@@ -1,10 +1,11 @@
 
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 
-import bolesImg from '../../public/Images/fathers/بولس.jpg';
-import abdelmalekImg from '../../public/Images/fathers/سمعان عبدالملك.png';
-import shahhatImg from '../../public/Images/fathers/سمعان الشحات.jpg';
-import barnabaImg from '../../public/Images/card/5.jpg';
+// Files live in public/Images — import their public URLs using Vite's `?url` suffix
+import bolesImg from '/Images/fathers/بولس.jpg?url';
+import abdelmalekImg from '/Images/fathers/سمعان عبدالملك.png?url';
+import shahhatImg from '/Images/fathers/سمعان الشحات.jpg?url';
+import barnabaImg from '/Images/card/5.jpg?url';
 
 const slides = [
     {

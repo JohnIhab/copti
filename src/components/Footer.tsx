@@ -36,18 +36,24 @@ const Footer: React.FC = () => {
             </p>
             
             <div className="space-y-3">
+              <Link to="https://www.google.com/maps/search/?api=1&query=30.5143667,31.3321065" className="flex items-center space-x-3 rtl:space-x-reverse text-gray-300 hover:text-blue-400 transition-colors duration-200 focus:outline-none">
               <div className="flex items-center space-x-3 rtl:space-x-reverse text-gray-300">
                 <MapPin className="h-5 w-5 text-blue-400 flex-shrink-0" />
                 <span>كفر فرج جرجس،منيا القمح، محافظة الشرقية، مصر</span>
               </div>
+              </Link>
+              <Link to="tel:+201110797455" className="flex items-center space-x-3 rtl:space-x-reverse text-gray-300 hover:text-green-400 transition-colors duration-200 focus:outline-none">
               <div className="flex items-center space-x-3 rtl:space-x-reverse text-gray-300">
                 <Phone className="h-5 w-5 text-green-400 flex-shrink-0" />
                 <span dir="ltr">+201110797455</span>
               </div>
+              </Link>
+              <Link to="mailto:johnihab.01@gmail.com" className="flex items-center space-x-3 rtl:space-x-reverse text-gray-300 hover:text-red-400 transition-colors duration-200 focus:outline-none">
               <div className="flex items-center space-x-3 rtl:space-x-reverse text-gray-300">
                 <Mail className="h-5 w-5 text-red-400 flex-shrink-0" />
                 <span dir="ltr">johnihab.01@gmail.com</span>
               </div>
+              </Link>
             </div>
           </div>
 

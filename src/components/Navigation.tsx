@@ -6,7 +6,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { signOut, auth } from '../services/firebase';
 import LoginButton from './LoginButton';
-import logo from '../../public/Images/logo.jpg'
+import logo from '/Images/logo.jpg?url'
 
 const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -178,7 +178,7 @@ const Navigation: React.FC = () => {
             <div className={`md:hidden fixed text-center top-0 left-0 w-80 max-w-[85vw] bg-white dark:bg-gray-900 shadow-xl border-r border-white/20 dark:border-gray-700/20 z-50 transition-all duration-800 ease-in-out  !overflow-x-hidden ${isOpen ? 'h-full translate-x-0' : 'h-0 -translate-x-full'}
               `} style={{ height: isOpen ? '100vh' : '0', overflowX: 'hidden' }}>
               {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-white/20 dark:border-gray-700/20 bg-white">
+              <div className="flex items-center justify-between p-4 border-b border-white/20 dark:border-gray-700/20 bg-white dark:bg-gray-900">
                 <div className="flex items-center justify-center flex-grow">
                   <Link to="/" className="focus:outline-none">
                     <img src={logo} alt="Church Logo Text" className="h-20 rounded-lg" />
@@ -193,7 +193,7 @@ const Navigation: React.FC = () => {
               </div>
 
               {/* Navigation Links */}
-              <div className="p-4 space-y-2 bg-white">
+              <div className="p-4 space-y-2 bg-white dark:bg-gray-900">
                 {navItems.map((item) => (
                   <Link
                     key={item.key}
