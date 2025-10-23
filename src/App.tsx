@@ -64,129 +64,136 @@ function App() {
   }
 
   if (maintenance && window.location.pathname !== '/admin' && window.location.pathname !== '/login') {
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-gray-900">
-      <div className="p-8 rounded-2xl shadow-xl bg-white dark:bg-gray-900 border border-yellow-400 dark:border-yellow-600 text-center">
-        <h1 className="text-2xl font-bold text-yellow-700 dark:text-yellow-400 mb-4">
-          الموقع الآن تحت الصيانة 🚧
-        </h1>
-        <p className="text-gray-700 dark:text-gray-200">
-          This site is currently under maintenance for updates.
-        </p>
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-gray-900">
+        <div className="p-8 rounded-2xl shadow-xl bg-white dark:bg-gray-900 border border-yellow-400 dark:border-yellow-600 text-center">
+          <h1 className="text-2xl font-bold text-yellow-700 dark:text-yellow-400 mb-4">
+            الموقع الآن تحت الصيانة 🚧
+          </h1>
+          <p className="text-gray-700 dark:text-gray-200">
+            This site is currently under maintenance for updates.
+          </p>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   return (
-    <ThemeProvider>
-      <LanguageProvider>
-        <AuthProvider>
-          <Router>
+    <>
+      <Helmet>
+        <meta
+          name="google-site-verification"
+          content="E2CbjVsL4CeTpBl-FSLTuxOTcZhjCyQPZqcpqnz8F3E"
+        />
+      </Helmet>
+      <ThemeProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <Router>
               <ScrollToTop />
               <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
-                <BibleVerseModal 
-                  isOpen={showBibleVerse} 
-                  onClose={() => setShowBibleVerse(false)} 
+                <BibleVerseModal
+                  isOpen={showBibleVerse}
+                  onClose={() => setShowBibleVerse(false)}
                 />
                 <Routes>
-                <Route path="/" element={
-                  <>
-                    <Navigation />
-                    <Hero />
-                    <ImageGallery />
-                    <Features />
-                    <CherchRole />
-                    <About />
-                    <Footer />
-                  </>
-                } />
-                <Route path='/aboutpage' element={
-                  <>
-                    <Navigation />
-                    <AboutPage />
-                    <Footer />
-                  </>
-                } />
-                <Route path="/meetings" element={
-                  <>
-                    <Navigation />
-                    <Meetings />
-                    <Footer />
-                  </>
-                } />
-                <Route path="/events" element={
-                  <>
-                    <Navigation />
-                    <Events />
-                    <Footer />
-                  </>
-                } />
-                <Route path="/trips" element={
-                  <>
-                    <Navigation />
-                    <Trips />
-                    <Footer />
-                  </>
-                } />
-                <Route path="/donations" element={
-                  <>
-                    <Navigation />
-                    <Donations />
-                    <Footer />
-                  </>
-                } />
-                <Route path="/confession" element={
-                  <>
-                    <Navigation />
-                    <Confession />
-                    <Footer />
-                  </>
-                } />
-                <Route path="/read-bible" element={
-                  <>
-                    <Navigation />
-                    <ReadBible />
-                    <Footer />
-                  </>
-                } />
-                <Route path="/contact" element={
-                  <>
-                    <Navigation />
-                    <Contact />
-                    <Footer />
-                  </>
-                } />
-                
-                <Route path="/login" element={<Login />} />
-                <Route path="/news" element={<News />} />
-                <Route path="/admin" element={
-                  
-                  <ProtectedRoute>
-                    <Admin />
-                  </ProtectedRoute>
-                } />
-                <Route path="/services-dashboard" element={
-                  <ServiceProtectedRoute>
-                    <Navigation />
-                    <ServicesDashboard />
-                  </ServiceProtectedRoute>
-                } />
-                <Route path='terms-and-conditions' element={
-                  <>
-                    <Navigation />
-                    <TermsAndConditions />
-                    <Footer />
-                  </>
-                } />
-                <Route path="*" element={
-                  <>
-                    <Navigation />
-                    <NotFound />
-                    <Footer />
-                  </>
-                } />
-              </Routes>
+                  <Route path="/" element={
+                    <>
+                      <Navigation />
+                      <Hero />
+                      <ImageGallery />
+                      <Features />
+                      <CherchRole />
+                      <About />
+                      <Footer />
+                    </>
+                  } />
+                  <Route path='/aboutpage' element={
+                    <>
+                      <Navigation />
+                      <AboutPage />
+                      <Footer />
+                    </>
+                  } />
+                  <Route path="/meetings" element={
+                    <>
+                      <Navigation />
+                      <Meetings />
+                      <Footer />
+                    </>
+                  } />
+                  <Route path="/events" element={
+                    <>
+                      <Navigation />
+                      <Events />
+                      <Footer />
+                    </>
+                  } />
+                  <Route path="/trips" element={
+                    <>
+                      <Navigation />
+                      <Trips />
+                      <Footer />
+                    </>
+                  } />
+                  <Route path="/donations" element={
+                    <>
+                      <Navigation />
+                      <Donations />
+                      <Footer />
+                    </>
+                  } />
+                  <Route path="/confession" element={
+                    <>
+                      <Navigation />
+                      <Confession />
+                      <Footer />
+                    </>
+                  } />
+                  <Route path="/read-bible" element={
+                    <>
+                      <Navigation />
+                      <ReadBible />
+                      <Footer />
+                    </>
+                  } />
+                  <Route path="/contact" element={
+                    <>
+                      <Navigation />
+                      <Contact />
+                      <Footer />
+                    </>
+                  } />
+
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/news" element={<News />} />
+                  <Route path="/admin" element={
+
+                    <ProtectedRoute>
+                      <Admin />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/services-dashboard" element={
+                    <ServiceProtectedRoute>
+                      <Navigation />
+                      <ServicesDashboard />
+                    </ServiceProtectedRoute>
+                  } />
+                  <Route path='terms-and-conditions' element={
+                    <>
+                      <Navigation />
+                      <TermsAndConditions />
+                      <Footer />
+                    </>
+                  } />
+                  <Route path="*" element={
+                    <>
+                      <Navigation />
+                      <NotFound />
+                      <Footer />
+                    </>
+                  } />
+                </Routes>
               </div>
               <ToastContainer
                 position="top-center"
@@ -199,15 +206,16 @@ function App() {
                 draggable
                 pauseOnHover
                 theme="colored"
-                style={{ 
+                style={{
                   fontFamily: 'inherit',
                   direction: 'rtl'
                 }}
               />
             </Router>
-        </AuthProvider>
-      </LanguageProvider>
-    </ThemeProvider>
+          </AuthProvider>
+        </LanguageProvider>
+      </ThemeProvider>
+    </>
   );
 }
 
