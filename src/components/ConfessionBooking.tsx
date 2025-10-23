@@ -308,8 +308,8 @@ const ConfessionBooking: React.FC = () => {
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
             {language === 'ar'
-              ? 'اختر الوقت والكاهن المناسب لك لحجز موعد الاعتراف'
-              : 'Choose the time and priest that works best for you to book your confession appointment'
+              ? 'اختر الوقت المناسب لك لحجز موعد الاعتراف'
+              : 'Choose the time that works best for you to book your confession appointment'
             }
           </p>
         </div>
