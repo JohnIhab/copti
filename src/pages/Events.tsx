@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Calendar, MapPin, Users, Clock } from 'lucide-react';
+import { Calendar, MapPin, Clock } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Event, getAllEvents } from '../services/eventsService';
 import { Helmet } from 'react-helmet';
@@ -10,8 +10,10 @@ gsap.registerPlugin(ScrollTrigger);
 
 const Events: React.FC = () => {
   const { language } = useLanguage();
-  const [selectedCategory, setSelectedCategory] = useState('all');
   const [events, setEvents] = useState<Event[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const perPage = 9;
+  // removed category filter state — show all events with pagination
   const [loading, setLoading] = useState(true);
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -32,21 +34,14 @@ const Events: React.FC = () => {
     loadEvents();
   }, []);
 
-  const categories = [
-    { key: 'all', label: 'الكل', labelEn: 'All' },
-    { key: 'conference', label: 'مؤتمرات', labelEn: 'Conferences' },
-    { key: 'celebration', label: 'احتفاليات', labelEn: 'Celebrations' },
-    { key: 'seminar', label: 'ندوات', labelEn: 'Seminars' },
-    { key: 'festival', label: 'مهرجانات', labelEn: 'Festivals' },
-    { key: 'youth', label: 'شباب', labelEn: 'Youth' },
-    { key: 'children', label: 'أطفال', labelEn: 'Children' },
-    { key: 'prayer', label: 'صلاة', labelEn: 'Prayer' },
-    { key: 'workshop', label: 'ورش عمل', labelEn: 'Workshops' }
-  ];
+  // show all events; pagination will slice the events array
+  const filteredEvents = events;
 
-  const filteredEvents = events.filter(event => 
-    selectedCategory === 'all' || event.category === selectedCategory
-  );
+  // keep currentPage in range if events length changes
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(events.length / perPage));
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [events.length, currentPage]);
 
   // const featuredEvents = events.filter(event => event.featured);
 
@@ -84,7 +79,7 @@ const Events: React.FC = () => {
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [filteredEvents]);
+  }, [filteredEvents, currentPage]);
 
   return (
     <>
@@ -108,24 +103,7 @@ const Events: React.FC = () => {
 
 
 
-        {/* Category Filter */}
-        <div className="mb-8">
-          <div className="flex flex-wrap gap-2 justify-center">
-            {categories.map((category) => (
-              <button
-                key={category.key}
-                onClick={() => setSelectedCategory(category.key)}
-                className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
-                  selectedCategory === category.key
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700'
-                }`}
-              >
-                {language === 'ar' ? category.label : category.labelEn}
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* Pagination will replace the previous category filter */}
 
         {/* Events Grid */}
         {loading ? (
@@ -139,15 +117,15 @@ const Events: React.FC = () => {
               {language === 'ar' ? 'لا توجد فعاليات' : 'No Events Found'}
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
-              {selectedCategory === 'all' 
-                ? (language === 'ar' ? 'لم يتم العثور على أي فعاليات' : 'No events available')
-                : (language === 'ar' ? 'لا توجد فعاليات في هذه الفئة' : 'No events found in this category')
-              }
+              {language === 'ar' ? 'لم يتم العثور على أي فعاليات' : 'No events available'}
             </p>
           </div>
         ) : (
+          <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredEvents.map((event) => (
+            {filteredEvents
+              .slice((currentPage - 1) * perPage, currentPage * perPage)
+              .map((event) => (
             <div
               key={event.id}
               className="event-card bg-white dark:bg-gray-800 rounded-2xl overflow-hidden
@@ -192,6 +170,42 @@ const Events: React.FC = () => {
             </div>
           ))}
           </div>
+
+          {/* Pagination Controls */}
+          <div className="mt-8 flex items-center justify-center space-x-3">
+            {/* Prev button */}
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50"
+            >
+              {language === 'ar' ? 'السابق' : 'Prev'}
+            </button>
+
+            {/* Page numbers */}
+            {Array.from({ length: Math.max(1, Math.ceil(filteredEvents.length / perPage)) }).map((_, idx) => {
+              const page = idx + 1;
+              return (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-3 py-1 rounded-md font-medium ${currentPage === page ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'}`}
+                >
+                  {page}
+                </button>
+              );
+            })}
+
+            {/* Next button */}
+            <button
+              onClick={() => setCurrentPage(p => Math.min(Math.ceil(filteredEvents.length / perPage), p + 1))}
+              disabled={currentPage >= Math.ceil(filteredEvents.length / perPage)}
+              className="px-4 py-2 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50"
+            >
+              {language === 'ar' ? 'التالي' : 'Next'}
+            </button>
+          </div>
+          </>
         )}
       </div>
     </div>

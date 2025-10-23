@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, Calendar, Edit, Trash2, X, Save } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { toast } from 'react-toastify';
@@ -30,6 +30,11 @@ interface Meeting {
   organizer: string;
   createdAt: any;
   updatedAt: any;
+  // optional fields that may exist in documents
+  image?: string;
+  isRecurring?: boolean;
+  locationEn?: string;
+  organizerEn?: string;
 }
 
 interface MeetingFormData {
@@ -43,6 +48,14 @@ interface MeetingFormData {
   description: string;
   organizer: string;
   image?: File | null;
+  // optional/extended form fields
+  locationEn?: string;
+  descriptionEn?: string;
+  organizerEn?: string;
+  maxAttendees?: number;
+  isRecurring?: boolean;
+  recurrenceType?: string;
+  status?: string;
 }
 
 const MeetingsManagement: React.FC = () => {
@@ -81,6 +94,33 @@ const MeetingsManagement: React.FC = () => {
   const [imageUploading, setImageUploading] = useState(false);
   const [imageUploadProgress, setImageUploadProgress] = useState(0);
   const [imageUploadError, setImageUploadError] = useState('');
+  // Search and pagination
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const perPage = 10;
+
+  // Filter meetings by title (arabic or english)
+  const filteredMeetings = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return meetings;
+    return meetings.filter(m => {
+      const title = (m.title || '').toString().toLowerCase();
+      const titleEn = (m.titleEn || '').toString().toLowerCase();
+      return title.includes(q) || titleEn.includes(q);
+    });
+  }, [meetings, searchQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredMeetings.length / perPage));
+
+  // Ensure currentPage is valid when filteredMeetings or totalPages change
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [currentPage, totalPages]);
+
+  const paginatedMeetings = useMemo(() => {
+    const start = (currentPage - 1) * perPage;
+    return filteredMeetings.slice(start, start + perPage);
+  }, [filteredMeetings, currentPage]);
   
   const handleMeetingImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
@@ -98,12 +138,7 @@ const MeetingsManagement: React.FC = () => {
   };
 
 
-  const statusOptions = [
-    { value: 'scheduled', label: 'مجدول', labelEn: 'Scheduled' },
-    { value: 'ongoing', label: 'جاري', labelEn: 'Ongoing' },
-    { value: 'completed', label: 'مكتمل', labelEn: 'Completed' },
-    { value: 'cancelled', label: 'ملغي', labelEn: 'Cancelled' }
-  ];
+  
 
   // Load meetings from Firebase
   const loadMeetings = async () => {
@@ -153,16 +188,9 @@ const MeetingsManagement: React.FC = () => {
       time: '',
       endTime: '',
       location: '',
-      locationEn: '',
       type: '',
       description: '',
-      descriptionEn: '',
       organizer: '',
-      organizerEn: '',
-      maxAttendees: 20,
-      isRecurring: false,
-      recurrenceType: 'weekly',
-      status: 'scheduled'
     });
   };
 
@@ -247,11 +275,14 @@ const MeetingsManagement: React.FC = () => {
           meetingData['image'] = imageUrl;
           setImageUploading(false);
           setImageUploadProgress(100);
+          // Clear selected file after successful upload
+          setMeetingImageFile(null);
         } catch (imgErr: any) {
           console.error('Meeting image upload failed:', imgErr);
           setImageUploading(false);
-          setImageUploadError(imgErr?.message || 'فشل رفع الصورة');
-          toast.error(imageUploadError || 'فشل رفع الصورة');
+          const msg = imgErr?.message || (language === 'ar' ? 'فشل رفع الصورة' : 'Failed to upload image');
+          setImageUploadError(msg);
+          toast.error(msg);
         }
       }
 
@@ -306,16 +337,9 @@ const MeetingsManagement: React.FC = () => {
       time: meeting.time,
       endTime: meeting.endTime,
       location: meeting.location,
-      locationEn: meeting.locationEn,
       type: meeting.type,
       description: meeting.description,
-      descriptionEn: meeting.descriptionEn,
       organizer: meeting.organizer,
-      organizerEn: meeting.organizerEn,
-      maxAttendees: meeting.maxAttendees,
-      isRecurring: meeting.isRecurring,
-      recurrenceType: meeting.recurrenceType || 'weekly',
-      status: meeting.status
     });
     setShowEditModal(true);
   };
@@ -351,20 +375,7 @@ const MeetingsManagement: React.FC = () => {
     setShowDeleteConfirm(true);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'scheduled':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-      case 'ongoing':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      case 'completed':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
-    }
-  };
+
 
   const formatTime = (timeString: string) => {
     const [hours, minutes] = timeString.split(':');
@@ -400,17 +411,33 @@ const MeetingsManagement: React.FC = () => {
             }
           </p>
         </div>
-        <button
-          onClick={() => {
-            resetForm();
-            setShowAddModal(true);
-          }}
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="h-5 w-5 ml-2" />
-          {language === 'ar' ? 'اجتماع جديد' : 'New Meeting'}
-        </button>
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="relative w-full sm:w-72">
+            <input
+              type="search"
+              placeholder={language === 'ar' ? 'ابحث بالعنوان...' : 'Search by title...'}
+              value={searchQuery}
+              onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+              className="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
+            <div className="absolute inset-y-0 right-2 flex items-center">
+              <svg className="h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1016.65 16.65z" /></svg>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              resetForm();
+              setShowAddModal(true);
+            }}
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="h-5 w-5 ml-2" />
+            {language === 'ar' ? 'اجتماع جديد' : 'New Meeting'}
+          </button>
+        </div>
       </div>
+
+ 
 
       {/* Meetings Table */}
       <div className="bg-white dark:bg-gray-800 shadow-xl rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700">
@@ -474,7 +501,7 @@ const MeetingsManagement: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
-                  {meetings.map((meeting, index) => (
+                  {paginatedMeetings.map((meeting, index) => (
                     <tr 
                       key={meeting.id} 
                       className={`
@@ -536,7 +563,7 @@ const MeetingsManagement: React.FC = () => {
             </div>
             {/* Mobile Cards: only visible on mobile */}
             <div className="block sm:hidden space-y-4 p-2">
-              {meetings.map((meeting) => (
+              {paginatedMeetings.map((meeting) => (
                 <div key={meeting.id} className="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <div className="font-bold text-lg text-gray-900 dark:text-white">
@@ -581,6 +608,39 @@ const MeetingsManagement: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Pagination Controls (under the table) */}
+      {filteredMeetings.length > perPage && (
+        <div className="mt-4 flex items-center justify-center gap-3">
+          <button
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >
+            {language === 'ar' ? 'السابق' : 'Prev'}
+          </button>
+
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`px-3 py-1 rounded ${currentPage === i + 1 ? 'bg-blue-600 text-white' : 'border'}`}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >
+            {language === 'ar' ? 'التالي' : 'Next'}
+          </button>
+        </div>
+      )}
 
       {/* Add/Edit Meeting Modal */}
       {(showAddModal || showEditModal) && (

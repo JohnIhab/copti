@@ -39,18 +39,18 @@ const Meetings: React.FC = () => {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  // Category filter removed — only search is used now
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 9;
   const sectionRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
 
-  // Helper function to format date to day name
+  // Helper function to format date to only the weekday name
   const formatDateToDay = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
-      weekday: 'long',
-      month: 'short',
-      day: 'numeric'
+      weekday: 'long'
     });
   };
 
@@ -87,30 +87,27 @@ const Meetings: React.FC = () => {
     loadMeetings();
   }, []);
 
-  const categories = [
-    { key: 'all', label: 'الكل', labelEn: 'All' },
-    { key: 'youth', label: 'الشباب', labelEn: 'Youth' },
-    { key: 'children', label: 'الأطفال', labelEn: 'Children' },
-    { key: 'prayer', label: 'صلاة', labelEn: 'Prayer' },
-    { key: 'bible-study', label: 'دراسة كتابية', labelEn: 'Bible Study' },
-    { key: 'worship', label: 'تسبيح', labelEn: 'Worship' },
-    { key: 'leadership', label: 'قيادة', labelEn: 'Leadership' },
-    { key: 'general', label: 'عام', labelEn: 'General' }
-  ];
+  // Reset to first page when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
 
   const filteredMeetings = meetings.filter(meeting => {
-    const matchesCategory = selectedCategory === 'all' || meeting.category === selectedCategory;
     const matchesSearch = searchTerm === '' ||
       meeting.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       meeting.titleEn.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
+    return matchesSearch;
   });
+
+  // Pagination calculations
+  const totalPages = Math.max(1, Math.ceil(filteredMeetings.length / ITEMS_PER_PAGE));
+  const paginatedMeetings = filteredMeetings.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   useEffect(() => {
     if (!sectionRef.current) return;
 
-    gsap.set('.meeting-card', { opacity: 0, y: 50, scale: 0.9 });
-    gsap.set('.filter-item', { opacity: 0, x: -20 });
+  gsap.set('.meeting-card', { opacity: 0, y: 50, scale: 0.9 });
 
     const tl = gsap.timeline({
       scrollTrigger: {
@@ -121,21 +118,14 @@ const Meetings: React.FC = () => {
       },
     });
 
-    tl.to('.filter-item', {
+    tl.to('.meeting-card', {
       opacity: 1,
-      x: 0,
-      duration: 0.5,
-      stagger: 0.1,
+      y: 0,
+      scale: 1,
+      duration: 0.6,
+      stagger: 0.15,
       ease: 'power3.out',
-    })
-      .to('.meeting-card', {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.6,
-        stagger: 0.15,
-        ease: 'power3.out',
-      }, '-=0.3');
+    });
 
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
@@ -163,26 +153,9 @@ const Meetings: React.FC = () => {
           </div>
 
           {/* Filters and Search */}
-          <div className="mb-8 space-y-4">
-            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-              {/* Categories Filter */}
-              <div className="flex flex-wrap gap-2">
-                {categories.map((category) => (
-                  <button
-                    key={category.key}
-                    onClick={() => setSelectedCategory(category.key)}
-                    className={`filter-item px-4 py-2 rounded-full font-medium transition-all duration-300 ${selectedCategory === category.key
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700'
-                      }`}
-                  >
-                    {language === 'ar' ? category.label : category.labelEn}
-                  </button>
-                ))}
-              </div>
-
-              {/* Search */}
-              <div className="relative">
+          <div className="mb-8">
+            <div className="flex items-center justify-end">
+              <div className="relative w-full sm:w-80">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
@@ -190,7 +163,7 @@ const Meetings: React.FC = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
-                         bg-white dark:bg-gray-800 text-gray-900 dark:text-white
+                         bg-white dark:bg-gray-800 text-gray-900 dark:text-white w-full
                          focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
@@ -216,7 +189,7 @@ const Meetings: React.FC = () => {
             </div>
           ) : (
             <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-              {filteredMeetings.map((meeting) => (
+              {paginatedMeetings.map((meeting) => (
                 <div key={meeting.id} className="meeting-card">
                   <CardMeeting
                     title={language === 'ar' ? meeting.title : meeting.titleEn}
@@ -232,6 +205,40 @@ const Meetings: React.FC = () => {
                   />
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {!loading && filteredMeetings.length > ITEMS_PER_PAGE && (
+            <div className="mt-6 flex items-center justify-center space-x-2">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 rounded border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 disabled:opacity-50"
+              >
+                {language === 'ar' ? 'السابق' : 'Prev'}
+              </button>
+
+              {Array.from({ length: totalPages }).map((_, idx) => {
+                const page = idx + 1;
+                return (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-1 rounded border ${currentPage === page ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 rounded border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 disabled:opacity-50"
+              >
+                {language === 'ar' ? 'التالي' : 'Next'}
+              </button>
             </div>
           )}
 

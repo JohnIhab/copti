@@ -13,7 +13,9 @@ gsap.registerPlugin(ScrollTrigger);
 
 const Trips: React.FC = () => {
   const { language } = useLanguage();
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  // pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const tripsPerPage = 6;
   const [selectedTrips, setSelectedTrips] = useState<string[]>([]);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,16 +54,20 @@ const Trips: React.FC = () => {
     loadTrips();
   }, []);
   const categories = [
-    { key: 'all', label: 'الكل', labelEn: 'All' },
     { key: 'children', label: 'الأطفال', labelEn: 'Children' },
     { key: 'youth', label: 'الشباب', labelEn: 'Youth' },
     { key: 'adults', label: 'الكبار', labelEn: 'Adults' },
     { key: 'servants', label: 'الخدام', labelEn: 'Servants' }
   ];
 
-  const filteredTrips = trips.filter(trip => 
-    selectedCategory === 'all' || trip.category === selectedCategory
-  );
+  // pagination helpers
+  const totalPages = Math.max(1, Math.ceil(trips.length / tripsPerPage));
+  // ensure currentPage is within bounds when trips change
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [trips.length, totalPages]);
+
+  const paginatedTrips = trips.slice((currentPage - 1) * tripsPerPage, currentPage * tripsPerPage);
 
   const toggleTripSelection = (tripId: string | undefined) => {
     if (!tripId) return;
@@ -163,7 +169,7 @@ const Trips: React.FC = () => {
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [filteredTrips]);
+  }, [paginatedTrips]);
 
   return (
     <>
@@ -194,24 +200,7 @@ const Trips: React.FC = () => {
           </div>
         ) : (
           <>
-            {/* Category Filter */}
-            <div className="mb-8">
-              <div className="flex flex-wrap gap-2 justify-center">
-                {categories.map((category) => (
-                  <button
-                    key={category.key}
-                    onClick={() => setSelectedCategory(category.key)}
-                    className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
-                      selectedCategory === category.key
-                        ? 'bg-blue-600 text-white shadow-lg'
-                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700'
-                    }`}
-                  >
-                    {language === 'ar' ? category.label : category.labelEn}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {/* (Filter removed) */}
 
         {/* Selected Trips Summary */}
         {selectedTrips.length > 0 && (
@@ -389,7 +378,7 @@ const Trips: React.FC = () => {
 
         {/* Trips Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTrips.length > 0 ? filteredTrips.map((trip) => (
+          {trips.length > 0 ? paginatedTrips.map((trip: Trip) => (
             <div
               key={trip.id}
               className={`trip-card bg-white dark:bg-gray-800 rounded-2xl overflow-hidden
@@ -408,9 +397,7 @@ const Trips: React.FC = () => {
                 <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 rounded-full text-sm font-medium">
                   {trip.cost} جنيه
                 </div>
-                <div className="absolute top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
-                  {language === 'ar' ? categories.find(c => c.key === trip.category)?.label : categories.find(c => c.key === trip.category)?.labelEn}
-                </div>
+                
                 {selectedTrips.includes(trip.id || '') && (
                   <div className="absolute inset-0 bg-blue-600/20 flex items-center justify-center">
                     <div className="bg-blue-600 text-white rounded-full p-2">
@@ -453,7 +440,7 @@ const Trips: React.FC = () => {
                 {/* Includes */}
                 <div className="mb-4">
                   <div className="flex flex-wrap gap-1">
-                    {(language === 'ar' ? trip.includes || [] : trip.includesEn || []).map((item, index) => (
+                    {(language === 'ar' ? trip.includes || [] : trip.includesEn || []).map((item: string, index: number) => (
                       <span key={index} className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
                                                   px-2 py-1 rounded text-xs">
                         {item}
@@ -483,6 +470,36 @@ const Trips: React.FC = () => {
             </div>
           )}
         </div>
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="mt-8 flex items-center justify-center gap-3">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              className="px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50"
+              disabled={currentPage === 1}
+            >
+              {language === 'ar' ? 'السابق' : 'Prev'}
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+              <button
+                key={pageNum}
+                onClick={() => setCurrentPage(pageNum)}
+                className={`px-3 py-2 rounded-lg border ${currentPage === pageNum ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'}`}
+              >
+                {pageNum}
+              </button>
+            ))}
+
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              className="px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50"
+              disabled={currentPage === totalPages}
+            >
+              {language === 'ar' ? 'التالي' : 'Next'}
+            </button>
+          </div>
+        )}
         </>
         )}
       </div>

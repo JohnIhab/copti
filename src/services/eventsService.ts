@@ -10,7 +10,11 @@ import {
   orderBy,
   where,
   Timestamp,
-  onSnapshot
+  onSnapshot,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  storage
 } from './firebase';
 import { db } from './firebase';
 
@@ -55,29 +59,35 @@ const EVENTS_COLLECTION = 'events';
 // Helper function to upload image
 export const uploadEventImage = async (file: File): Promise<string> => {
   try {
-    // Use Cloudinary unsigned upload from client
-    const cloudName = (import.meta as any).env.VITE_CLOUDINARY_CLOUD_NAME as string;
-    const preset = (import.meta as any).env.VITE_CLOUDINARY_UPLOAD_PRESET as string;
-    if (!cloudName || !preset) {
-      throw new Error('Cloudinary upload not configured. Set VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET');
+    // Try Cloudinary unsigned upload from client when configured
+    const cloudName = (import.meta as any).env.VITE_CLOUDINARY_CLOUD_NAME as string | undefined;
+    const preset = (import.meta as any).env.VITE_CLOUDINARY_UPLOAD_PRESET as string | undefined;
+
+    if (cloudName && preset) {
+      const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('upload_preset', preset);
+      // Optionally include context/public_id/folder
+      const res = await fetch(url, { method: 'POST', body: fd });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        const errMsg = body?.error?.message || res.statusText;
+        throw new Error(`Cloudinary upload failed: ${errMsg}`);
+      }
+      const data = await res.json();
+      return data.secure_url as string;
     }
 
-    const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('upload_preset', preset);
-    // Optionally include context/public_id/folder
-    const res = await fetch(url, { method: 'POST', body: fd });
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      const errMsg = body?.error?.message || res.statusText;
-      throw new Error(`Cloudinary upload failed: ${errMsg}`);
-    }
-    const data = await res.json();
-    return data.secure_url as string;
-  } catch (error) {
-    console.error('Error uploading image to Cloudinary:', error);
-    throw new Error('Failed to upload image');
+    // Fallback: upload to Firebase Storage if Cloudinary isn't configured
+    console.warn('Cloudinary not configured. Falling back to Firebase Storage for image upload.');
+    const storageRef = ref(storage, `meetings/${Date.now()}_${file.name}`);
+    await uploadBytes(storageRef, file);
+    const downloadUrl = await getDownloadURL(storageRef);
+    return downloadUrl;
+  } catch (err: any) {
+    console.error('Error uploading image:', err);
+    throw new Error(err?.message || 'Failed to upload image');
   }
 };
 
