@@ -167,7 +167,12 @@ function App() {
                   } />
 
                   <Route path="/login" element={<Login />} />
-                  <Route path="/news" element={<News />} />
+                  <Route path="/news" element={
+                    <>
+                      <Navigation />
+                      <News />
+                    </>
+                    } />
                   <Route path="/admin" element={
 
                     <ProtectedRoute>
