@@ -192,20 +192,7 @@ const Hero: React.FC = () => {
             </button>
 
             <button
-              onClick={() => {
-                // If already on home, just smooth-scroll to the about section.
-                if (location.pathname === '/' || location.pathname === '') {
-                  const el = document.getElementById('about');
-                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                } else {
-                  // Navigate to home first, then smooth-scroll after a short delay to allow render
-                  navigate('/');
-                  setTimeout(() => {
-                    const el = document.getElementById('about');
-                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }, 200);
-                }
-              }}
+              onClick={() => navigate('/aboutpage')}
               className="px-6 py-3 sm:px-8 sm:py-4 bg-transparent border-2 border-white text-white rounded-lg font-semibold
                             hover:bg-red-500 hover:text-white hover:border-0 transition-all duration-300 transform hover:scale-105"
             >

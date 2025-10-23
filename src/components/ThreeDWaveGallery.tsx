@@ -23,7 +23,7 @@ interface ThreeDWaveGalleryProps {
 const ThreeDWaveGallery: React.FC<ThreeDWaveGalleryProps> = ({ className }) => {
   return (
     <div className={className}>
-      <h2 className="gallery-title" dir="rtl">صور الهدم لبناء الكنيسة الحالية</h2>
+      <h2 className="gallery-title dark:text-white" dir="rtl">صور الهدم لبناء الكنيسة الحالية</h2>
       <div className="wrapper">
         <div
           className="items"

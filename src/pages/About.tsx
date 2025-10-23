@@ -38,7 +38,7 @@ export default function AboutPage() {
         <meta name="keywords" content="كنيسة الأنبا رويس, دور الكنيسة, تميز الكنيسة, كورالات, جوائز الكنيسة, مدارس الأحد, تاريخ الكنيسة" />
         <meta name="author" content="كنيسة الأنيا رويس بكفر فرج" />
     </Helmet>
-      <div className="max-w-7xl mx-auto px-4 py-10 mt-24" ref={containerRef}>
+      <div className="max-w-7xl mx-auto px-4 py-40" ref={containerRef}>
         {/* Section 1: Fathers */}
         <Fathers />
 
