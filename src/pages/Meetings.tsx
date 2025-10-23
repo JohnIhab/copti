@@ -214,7 +214,7 @@ const Meetings: React.FC = () => {
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-1 rounded border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 disabled:opacity-50"
+                className="px-3 ml-2 py-1 rounded border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 disabled:opacity-50"
               >
                 {language === 'ar' ? 'السابق' : 'Prev'}
               </button>

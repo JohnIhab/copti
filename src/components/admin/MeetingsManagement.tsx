@@ -611,7 +611,7 @@ const MeetingsManagement: React.FC = () => {
 
       {/* Pagination Controls (under the table) */}
       {filteredMeetings.length > perPage && (
-        <div className="mt-4 flex items-center justify-center gap-3">
+        <div className="mt-4 flex items-center justify-center gap-3 dark:text-white">
           <button
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             disabled={currentPage === 1}
