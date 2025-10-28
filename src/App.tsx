@@ -86,6 +86,7 @@ function App() {
           name="google-site-verification"
           content="E2CbjVsL4CeTpBl-FSLTuxOTcZhjCyQPZqcpqnz8F3E"
         />
+        
       </Helmet>
       <ThemeProvider>
         <LanguageProvider>
