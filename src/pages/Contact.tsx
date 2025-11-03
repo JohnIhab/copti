@@ -237,8 +237,7 @@ const Contact: React.FC = () => {
             </p>
           </div>
 
-          {/* Contact Info Caz}
-          </div>
+          {/* Contact Info Caz */}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Contact Form */}
