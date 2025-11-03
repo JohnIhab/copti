@@ -237,47 +237,7 @@ const Contact: React.FC = () => {
             </p>
           </div>
 
-          {/* Contact Info Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {contactInfo.map((info, index) => {
-              const title = language === 'ar' ? info.title : info.titleEn;
-              const content = language === 'ar' ? info.content : info.contentEn;
-
-              const card = (
-                <div
-                  className="contact-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg
-                        hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2
-                        border border-gray-100 dark:border-gray-700 text-center group"
-                >
-                  <div className={`${info.color} bg-gray-50 dark:bg-gray-700 p-4 rounded-full w-16 h-16 mx-auto mb-4
-                              group-hover:scale-110 transition-transform duration-300`}>
-                    <info.icon className="h-8 w-8 mx-auto" />
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{title}</h3>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed break-words">{content}</p>
-                </div>
-              );
-
-              // If href exists, wrap the entire card so the whole card is clickable
-              if (info.href) {
-                return (
-                  <a
-                    key={index}
-                    href={info.href}
-                    target={info.href.startsWith('http') ? '_blank' : undefined}
-                    rel={info.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                    aria-label={title}
-                    className="block"
-                  >
-                    {card}
-                  </a>
-                );
-              }
-
-              return (
-                <div key={index}>{card}</div>
-              );
-            })}
+          {/* Contact Info Caz}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
