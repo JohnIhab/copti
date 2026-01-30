@@ -134,10 +134,10 @@ const Contact: React.FC = () => {
       icon: Phone,
       title: 'الهاتف',
       titleEn: 'Phone',
-      content: '+201110797455',
-      contentEn: '+201110797455',
+      content: '+201205002001',
+      contentEn: '+201205002001',
       // tel: link so clicking will attempt to call on supported devices
-      href: 'tel:+201110797455',
+      href: 'tel:+201205002001',
       color: 'text-green-500'
     },
     {
@@ -163,8 +163,8 @@ const Contact: React.FC = () => {
 
   const socialLinks = [
     { icon: Facebook, href: 'https://www.facebook.com/profile.php?id=100064731461327', color: 'hover:text-blue-600', name: 'Facebook' },
-    { icon: Instagram, href: '#', color: 'hover:text-pink-600', name: 'Instagram' },
-    { icon: Youtube, href: '#', color: 'hover:text-red-600', name: 'YouTube' }
+    // { icon: Instagram, href: '#', color: 'hover:text-pink-600', name: 'Instagram' },
+    // { icon: Youtube, href: '#', color: 'hover:text-red-600', name: 'YouTube' }
   ];
 
   useEffect(() => {
@@ -417,7 +417,7 @@ const Contact: React.FC = () => {
                 </h3>
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
-                    <span className="text-gray-600 dark:text-gray-300">القداس الصباحي</span>
+                    <span className="text-gray-600 dark:text-gray-300">القداس </span>
                     <span className="font-semibold text-gray-900 dark:text-white">7:00 ص</span>
                   </div>
 

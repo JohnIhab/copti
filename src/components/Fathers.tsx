@@ -108,8 +108,8 @@ export default function Fathers() {
                     ))}
                 </div>
                 <div className="button">
-                    <button className="prev" onClick={prevSlide}><i className="fa-solid fa-arrow-left"></i></button>
-                    <button className="next" onClick={nextSlide}><i className="fa-solid fa-arrow-right"></i></button>
+                    <button className="prev" onClick={prevSlide}><i className="fa-solid fa-arrow-right"></i></button>
+                    <button className="next" onClick={nextSlide}><i className="fa-solid fa-arrow-left"></i></button>
                 </div>
             </div>
         </div>
