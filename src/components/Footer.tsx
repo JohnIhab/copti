@@ -17,8 +17,8 @@ const Footer: React.FC = () => {
 
   const socialLinks = [
     { icon: Facebook, href: 'https://www.facebook.com/profile.php?id=100064731461327', color: 'hover:text-blue-600' },
-    { icon: Instagram, href: '#', color: 'hover:text-pink-600' },
-    { icon: Youtube, href: '#', color: 'hover:text-red-600' },
+    // { icon: Instagram, href: '#', color: 'hover:text-pink-600' },
+    // { icon: Youtube, href: '#', color: 'hover:text-red-600' },
   ];
 
   return (
@@ -42,10 +42,10 @@ const Footer: React.FC = () => {
                 <span>كفر فرج جرجس،منيا القمح، محافظة الشرقية، مصر</span>
               </div>
               </Link>
-              <Link to="tel:+201110797455" className="flex items-center space-x-3 rtl:space-x-reverse text-gray-300 hover:text-green-400 transition-colors duration-200 focus:outline-none">
+              <Link to="tel:+201205002001" className="flex items-center space-x-3 rtl:space-x-reverse text-gray-300 hover:text-green-400 transition-colors duration-200 focus:outline-none">
               <div className="flex items-center space-x-3 rtl:space-x-reverse text-gray-300">
                 <Phone className="h-5 w-5 text-green-400 flex-shrink-0" />
-                <span dir="ltr">+201110797455</span>
+                <span dir="ltr">+201205002001</span>
               </div>
               </Link>
               <Link to="mailto:johnihab.01@gmail.com" className="flex items-center space-x-3 rtl:space-x-reverse text-gray-300 hover:text-red-400 transition-colors duration-200 focus:outline-none">
@@ -93,7 +93,7 @@ const Footer: React.FC = () => {
             <div className="mt-6">
               <h5 className="font-semibold mb-3">أوقات الخدمة</h5>
               <div className="text-gray-300 text-sm space-y-1">
-                <p>القداس الصباحي: 7:00 ص</p>
+                <p>القداس : 7:00 ص</p>
                 <p>اجتماع الشباب: الخميس 7:00 م</p>
               </div>
             </div>

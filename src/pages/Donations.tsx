@@ -677,7 +677,7 @@ const Donations: React.FC = () => {
                       احول المبلغ على الرقم التالي:
                     </p>
                     <p className="font-bold text-lg text-gray-900 dark:text-white" dir="ltr">
-                      01110797455
+                      01205002001
                     </p>
                   </div>
 
@@ -688,7 +688,8 @@ const Donations: React.FC = () => {
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
                       <p>اسم الحساب: كنيسة السيدة العذراء مريم</p>
-                      <p>رقم الحساب: 1234567890123456</p>
+                      {/* <p>رقم الحساب: 1234567890123456</p> */}
+                      <p>يتم العمل علي انشاء حساب بنكي</p>
                       <p>البنك: البنك الأهلي المصري</p>
                     </div>
                   </div>
@@ -696,7 +697,7 @@ const Donations: React.FC = () => {
 
                 <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
                   <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                    <strong>مهم:</strong> بعد إتمام التحويل، يرجى إرسال صورة من الإيصال على واتساب رقم: 01234567890
+                    <strong>مهم:</strong> بعد إتمام التحويل، يرجى إرسال صورة من الإيصال على واتساب رقم: 01205002001
                   </p>
                 </div>
 
